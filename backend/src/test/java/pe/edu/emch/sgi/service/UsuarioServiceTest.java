@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.edu.emch.sgi.dto.common.PagedResponse;
 import pe.edu.emch.sgi.dto.usuario.CambioPasswordRequest;
@@ -93,7 +94,7 @@ class UsuarioServiceTest {
 
     @Test
     void listarRoles_retornaLista() {
-        when(rolRepository.findAll()).thenReturn(List.of(rol));
+        when(rolRepository.findAll(Sort.by("nombreRol"))).thenReturn(List.of(rol));
         List<RolResponse> lista = usuarioService.listarRoles();
         assertThat(lista).hasSize(1);
         assertThat(lista.get(0).getNombreRol()).isEqualTo("ADMINISTRADOR");

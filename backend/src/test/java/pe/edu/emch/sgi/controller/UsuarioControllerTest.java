@@ -194,6 +194,16 @@ class UsuarioControllerTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMINISTRADOR")
+    void crearUsuario_requestInvalido_retorna400() throws Exception {
+        mockMvc.perform(post("/api/usuarios")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void sinAutenticacion_retorna401() throws Exception {
         mockMvc.perform(get("/api/usuarios"))
             .andExpect(status().isUnauthorized());

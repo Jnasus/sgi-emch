@@ -19,7 +19,6 @@ public class UsuarioCreateRequest {
     private String apellidos;
 
     @NotBlank(message = "El DNI es obligatorio")
-    @Size(min = 8, max = 8, message = "El DNI debe tener exactamente 8 caracteres")
     @Pattern(regexp = "\\d{8}", message = "El DNI debe tener exactamente 8 dígitos numéricos")
     private String dni;
 

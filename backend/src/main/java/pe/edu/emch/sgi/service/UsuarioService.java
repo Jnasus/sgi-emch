@@ -3,6 +3,7 @@ package pe.edu.emch.sgi.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,7 +51,8 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public List<RolResponse> listarRoles() {
-        return rolRepository.findAll().stream().map(this::toRolResponse).toList();
+        return rolRepository.findAll(Sort.by("nombreRol")).stream()
+            .map(this::toRolResponse).toList();
     }
 
     @Transactional
