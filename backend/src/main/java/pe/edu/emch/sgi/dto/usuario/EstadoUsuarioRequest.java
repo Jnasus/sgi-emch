@@ -1,15 +1,11 @@
 package pe.edu.emch.sgi.dto.usuario;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class EstadoUsuarioRequest {
 
-    @NotNull
+    @NotNull(message = "El estado activo es obligatorio")
     private Boolean activo;
 }

@@ -2,16 +2,12 @@ package pe.edu.emch.sgi.dto.usuario;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class CambioPasswordRequest {
 
-    @NotBlank
-    @Size(min = 6, max = 255)
+    @NotBlank(message = "La nueva contraseña es obligatoria")
+    @Size(min = 6, max = 255, message = "La contraseña debe tener entre 6 y 255 caracteres")
     private String nuevaPassword;
 }

@@ -5,39 +5,35 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class UsuarioUpdateRequest {
 
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100, message = "El nombre no puede superar 100 caracteres")
     private String nombres;
 
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank(message = "Los apellidos son obligatorios")
+    @Size(max = 100, message = "Los apellidos no pueden superar 100 caracteres")
     private String apellidos;
 
-    @NotBlank
-    @Size(min = 8, max = 8)
+    @NotBlank(message = "El DNI es obligatorio")
+    @Size(min = 8, max = 8, message = "El DNI debe tener exactamente 8 caracteres")
     @Pattern(regexp = "\\d{8}", message = "El DNI debe tener exactamente 8 dígitos numéricos")
     private String dni;
 
-    @NotBlank
-    @Size(max = 50)
+    @NotBlank(message = "El username es obligatorio")
+    @Size(max = 50, message = "El username no puede superar 50 caracteres")
     private String username;
 
-    @Email
-    @Size(max = 150)
+    @Email(message = "El email no tiene un formato válido")
+    @Size(max = 150, message = "El email no puede superar 150 caracteres")
     private String email;
 
-    @NotNull
+    @NotNull(message = "El rol es obligatorio")
     private Integer idRol;
 
-    @NotNull
+    @NotNull(message = "El área es obligatoria")
     private Integer idArea;
 }

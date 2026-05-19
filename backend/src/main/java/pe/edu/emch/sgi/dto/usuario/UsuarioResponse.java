@@ -1,14 +1,10 @@
 package pe.edu.emch.sgi.dto.usuario;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
+@Data
 public class UsuarioResponse {
     private Integer idUsuario;
     private String nombres;
