@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -134,6 +135,7 @@ class UsuarioControllerTest {
         when(usuarioService.crearUsuario(any())).thenReturn(usuarioResponse);
 
         mockMvc.perform(post("/api/usuarios")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -154,6 +156,7 @@ class UsuarioControllerTest {
         when(usuarioService.actualizarUsuario(eq(1), any())).thenReturn(usuarioResponse);
 
         mockMvc.perform(put("/api/usuarios/1")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -168,9 +171,11 @@ class UsuarioControllerTest {
         when(usuarioService.cambiarEstado(eq(1), any())).thenReturn(usuarioResponse);
 
         mockMvc.perform(patch("/api/usuarios/1/estado")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.success").value(true));
     }
 
     @Test
@@ -181,6 +186,7 @@ class UsuarioControllerTest {
         doNothing().when(usuarioService).cambiarPassword(eq(1), any());
 
         mockMvc.perform(put("/api/usuarios/1/password")
+                .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isOk())
@@ -197,6 +203,25 @@ class UsuarioControllerTest {
     @WithMockUser(roles = "TECNICO")
     void sinRolAdmin_retorna403() throws Exception {
         mockMvc.perform(get("/api/usuarios"))
+            .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(roles = "TECNICO")
+    void crearUsuario_sinRolAdmin_retorna403() throws Exception {
+        UsuarioCreateRequest request = new UsuarioCreateRequest();
+        request.setNombres("Test");
+        request.setApellidos("User");
+        request.setDni("12345678");
+        request.setUsername("testuser");
+        request.setPassword("password123");
+        request.setIdRol(1);
+        request.setIdArea(1);
+
+        mockMvc.perform(post("/api/usuarios")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isForbidden());
     }
 }
