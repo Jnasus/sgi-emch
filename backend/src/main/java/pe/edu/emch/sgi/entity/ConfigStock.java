@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "config_stock")
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class ConfigStock {
 
     @Id
@@ -21,7 +23,7 @@ public class ConfigStock {
     @JoinColumn(name = "id_tipo", nullable = false)
     private TipoEquipo tipo;
 
-    @Column(name = "umbral_pct", nullable = false)
+    @Column(name = "umbral_pct", nullable = false, columnDefinition = "TINYINT UNSIGNED")
     private Short umbralPct;
 
     @ManyToOne(fetch = FetchType.EAGER)

@@ -7,7 +7,9 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "modelo_equipo")
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class ModeloEquipo {
 
     @Id

@@ -6,8 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "sistema_operativo")
-@Getter @Setter @NoArgsConstructor
+@Table(name = "sistema_operativo",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"nombre_so", "version_so"}))
+@Getter
+@Setter
+@NoArgsConstructor
 public class SistemaOperativo {
 
     @Id

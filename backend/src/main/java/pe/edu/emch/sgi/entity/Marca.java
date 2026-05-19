@@ -7,7 +7,9 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "marca")
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
 public class Marca {
 
     @Id
