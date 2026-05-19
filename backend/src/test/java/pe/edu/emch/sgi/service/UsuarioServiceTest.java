@@ -35,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -129,7 +130,8 @@ class UsuarioServiceTest {
         UsuarioResponse r = usuarioService.crearUsuario(request);
         assertThat(r.getIdUsuario()).isEqualTo(1);
         verify(passwordEncoder).encode("password123");
-        verify(usuarioRepository).save(argThat(u -> u.getCreatedAt() != null));
+        verify(usuarioRepository).save(argThat(u ->
+            u.getCreatedAt() != null && Boolean.TRUE.equals(u.getActivo())));
     }
 
     @Test
@@ -194,6 +196,8 @@ class UsuarioServiceTest {
         request.setIdArea(1);
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.existsByDniAndIdUsuarioNot("12345678", 1)).thenReturn(true);
+        lenient().when(rolRepository.findById(1)).thenReturn(Optional.of(rol));
+        lenient().when(areaRepository.findById(1)).thenReturn(Optional.of(area));
         assertThatThrownBy(() -> usuarioService.actualizarUsuario(1, request))
             .isInstanceOf(DuplicateResourceException.class);
     }
@@ -208,6 +212,8 @@ class UsuarioServiceTest {
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.existsByDniAndIdUsuarioNot("12345678", 1)).thenReturn(false);
         when(usuarioRepository.existsByUsernameAndIdUsuarioNot("jtorres", 1)).thenReturn(true);
+        lenient().when(rolRepository.findById(1)).thenReturn(Optional.of(rol));
+        lenient().when(areaRepository.findById(1)).thenReturn(Optional.of(area));
         assertThatThrownBy(() -> usuarioService.actualizarUsuario(1, request))
             .isInstanceOf(DuplicateResourceException.class);
     }
