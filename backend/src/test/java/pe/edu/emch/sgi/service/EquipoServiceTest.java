@@ -206,6 +206,8 @@ class EquipoServiceTest {
             "EN_BODEGA".equals(h.getEstadoAnterior())
             && "ASIGNADO".equals(h.getEstadoNuevo())
             && "Asignado a laboratorio".equals(h.getMotivo())
+            && equipo.equals(h.getEquipo())
+            && usuario.equals(h.getUsuario())
         ));
     }
 
