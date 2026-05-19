@@ -129,6 +129,7 @@ class UsuarioServiceTest {
         UsuarioResponse r = usuarioService.crearUsuario(request);
         assertThat(r.getIdUsuario()).isEqualTo(1);
         verify(passwordEncoder).encode("password123");
+        verify(usuarioRepository).save(argThat(u -> u.getCreatedAt() != null));
     }
 
     @Test
@@ -171,6 +172,7 @@ class UsuarioServiceTest {
 
         UsuarioResponse r = usuarioService.actualizarUsuario(1, request);
         assertThat(r.getIdUsuario()).isEqualTo(1);
+        verify(usuarioRepository).save(argThat(u -> "Juan Carlos".equals(u.getNombres())));
     }
 
     @Test
@@ -184,12 +186,40 @@ class UsuarioServiceTest {
     }
 
     @Test
+    void actualizarUsuario_dniDuplicado_lanzaExcepcion() {
+        UsuarioUpdateRequest request = new UsuarioUpdateRequest();
+        request.setDni("12345678");
+        request.setUsername("jtorres");
+        request.setIdRol(1);
+        request.setIdArea(1);
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.existsByDniAndIdUsuarioNot("12345678", 1)).thenReturn(true);
+        assertThatThrownBy(() -> usuarioService.actualizarUsuario(1, request))
+            .isInstanceOf(DuplicateResourceException.class);
+    }
+
+    @Test
+    void actualizarUsuario_usernameDuplicado_lanzaExcepcion() {
+        UsuarioUpdateRequest request = new UsuarioUpdateRequest();
+        request.setDni("12345678");
+        request.setUsername("jtorres");
+        request.setIdRol(1);
+        request.setIdArea(1);
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
+        when(usuarioRepository.existsByDniAndIdUsuarioNot("12345678", 1)).thenReturn(false);
+        when(usuarioRepository.existsByUsernameAndIdUsuarioNot("jtorres", 1)).thenReturn(true);
+        assertThatThrownBy(() -> usuarioService.actualizarUsuario(1, request))
+            .isInstanceOf(DuplicateResourceException.class);
+    }
+
+    @Test
     void cambiarEstado_desactiva() {
         EstadoUsuarioRequest request = new EstadoUsuarioRequest();
         request.setActivo(false);
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-        usuarioService.cambiarEstado(1, request);
+        UsuarioResponse r = usuarioService.cambiarEstado(1, request);
+        assertThat(r.getIdUsuario()).isEqualTo(1);
         verify(usuarioRepository).save(argThat(u -> Boolean.FALSE.equals(u.getActivo())));
     }
 
@@ -199,7 +229,6 @@ class UsuarioServiceTest {
         request.setNuevaPassword("newpass123");
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("newpass123")).thenReturn("$2a$10$newhash");
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
         usuarioService.cambiarPassword(1, request);
         verify(passwordEncoder).encode("newpass123");
         verify(usuarioRepository).save(argThat(u -> "$2a$10$newhash".equals(u.getPasswordHash())));
