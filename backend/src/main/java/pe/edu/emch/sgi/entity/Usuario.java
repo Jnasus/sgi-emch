@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -33,6 +35,8 @@ public class Usuario {
     @Column(name = "apellidos", nullable = false, length = 100)
     private String apellidos;
 
+    /** MySQL define la columna como CHAR(8); sin esto Hibernate espera VARCHAR y falla validate. */
+    @JdbcTypeCode(SqlTypes.CHAR)
     @Column(name = "dni", nullable = false, unique = true, length = 8)
     private String dni;
 

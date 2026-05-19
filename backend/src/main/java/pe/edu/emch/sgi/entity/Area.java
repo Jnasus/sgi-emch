@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +29,12 @@ public class Area {
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
+    /**
+     * En MySQL la columna es tipo YEAR; el driver JDBC la expone como DATE.
+     * LocalDate alinea el mapeo con {@code spring.jpa.hibernate.ddl-auto=validate}.
+     */
     @Column(name = "anio_vigencia", nullable = false)
-    private Short anioVigencia;
+    private LocalDate anioVigencia;
 
     @Column(name = "activo", nullable = false)
     private Boolean activo;
