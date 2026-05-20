@@ -7,8 +7,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: db_sgi_emch
-      MYSQL_USER: ${DB_USERNAME:-sgi}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
