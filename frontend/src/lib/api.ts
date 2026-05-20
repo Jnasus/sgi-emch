@@ -2,7 +2,7 @@ export const API_BASE = 'http://localhost:8080';
 
 export async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem('sgi_token');
-  return fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -10,4 +10,9 @@ export async function fetchWithAuth(path: string, options: RequestInit = {}): Pr
       ...options.headers,
     },
   });
+  if (res.status === 401) {
+    localStorage.removeItem('sgi_token');
+    window.dispatchEvent(new Event('sgi:unauthorized'));
+  }
+  return res;
 }

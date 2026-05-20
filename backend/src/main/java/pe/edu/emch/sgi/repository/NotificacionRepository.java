@@ -20,7 +20,7 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Inte
             @Param("leida") Boolean leida,
             Pageable pageable);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Notificacion n SET n.leida = true WHERE n.usuario.idUsuario = :idUsuario AND n.leida = false")
     int marcarTodasLeidasByUsuario(@Param("idUsuario") Integer idUsuario);
 }

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -31,7 +32,7 @@ public class NotificacionController {
     @Operation(summary = "Listar notificaciones del usuario autenticado, filtrable por ?leida=")
     public ResponseEntity<ApiResponse<PagedResponse<NotificacionResponse>>> listarNotificaciones(
             @RequestParam(required = false) Boolean leida,
-            @PageableDefault(size = 20, sort = "fechaCreacion") Pageable pageable,
+            @PageableDefault(size = 20, sort = "fechaCreacion", direction = Sort.Direction.DESC) Pageable pageable,
             HttpServletRequest httpRequest) {
         Integer idUsuario = (Integer) httpRequest.getAttribute("idUsuarioActivo");
         return ResponseEntity.ok(ApiResponse.ok("OK",

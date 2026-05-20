@@ -22,7 +22,6 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  ReferenceLine,
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import * as dashboardService from '../../services/dashboardService';
@@ -270,14 +269,7 @@ export function Dashboard() {
                   <Tooltip formatter={(value: number) => [`${value}%`]} />
                   <Legend />
                   <Bar dataKey="pctActual" name="% Operativo" radius={[4, 4, 0, 0]} fill="#4A5D23" />
-                  {stockChart.length > 0 && (
-                    <ReferenceLine
-                      y={stockChart[0].umbral}
-                      stroke="#D91E18"
-                      strokeDasharray="4 4"
-                      label={{ value: 'Umbral', position: 'insideTopRight' as const, fontSize: 11, fill: '#D91E18' }}
-                    />
-                  )}
+                  <Bar dataKey="umbral" name="Umbral mínimo" radius={[4, 4, 0, 0]} fill="#D91E18" fillOpacity={0.3} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>

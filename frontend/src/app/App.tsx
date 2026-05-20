@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router';
 import { Login } from './components/Login';
 import { Layout } from './components/Layout';
@@ -25,6 +25,11 @@ export default function App() {
     authService.logout();
     setIsAuthenticated(false);
   };
+
+  useEffect(() => {
+    window.addEventListener('sgi:unauthorized', handleLogout);
+    return () => window.removeEventListener('sgi:unauthorized', handleLogout);
+  }, []);
 
   if (!isAuthenticated) {
     return <Login onLogin={handleLogin} />;
