@@ -132,7 +132,7 @@ class TicketControllerTest {
         resp.setEstado("EN_PROCESO");
         when(ticketService.cambiarEstado(eq(1), any())).thenReturn(resp);
 
-        mockMvc.perform(put("/api/tickets/1/estado")
+        mockMvc.perform(patch("/api/tickets/1/estado")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))
@@ -145,7 +145,7 @@ class TicketControllerTest {
     void cambiarEstado_sinRol_retorna403() throws Exception {
         TicketCambioEstadoRequest req = new TicketCambioEstadoRequest();
         req.setEstado("EN_PROCESO");
-        mockMvc.perform(put("/api/tickets/1/estado")
+        mockMvc.perform(patch("/api/tickets/1/estado")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(req)))

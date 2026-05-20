@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -62,7 +63,7 @@ public class TicketController {
                 .body(ApiResponse.ok("Ticket creado correctamente", ticketService.crearTicket(request)));
     }
 
-    @PutMapping("/{id}/estado")
+    @PatchMapping("/{id}/estado")
     @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('TECNICO_CAMPO')")
     @Operation(summary = "Cambiar estado del ticket")
     public ResponseEntity<ApiResponse<TicketResponse>> cambiarEstado(
