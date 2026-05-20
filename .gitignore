@@ -1,0 +1,16 @@
+# Build artifacts
+frontend/dist/
+frontend/node_modules/
+
+# Claude Code internal config
+.claude/
+
+# IntelliJ
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db

@@ -40,6 +40,3 @@ src/main/resources/application-local.yml
 
 ### Claude Code ###
 .claude/
-
-### Frontend build artifacts ###
-../frontend/dist/
