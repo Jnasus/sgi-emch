@@ -12,8 +12,9 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
       - ./db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
-    ports:
-      - "3306:3306"
+    # sin ports: la DB solo es accesible desde la red interna
+    networks:
+      - sgi_internal
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
       interval: 10s
@@ -27,14 +28,16 @@ services:
       dockerfile: Dockerfile
     container_name: sgi-emch-backend
     restart: unless-stopped
-    ports:
-      - "8080:8080"
+    # sin ports: NPM accede por proxy_network usando el nombre del contenedor
     env_file:
       - .env
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/db_sgi_emch?useSSL=false&serverTimezone=America/Lima&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
     volumes:
       - pdf_storage:/app/storage/actas
+    networks:
+      - sgi_internal    # para hablar con la DB
+      - proxy_network   # para ser alcanzado por NPM
     depends_on:
       db:
         condition: service_healthy
@@ -42,3 +45,9 @@ services:
 volumes:
   mysql_data:
   pdf_storage:
+
+networks:
+  sgi_internal:
+    driver: bridge
+  proxy_network:
+    external: true   # red existente de Nginx Proxy Manager
