@@ -23,7 +23,8 @@ public class Notificacion {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "tipo_notif", nullable = false)
+    @Column(name = "tipo_notif", nullable = false,
+        columnDefinition = "ENUM('STOCK_CRITICO', 'SLA_VENCIDO', 'TICKET_ASIGNADO', 'INFO')")
     private String tipoNotif;
 
     @Column(name = "titulo", nullable = false, length = 200)
