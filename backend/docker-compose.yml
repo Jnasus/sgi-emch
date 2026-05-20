@@ -1,0 +1,44 @@
+services:
+
+  db:
+    image: mysql:8.0
+    container_name: sgi-emch-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+      MYSQL_DATABASE: db_sgi_emch
+      MYSQL_USER: ${DB_USERNAME:-sgi}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-root}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sgi-emch-backend
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/db_sgi_emch?useSSL=false&serverTimezone=America/Lima&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
+    volumes:
+      - pdf_storage:/app/storage/actas
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+  pdf_storage:
