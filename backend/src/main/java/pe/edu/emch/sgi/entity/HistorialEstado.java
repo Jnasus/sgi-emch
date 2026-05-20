@@ -27,10 +27,12 @@ public class HistorialEstado {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "estado_anterior", nullable = false)
+    @Column(name = "estado_anterior", nullable = false,
+        columnDefinition = "ENUM('EN_BODEGA', 'ASIGNADO', 'EN_REPARACION', 'PRESTADO', 'DADO_DE_BAJA')")
     private String estadoAnterior;
 
-    @Column(name = "estado_nuevo", nullable = false)
+    @Column(name = "estado_nuevo", nullable = false,
+        columnDefinition = "ENUM('EN_BODEGA', 'ASIGNADO', 'EN_REPARACION', 'PRESTADO', 'DADO_DE_BAJA')")
     private String estadoNuevo;
 
     @Column(name = "motivo", length = 255)

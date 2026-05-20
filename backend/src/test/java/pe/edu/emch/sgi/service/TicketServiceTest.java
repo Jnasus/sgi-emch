@@ -52,7 +52,7 @@ class TicketServiceTest {
         tipoIncidente = new TipoIncidente();
         tipoIncidente.setIdTipoIncidente(1);
         tipoIncidente.setNombreTipo("Hardware");
-        tipoIncidente.setTiempoResolucionMin(120);
+        tipoIncidente.setTiempoResolucionMin((short) 120);
 
         ticket = new Ticket();
         ticket.setIdTicket(1);

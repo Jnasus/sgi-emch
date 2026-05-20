@@ -187,8 +187,8 @@ public class CatalogoService {
     public TipoIncidenteResponse configurarSla(Integer idTipo, SlaConfigRequest request) {
         TipoIncidente tipo = tipoIncidenteRepository.findById(idTipo)
             .orElseThrow(() -> new ResourceNotFoundException("Tipo de incidente no encontrado: " + idTipo));
-        tipo.setTiempoRespuestaMin(request.getTiempoRespuestaMin());
-        tipo.setTiempoResolucionMin(request.getTiempoResolucionMin());
+        tipo.setTiempoRespuestaMin(request.getTiempoRespuestaMin().shortValue());
+        tipo.setTiempoResolucionMin(request.getTiempoResolucionMin().shortValue());
         return toTipoIncidenteResponse(tipoIncidenteRepository.save(tipo));
     }
 
@@ -242,8 +242,8 @@ public class CatalogoService {
         TipoIncidenteResponse r = new TipoIncidenteResponse();
         r.setIdTipoIncidente(t.getIdTipoIncidente());
         r.setNombreTipo(t.getNombreTipo());
-        r.setTiempoRespuestaMin(t.getTiempoRespuestaMin());
-        r.setTiempoResolucionMin(t.getTiempoResolucionMin());
+        r.setTiempoRespuestaMin(t.getTiempoRespuestaMin().intValue());
+        r.setTiempoResolucionMin(t.getTiempoResolucionMin().intValue());
         r.setDescripcion(t.getDescripcion());
         return r;
     }

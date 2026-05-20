@@ -50,10 +50,12 @@ public class Equipo {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    @Column(name = "tipo_red", nullable = false)
+    @Column(name = "tipo_red", nullable = false,
+        columnDefinition = "ENUM('ETHERNET', 'WIFI', 'N/A')")
     private String tipoRed;
 
-    @Column(name = "estado", nullable = false)
+    @Column(name = "estado", nullable = false,
+        columnDefinition = "ENUM('EN_BODEGA', 'ASIGNADO', 'EN_REPARACION', 'PRESTADO', 'DADO_DE_BAJA')")
     private String estado;
 
     @Column(name = "fecha_adquisicion")

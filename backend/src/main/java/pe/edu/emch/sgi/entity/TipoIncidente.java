@@ -20,11 +20,11 @@ public class TipoIncidente {
     @Column(name = "nombre_tipo", nullable = false, unique = true, length = 50)
     private String nombreTipo;
 
-    @Column(name = "tiempo_respuesta_min", nullable = false)
-    private Integer tiempoRespuestaMin;
+    @Column(name = "tiempo_respuesta_min", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    private Short tiempoRespuestaMin;
 
-    @Column(name = "tiempo_resolucion_min", nullable = false)
-    private Integer tiempoResolucionMin;
+    @Column(name = "tiempo_resolucion_min", nullable = false, columnDefinition = "SMALLINT UNSIGNED")
+    private Short tiempoResolucionMin;
 
     @Column(name = "descripcion", length = 255)
     private String descripcion;

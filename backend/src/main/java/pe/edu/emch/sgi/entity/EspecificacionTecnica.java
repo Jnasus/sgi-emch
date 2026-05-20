@@ -35,11 +35,11 @@ public class EspecificacionTecnica {
     @Column(name = "ram_modulos", columnDefinition = "TINYINT UNSIGNED")
     private Short ramModulos;
 
-    @Column(name = "ram_total_gb")
-    private Integer ramTotalGb;
+    @Column(name = "ram_total_gb", columnDefinition = "SMALLINT UNSIGNED")
+    private Short ramTotalGb;
 
-    @Column(name = "ram_velocidad_mhz")
-    private Integer ramVelocidadMhz;
+    @Column(name = "ram_velocidad_mhz", columnDefinition = "SMALLINT UNSIGNED")
+    private Short ramVelocidadMhz;
 
     @Column(name = "ram_marca", length = 50)
     private String ramMarca;

@@ -74,8 +74,8 @@ class CatalogoServiceTest {
         tipoIncidente = new TipoIncidente();
         tipoIncidente.setIdTipoIncidente(1);
         tipoIncidente.setNombreTipo("Fallo de hardware");
-        tipoIncidente.setTiempoRespuestaMin(60);
-        tipoIncidente.setTiempoResolucionMin(480);
+        tipoIncidente.setTiempoRespuestaMin((short) 60);
+        tipoIncidente.setTiempoResolucionMin((short) 480);
 
         usuario = new Usuario();
         usuario.setIdUsuario(1);

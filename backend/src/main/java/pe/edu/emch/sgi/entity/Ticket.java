@@ -40,10 +40,12 @@ public class Ticket {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String descripcion;
 
-    @Column(name = "estado", nullable = false)
+    @Column(name = "estado", nullable = false,
+        columnDefinition = "ENUM('ABIERTO', 'EN_PROCESO', 'RESUELTO', 'CERRADO')")
     private String estado;
 
-    @Column(name = "prioridad", nullable = false)
+    @Column(name = "prioridad", nullable = false,
+        columnDefinition = "ENUM('BAJA', 'MEDIA', 'ALTA', 'CRITICA')")
     private String prioridad;
 
     @Column(name = "fecha_apertura", nullable = false)

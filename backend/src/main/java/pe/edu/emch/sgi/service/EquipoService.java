@@ -167,8 +167,8 @@ public class EquipoService {
         e.setNucleos(r.getNucleos());
         e.setHilos(r.getHilos());
         e.setRamModulos(r.getRamModulos());
-        e.setRamTotalGb(r.getRamTotalGb());
-        e.setRamVelocidadMhz(r.getRamVelocidadMhz());
+        e.setRamTotalGb(r.getRamTotalGb() != null ? r.getRamTotalGb().shortValue() : null);
+        e.setRamVelocidadMhz(r.getRamVelocidadMhz() != null ? r.getRamVelocidadMhz().shortValue() : null);
         e.setRamMarca(r.getRamMarca());
         e.setDiscoModelo(r.getDiscoModelo());
         e.setDiscoInterface(r.getDiscoInterface());
@@ -218,8 +218,8 @@ public class EquipoService {
         r.setNucleos(e.getNucleos());
         r.setHilos(e.getHilos());
         r.setRamModulos(e.getRamModulos());
-        r.setRamTotalGb(e.getRamTotalGb());
-        r.setRamVelocidadMhz(e.getRamVelocidadMhz());
+        r.setRamTotalGb(e.getRamTotalGb() != null ? e.getRamTotalGb().intValue() : null);
+        r.setRamVelocidadMhz(e.getRamVelocidadMhz() != null ? e.getRamVelocidadMhz().intValue() : null);
         r.setRamMarca(e.getRamMarca());
         r.setDiscoModelo(e.getDiscoModelo());
         r.setDiscoInterface(e.getDiscoInterface());

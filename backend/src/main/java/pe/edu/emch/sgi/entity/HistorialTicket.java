@@ -27,10 +27,12 @@ public class HistorialTicket {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @Column(name = "estado_anterior", nullable = false)
+    @Column(name = "estado_anterior", nullable = false,
+        columnDefinition = "ENUM('ABIERTO', 'EN_PROCESO', 'RESUELTO', 'CERRADO')")
     private String estadoAnterior;
 
-    @Column(name = "estado_nuevo", nullable = false)
+    @Column(name = "estado_nuevo", nullable = false,
+        columnDefinition = "ENUM('ABIERTO', 'EN_PROCESO', 'RESUELTO', 'CERRADO')")
     private String estadoNuevo;
 
     @Column(name = "comentario", columnDefinition = "TEXT")
