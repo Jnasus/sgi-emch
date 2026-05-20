@@ -37,3 +37,9 @@ src/main/resources/application-local.properties
 src/main/resources/application-local.yml
 .env
 .env.local
+
+### Claude Code ###
+.claude/
+
+### Frontend build artifacts ###
+../frontend/dist/
