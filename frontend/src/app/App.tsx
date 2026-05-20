@@ -11,17 +11,18 @@ import { IncidenteNuevo } from './components/IncidenteNuevo';
 import { Reportes } from './components/Reportes';
 import { Notificaciones } from './components/Notificaciones';
 import { Usuarios } from './components/Usuarios';
+import * as authService from '../services/authService';
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => authService.isAuthenticated());
 
-  const handleLogin = (username: string, password: string) => {
-    // Simulación de autenticación
-    // En producción, aquí se validaría contra el backend
+  const handleLogin = async (username: string, password: string): Promise<void> => {
+    await authService.login(username, password);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    authService.logout();
     setIsAuthenticated(false);
   };
 

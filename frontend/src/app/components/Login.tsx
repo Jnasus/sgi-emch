@@ -6,21 +6,30 @@ import { Input } from './ui/input';
 import { Label } from './ui/label';
 
 interface LoginProps {
-  onLogin: (username: string, password: string) => void;
+  onLogin: (username: string, password: string) => Promise<void>;
 }
 
 export function Login({ onLogin }: LoginProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!username || !password) {
       setError('Por favor complete todos los campos');
       return;
     }
-    onLogin(username, password);
+    try {
+      setLoading(true);
+      setError('');
+      await onLogin(username, password);
+    } catch {
+      setError('Credenciales inválidas. Verifique su usuario y contraseña.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -125,10 +134,11 @@ export function Login({ onLogin }: LoginProps) {
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-[#4A5D23] hover:bg-[#3A4D29] text-white uppercase tracking-wider relative overflow-hidden group"
+                disabled={loading}
+                className="w-full h-11 bg-[#4A5D23] hover:bg-[#3A4D29] text-white uppercase tracking-wider relative overflow-hidden group disabled:opacity-70"
                 style={{ fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.1em' }}
               >
-                <span className="relative z-10">Iniciar Sesión</span>
+                <span className="relative z-10">{loading ? 'Verificando...' : 'Iniciar Sesión'}</span>
                 <motion.div
                   className="absolute inset-0 bg-[#D91E18]"
                   initial={{ x: '-100%' }}
