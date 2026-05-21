@@ -12,7 +12,6 @@ import pe.edu.emch.sgi.exception.DuplicateResourceException;
 import pe.edu.emch.sgi.exception.ResourceNotFoundException;
 import pe.edu.emch.sgi.repository.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,7 +48,7 @@ class CatalogoServiceTest {
         areaActiva.setIdArea(1);
         areaActiva.setCodigoArea("DTIC");
         areaActiva.setNombreArea("Departamento TIC");
-        areaActiva.setAnioVigencia(LocalDate.of(2024, 1, 1));
+        areaActiva.setAnioVigencia(2024);
         areaActiva.setActivo(true);
 
         tipoEquipo = new TipoEquipo();

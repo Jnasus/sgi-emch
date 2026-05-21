@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import pe.edu.emch.sgi.dto.catalogo.AreaRequest;
 import pe.edu.emch.sgi.dto.catalogo.AreaResponse;
 import pe.edu.emch.sgi.dto.catalogo.ConfigStockRequest;
 import pe.edu.emch.sgi.dto.catalogo.ConfigStockResponse;
@@ -23,6 +24,7 @@ import pe.edu.emch.sgi.dto.catalogo.MarcaRequest;
 import pe.edu.emch.sgi.dto.catalogo.MarcaResponse;
 import pe.edu.emch.sgi.dto.catalogo.ModeloRequest;
 import pe.edu.emch.sgi.dto.catalogo.ModeloResponse;
+import pe.edu.emch.sgi.dto.catalogo.SistemaOperativoRequest;
 import pe.edu.emch.sgi.dto.catalogo.SistemaOperativoResponse;
 import pe.edu.emch.sgi.dto.catalogo.SlaConfigRequest;
 import pe.edu.emch.sgi.dto.catalogo.TipoEquipoRequest;
@@ -156,5 +158,50 @@ public class CatalogoController {
             @Valid @RequestBody SlaConfigRequest request) {
         return ResponseEntity.ok(ApiResponse.ok("SLA actualizado",
             catalogoService.configurarSla(idTipo, request)));
+    }
+
+    @PostMapping("/sistemas-operativos")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Crear sistema operativo")
+    public ResponseEntity<ApiResponse<SistemaOperativoResponse>> crearSistemaOperativo(
+            @Valid @RequestBody SistemaOperativoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok("Sistema operativo creado",
+                catalogoService.crearSistemaOperativo(request)));
+    }
+
+    @PutMapping("/sistemas-operativos/{idSo}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Actualizar sistema operativo")
+    public ResponseEntity<ApiResponse<SistemaOperativoResponse>> actualizarSistemaOperativo(
+            @PathVariable Integer idSo,
+            @Valid @RequestBody SistemaOperativoRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Sistema operativo actualizado",
+            catalogoService.actualizarSistemaOperativo(idSo, request)));
+    }
+
+    @GetMapping("/areas/todas")
+    @Operation(summary = "Listar todas las áreas (incluye inactivas)")
+    public ResponseEntity<ApiResponse<List<AreaResponse>>> listarTodasAreas() {
+        return ResponseEntity.ok(ApiResponse.ok("OK", catalogoService.listarTodasAreas()));
+    }
+
+    @PostMapping("/areas")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Crear área")
+    public ResponseEntity<ApiResponse<AreaResponse>> crearArea(
+            @Valid @RequestBody AreaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(ApiResponse.ok("Área creada", catalogoService.crearArea(request)));
+    }
+
+    @PutMapping("/areas/{idArea}")
+    @PreAuthorize("hasRole('ADMINISTRADOR')")
+    @Operation(summary = "Actualizar área")
+    public ResponseEntity<ApiResponse<AreaResponse>> actualizarArea(
+            @PathVariable Integer idArea,
+            @Valid @RequestBody AreaRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("Área actualizada",
+            catalogoService.actualizarArea(idArea, request)));
     }
 }
