@@ -2,13 +2,13 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: sgi-emch-db
+    container_name: sgi-full-db
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-root}
       MYSQL_DATABASE: db_sgi_emch
     volumes:
-      - mysql_data:/var/lib/mysql
+      - full_mysql_data:/var/lib/mysql
       - ./backend/db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     # sin ports: la DB solo es accesible desde la red interna
     networks:
@@ -24,7 +24,7 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: sgi-emch-backend
+    container_name: sgi-full-backend
     restart: unless-stopped
     # sin ports: solo accesible desde el frontend via sgi_app
     env_file:
@@ -32,7 +32,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://db:3306/db_sgi_emch?useSSL=false&serverTimezone=America/Lima&characterEncoding=UTF-8&allowPublicKeyRetrieval=true"
     volumes:
-      - pdf_storage:/app/storage/actas
+      - full_pdf_storage:/app/storage/actas
     networks:
       - sgi_internal  # habla con la DB
       - sgi_app       # alcanzable por el frontend
@@ -50,7 +50,7 @@ services:
     build:
       context: ./backend/backup
       dockerfile: Dockerfile
-    container_name: sgi-emch-backup
+    container_name: sgi-full-backup
     restart: unless-stopped
     command: >
       sh -c "
@@ -81,7 +81,7 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_BASE: ""  # vacío = URLs relativas; Nginx proxea /api/* al backend
-    container_name: sgi-emch-frontend
+    container_name: sgi-full-frontend
     restart: unless-stopped
     networks:
       - sgi_app       # para proxear al backend
@@ -91,8 +91,8 @@ services:
         condition: service_healthy
 
 volumes:
-  mysql_data:
-  pdf_storage:
+  full_mysql_data:
+  full_pdf_storage:
 
 networks:
   sgi_internal:
