@@ -3,6 +3,7 @@ package pe.edu.emch.sgi.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.edu.emch.sgi.dto.catalogo.AreaRequest;
 import pe.edu.emch.sgi.dto.catalogo.AreaResponse;
 import pe.edu.emch.sgi.dto.catalogo.ConfigStockRequest;
 import pe.edu.emch.sgi.dto.catalogo.ConfigStockResponse;
@@ -10,6 +11,7 @@ import pe.edu.emch.sgi.dto.catalogo.MarcaRequest;
 import pe.edu.emch.sgi.dto.catalogo.MarcaResponse;
 import pe.edu.emch.sgi.dto.catalogo.ModeloRequest;
 import pe.edu.emch.sgi.dto.catalogo.ModeloResponse;
+import pe.edu.emch.sgi.dto.catalogo.SistemaOperativoRequest;
 import pe.edu.emch.sgi.dto.catalogo.SistemaOperativoResponse;
 import pe.edu.emch.sgi.dto.catalogo.SlaConfigRequest;
 import pe.edu.emch.sgi.dto.catalogo.TipoEquipoRequest;
@@ -190,6 +192,70 @@ public class CatalogoService {
         tipo.setTiempoRespuestaMin(request.getTiempoRespuestaMin().shortValue());
         tipo.setTiempoResolucionMin(request.getTiempoResolucionMin().shortValue());
         return toTipoIncidenteResponse(tipoIncidenteRepository.save(tipo));
+    }
+
+    @Transactional
+    public SistemaOperativoResponse crearSistemaOperativo(SistemaOperativoRequest request) {
+        if (sistemaOperativoRepository.existsByNombreSoAndVersionSo(
+                request.getNombreSo(), request.getVersionSo())) {
+            throw new DuplicateResourceException(
+                "Ya existe el SO: " + request.getNombreSo() + " " + request.getVersionSo());
+        }
+        SistemaOperativo so = new SistemaOperativo();
+        so.setNombreSo(request.getNombreSo());
+        so.setVersionSo(request.getVersionSo());
+        return toSoResponse(sistemaOperativoRepository.save(so));
+    }
+
+    @Transactional
+    public SistemaOperativoResponse actualizarSistemaOperativo(Integer idSo, SistemaOperativoRequest request) {
+        SistemaOperativo so = sistemaOperativoRepository.findById(idSo)
+            .orElseThrow(() -> new ResourceNotFoundException("Sistema operativo no encontrado: " + idSo));
+        if (sistemaOperativoRepository.existsByNombreSoAndVersionSoAndIdSoNot(
+                request.getNombreSo(), request.getVersionSo(), idSo)) {
+            throw new DuplicateResourceException(
+                "Ya existe el SO: " + request.getNombreSo() + " " + request.getVersionSo());
+        }
+        so.setNombreSo(request.getNombreSo());
+        so.setVersionSo(request.getVersionSo());
+        return toSoResponse(sistemaOperativoRepository.save(so));
+    }
+
+    @Transactional(readOnly = true)
+    public List<AreaResponse> listarTodasAreas() {
+        return areaRepository.findAll().stream()
+            .map(this::toAreaResponse).toList();
+    }
+
+    @Transactional
+    public AreaResponse crearArea(AreaRequest request) {
+        if (areaRepository.existsByCodigoArea(request.getCodigoArea())) {
+            throw new DuplicateResourceException(
+                "Ya existe un área con código: " + request.getCodigoArea());
+        }
+        Area area = new Area();
+        area.setCodigoArea(request.getCodigoArea().toUpperCase());
+        area.setNombreArea(request.getNombreArea());
+        area.setDescripcion(request.getDescripcion());
+        area.setAnioVigencia(request.getAnioVigencia());
+        area.setActivo(true);
+        area.setCreatedAt(java.time.LocalDateTime.now());
+        return toAreaResponse(areaRepository.save(area));
+    }
+
+    @Transactional
+    public AreaResponse actualizarArea(Integer idArea, AreaRequest request) {
+        Area area = areaRepository.findById(idArea)
+            .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada: " + idArea));
+        if (areaRepository.existsByCodigoAreaAndIdAreaNot(request.getCodigoArea(), idArea)) {
+            throw new DuplicateResourceException(
+                "Ya existe un área con código: " + request.getCodigoArea());
+        }
+        area.setCodigoArea(request.getCodigoArea().toUpperCase());
+        area.setNombreArea(request.getNombreArea());
+        area.setDescripcion(request.getDescripcion());
+        area.setAnioVigencia(request.getAnioVigencia());
+        return toAreaResponse(areaRepository.save(area));
     }
 
     // ── Mappers ──────────────────────────────────────────────────────────────────
