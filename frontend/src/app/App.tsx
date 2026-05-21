@@ -11,6 +11,7 @@ import { IncidenteNuevo } from './components/IncidenteNuevo';
 import { Reportes } from './components/Reportes';
 import { Notificaciones } from './components/Notificaciones';
 import { Usuarios } from './components/Usuarios';
+import { Catalogos } from './components/Catalogos';
 import * as authService from '../services/authService';
 
 export default function App() {
@@ -50,7 +51,7 @@ export default function App() {
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/notificaciones" element={<Notificaciones />} />
           <Route path="/usuarios" element={<Usuarios />} />
-          <Route path="/configuracion" element={<Dashboard />} />
+          <Route path="/configuracion" element={<Catalogos />} />
         </Routes>
       </Layout>
     </Router>

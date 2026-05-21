@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Save, Package } from 'lucide-react';
+import { ArrowLeft, Save, Package, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import * as svc from '../../services/inventarioService';
 import type {
   TipoEquipoResponse, MarcaResponse, ModeloResponse,
   SistemaOperativoResponse, AreaCatResponse,
 } from '../../services/inventarioService';
+import * as catalogoSvc from '../../services/catalogoService';
 
 // ── Tipos locales ──────────────────────────────────────────────────────────
 type FieldErrors = Record<string, string>;
@@ -91,6 +93,31 @@ function SelectField({ label, value, onChange, options, error, disabled = false 
   );
 }
 
+function SelectWithPlus({ label, value, onChange, options, error, disabled = false, onPlus }: {
+  label: string; value: number; onChange: (v: string) => void;
+  options: { value: number; label: string }[]; error?: string;
+  disabled?: boolean; onPlus: () => void;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label className="text-xs text-[#5C6064] uppercase tracking-wide">{label}</Label>
+      <div className="flex gap-2">
+        <select value={value} onChange={e => onChange(e.target.value)} disabled={disabled}
+          className={`flex-1 h-9 rounded-md border bg-white px-3 text-sm focus:outline-none disabled:opacity-50
+            ${error ? 'border-[#D91E18]' : 'border-[#4A5D23]/30 focus:border-[#4A5D23]'}`}>
+          <option value={0} disabled>Seleccionar...</option>
+          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+        <button type="button" onClick={onPlus} title={`Nuevo ${label}`}
+          className="h-9 w-9 flex items-center justify-center rounded-md border border-[#4A5D23]/30 text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white transition-colors flex-shrink-0">
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+      {error && <p className="text-xs text-[#D91E18]">{error}</p>}
+    </div>
+  );
+}
+
 // ── Componente principal ───────────────────────────────────────────────────
 export function InventarioNuevo() {
   const { id } = useParams<{ id?: string }>();
@@ -108,6 +135,20 @@ export function InventarioNuevo() {
   const [modelos, setModelos] = useState<ModeloResponse[]>([]);
   const [sos, setSos]         = useState<SistemaOperativoResponse[]>([]);
   const [areas, setAreas]     = useState<AreaCatResponse[]>([]);
+
+  // quick-create modals
+  const [showPlusTipo,   setShowPlusTipo]   = useState(false);
+  const [showPlusMarca,  setShowPlusMarca]  = useState(false);
+  const [showPlusModelo, setShowPlusModelo] = useState(false);
+  const [showPlusSo,     setShowPlusSo]     = useState(false);
+  const [showPlusArea,   setShowPlusArea]   = useState(false);
+  const [plusSaving,     setPlusSaving]     = useState(false);
+  const [plusError,      setPlusError]      = useState<string | null>(null);
+  const [plusTipo,   setPlusTipo]   = useState('');
+  const [plusMarca,  setPlusMarca]  = useState('');
+  const [plusModelo, setPlusModelo] = useState({ idMarca: 0, idTipo: 0, nombre: '' });
+  const [plusSo,     setPlusSo]     = useState({ nombre: '', version: '' });
+  const [plusArea,   setPlusArea]   = useState({ codigo: '', nombre: '', anio: new Date().getFullYear() });
 
   useEffect(() => {
     async function init() {
@@ -204,6 +245,83 @@ export function InventarioNuevo() {
     }
   }
 
+  async function quickCreateTipo() {
+    if (!plusTipo.trim()) return;
+    setPlusSaving(true); setPlusError(null);
+    try {
+      const created = await catalogoSvc.crearTipo({ nombreTipo: plusTipo.trim() });
+      setTipos(prev => [...prev, created]);
+      setForm(f => ({ ...f, idTipo: created.idTipo }));
+      setErrors(e => ({ ...e, idTipo: '' }));
+      setShowPlusTipo(false); setPlusTipo('');
+    } catch (e: unknown) {
+      setPlusError(e instanceof Error ? e.message : 'Error');
+    } finally { setPlusSaving(false); }
+  }
+
+  async function quickCreateMarca() {
+    if (!plusMarca.trim()) return;
+    setPlusSaving(true); setPlusError(null);
+    try {
+      const created = await catalogoSvc.crearMarca({ nombreMarca: plusMarca.trim() });
+      setMarcas(prev => [...prev, created]);
+      setModelos([]);
+      setForm(f => ({ ...f, idMarca: created.idMarca, idModelo: 0 }));
+      setErrors(e => ({ ...e, idMarca: '', idModelo: '' }));
+      setShowPlusMarca(false); setPlusMarca('');
+    } catch (e: unknown) {
+      setPlusError(e instanceof Error ? e.message : 'Error');
+    } finally { setPlusSaving(false); }
+  }
+
+  async function quickCreateModelo() {
+    if (!plusModelo.nombre.trim() || !plusModelo.idMarca || !plusModelo.idTipo) return;
+    setPlusSaving(true); setPlusError(null);
+    try {
+      const created = await catalogoSvc.crearModelo({
+        idMarca: plusModelo.idMarca, idTipo: plusModelo.idTipo, nombreModelo: plusModelo.nombre.trim(),
+      });
+      setModelos(prev => [...prev, created]);
+      setForm(f => ({ ...f, idModelo: created.idModelo }));
+      setErrors(e => ({ ...e, idModelo: '' }));
+      setShowPlusModelo(false); setPlusModelo({ idMarca: form.idMarca, idTipo: form.idTipo, nombre: '' });
+    } catch (e: unknown) {
+      setPlusError(e instanceof Error ? e.message : 'Error');
+    } finally { setPlusSaving(false); }
+  }
+
+  async function quickCreateSo() {
+    if (!plusSo.nombre.trim() || !plusSo.version.trim()) return;
+    setPlusSaving(true); setPlusError(null);
+    try {
+      const created = await catalogoSvc.crearSO({ nombreSo: plusSo.nombre.trim(), versionSo: plusSo.version.trim() });
+      setSos(prev => [...prev, created]);
+      setForm(f => ({ ...f, idSo: created.idSo }));
+      setErrors(e => ({ ...e, idSo: '' }));
+      setShowPlusSo(false); setPlusSo({ nombre: '', version: '' });
+    } catch (e: unknown) {
+      setPlusError(e instanceof Error ? e.message : 'Error');
+    } finally { setPlusSaving(false); }
+  }
+
+  async function quickCreateArea() {
+    if (!plusArea.codigo.trim() || !plusArea.nombre.trim()) return;
+    setPlusSaving(true); setPlusError(null);
+    try {
+      const created = await catalogoSvc.crearArea({
+        codigoArea: plusArea.codigo.trim().toUpperCase(),
+        nombreArea: plusArea.nombre.trim(),
+        anioVigencia: plusArea.anio,
+      });
+      setAreas(prev => [...prev, created]);
+      setForm(f => ({ ...f, idArea: created.idArea }));
+      setErrors(e => ({ ...e, idArea: '' }));
+      setShowPlusArea(false); setPlusArea({ codigo: '', nombre: '', anio: new Date().getFullYear() });
+    } catch (e: unknown) {
+      setPlusError(e instanceof Error ? e.message : 'Error');
+    } finally { setPlusSaving(false); }
+  }
+
   const backTo = isEdit ? `/inventario/${id}` : '/inventario';
 
   return (
@@ -246,26 +364,31 @@ export function InventarioNuevo() {
                   placeholder="EJ-2024-001XXX" maxLength={20} error={errors.codigoEjercito}
                   onChange={v => { setForm(f => ({ ...f, codigoEjercito: v })); setErrors(e => ({ ...e, codigoEjercito: '' })); }} />
 
-                <SelectField label="Tipo de Equipo *" value={form.idTipo} error={errors.idTipo}
+                <SelectWithPlus label="Tipo de Equipo *" value={form.idTipo} error={errors.idTipo}
                   options={tipos.map(t => ({ value: t.idTipo, label: t.nombreTipo }))}
-                  onChange={v => { setForm(f => ({ ...f, idTipo: Number(v) })); setErrors(e => ({ ...e, idTipo: '' })); }} />
+                  onChange={v => { setForm(f => ({ ...f, idTipo: Number(v) })); setErrors(e => ({ ...e, idTipo: '' })); }}
+                  onPlus={() => { setPlusTipo(''); setPlusError(null); setShowPlusTipo(true); }} />
 
-                <SelectField label="Marca *" value={form.idMarca} error={errors.idMarca}
+                <SelectWithPlus label="Marca *" value={form.idMarca} error={errors.idMarca}
                   options={marcas.map(m => ({ value: m.idMarca, label: m.nombreMarca }))}
-                  onChange={handleMarcaChange} />
+                  onChange={handleMarcaChange}
+                  onPlus={() => { setPlusMarca(''); setPlusError(null); setShowPlusMarca(true); }} />
 
-                <SelectField label="Modelo *" value={form.idModelo} error={errors.idModelo}
+                <SelectWithPlus label="Modelo *" value={form.idModelo} error={errors.idModelo}
                   options={modelos.map(m => ({ value: m.idModelo, label: m.nombreModelo }))}
                   disabled={!form.idMarca}
-                  onChange={v => { setForm(f => ({ ...f, idModelo: Number(v) })); setErrors(e => ({ ...e, idModelo: '' })); }} />
+                  onChange={v => { setForm(f => ({ ...f, idModelo: Number(v) })); setErrors(e => ({ ...e, idModelo: '' })); }}
+                  onPlus={() => { setPlusModelo({ idMarca: form.idMarca, idTipo: form.idTipo, nombre: '' }); setPlusError(null); setShowPlusModelo(true); }} />
 
-                <SelectField label="Área *" value={form.idArea} error={errors.idArea}
+                <SelectWithPlus label="Área *" value={form.idArea} error={errors.idArea}
                   options={areas.map(a => ({ value: a.idArea, label: a.nombreArea }))}
-                  onChange={v => { setForm(f => ({ ...f, idArea: Number(v) })); setErrors(e => ({ ...e, idArea: '' })); }} />
+                  onChange={v => { setForm(f => ({ ...f, idArea: Number(v) })); setErrors(e => ({ ...e, idArea: '' })); }}
+                  onPlus={() => { setPlusArea({ codigo: '', nombre: '', anio: new Date().getFullYear() }); setPlusError(null); setShowPlusArea(true); }} />
 
-                <SelectField label="Sistema Operativo *" value={form.idSo} error={errors.idSo}
+                <SelectWithPlus label="Sistema Operativo *" value={form.idSo} error={errors.idSo}
                   options={sos.map(s => ({ value: s.idSo, label: `${s.nombreSo} ${s.versionSo ?? ''}`.trim() }))}
-                  onChange={v => { setForm(f => ({ ...f, idSo: Number(v) })); setErrors(e => ({ ...e, idSo: '' })); }} />
+                  onChange={v => { setForm(f => ({ ...f, idSo: Number(v) })); setErrors(e => ({ ...e, idSo: '' })); }}
+                  onPlus={() => { setPlusSo({ nombre: '', version: '' }); setPlusError(null); setShowPlusSo(true); }} />
 
                 <Field label="N° Serie *" value={form.numeroSerie}
                   placeholder="SN123456789" maxLength={80} error={errors.numeroSerie}
@@ -326,6 +449,118 @@ export function InventarioNuevo() {
           </Card>
         </motion.div>
       )}
+
+      {/* ── Quick-create modals ─────────────────────────────────────────────── */}
+
+      {/* Tipo */}
+      <Dialog open={showPlusTipo} onOpenChange={setShowPlusTipo}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="text-[#2C3E1F]">Nuevo Tipo de Equipo</DialogTitle></DialogHeader>
+          <div className="py-2">
+            <Field label="Nombre *" value={plusTipo} placeholder="Laptop, Monitor, Switch..."
+              onChange={v => { setPlusTipo(v); setPlusError(null); }} />
+          </div>
+          {plusError && <p className="text-sm text-[#D91E18]">{plusError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlusTipo(false)}>Cancelar</Button>
+            <Button onClick={quickCreateTipo} disabled={plusSaving || !plusTipo.trim()}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {plusSaving ? 'Guardando...' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Marca */}
+      <Dialog open={showPlusMarca} onOpenChange={setShowPlusMarca}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="text-[#2C3E1F]">Nueva Marca</DialogTitle></DialogHeader>
+          <div className="py-2">
+            <Field label="Nombre *" value={plusMarca} placeholder="HP, Dell, Lenovo..."
+              onChange={v => { setPlusMarca(v); setPlusError(null); }} />
+          </div>
+          {plusError && <p className="text-sm text-[#D91E18]">{plusError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlusMarca(false)}>Cancelar</Button>
+            <Button onClick={quickCreateMarca} disabled={plusSaving || !plusMarca.trim()}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {plusSaving ? 'Guardando...' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modelo */}
+      <Dialog open={showPlusModelo} onOpenChange={setShowPlusModelo}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="text-[#2C3E1F]">Nuevo Modelo</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            <SelectField label="Marca *" value={plusModelo.idMarca}
+              options={marcas.map(m => ({ value: m.idMarca, label: m.nombreMarca }))}
+              onChange={v => setPlusModelo(p => ({ ...p, idMarca: Number(v) }))} />
+            <SelectField label="Tipo *" value={plusModelo.idTipo}
+              options={tipos.map(t => ({ value: t.idTipo, label: t.nombreTipo }))}
+              onChange={v => setPlusModelo(p => ({ ...p, idTipo: Number(v) }))} />
+            <Field label="Nombre del modelo *" value={plusModelo.nombre} placeholder="EliteBook 840 G9..."
+              onChange={v => { setPlusModelo(p => ({ ...p, nombre: v })); setPlusError(null); }} />
+          </div>
+          {plusError && <p className="text-sm text-[#D91E18]">{plusError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlusModelo(false)}>Cancelar</Button>
+            <Button onClick={quickCreateModelo}
+              disabled={plusSaving || !plusModelo.nombre.trim() || !plusModelo.idMarca || !plusModelo.idTipo}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {plusSaving ? 'Guardando...' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* SO */}
+      <Dialog open={showPlusSo} onOpenChange={setShowPlusSo}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="text-[#2C3E1F]">Nuevo Sistema Operativo</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            <Field label="Nombre *" value={plusSo.nombre} placeholder="Windows, Ubuntu..."
+              onChange={v => { setPlusSo(p => ({ ...p, nombre: v })); setPlusError(null); }} />
+            <Field label="Versión *" value={plusSo.version} placeholder="11 Pro, 22.04 LTS..."
+              onChange={v => { setPlusSo(p => ({ ...p, version: v })); setPlusError(null); }} />
+          </div>
+          {plusError && <p className="text-sm text-[#D91E18]">{plusError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlusSo(false)}>Cancelar</Button>
+            <Button onClick={quickCreateSo}
+              disabled={plusSaving || !plusSo.nombre.trim() || !plusSo.version.trim()}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {plusSaving ? 'Guardando...' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Área */}
+      <Dialog open={showPlusArea} onOpenChange={setShowPlusArea}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader><DialogTitle className="text-[#2C3E1F]">Nueva Área</DialogTitle></DialogHeader>
+          <div className="space-y-3 py-2">
+            <Field label="Código *" value={plusArea.codigo} placeholder="DTIC, LOGISTICA..."
+              onChange={v => { setPlusArea(p => ({ ...p, codigo: v.toUpperCase() })); setPlusError(null); }} />
+            <Field label="Nombre *" value={plusArea.nombre}
+              onChange={v => { setPlusArea(p => ({ ...p, nombre: v })); setPlusError(null); }} />
+            <Field label="Año vigencia *" value={String(plusArea.anio)} type="number"
+              onChange={v => setPlusArea(p => ({ ...p, anio: Number(v) }))} />
+          </div>
+          {plusError && <p className="text-sm text-[#D91E18]">{plusError}</p>}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPlusArea(false)}>Cancelar</Button>
+            <Button onClick={quickCreateArea}
+              disabled={plusSaving || !plusArea.codigo.trim() || !plusArea.nombre.trim()}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {plusSaving ? 'Guardando...' : 'Crear'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
