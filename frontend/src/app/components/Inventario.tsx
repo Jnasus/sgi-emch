@@ -1,297 +1,219 @@
-import { useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import {
-  Package,
-  Search,
-  Filter,
-  Plus,
-  Edit,
-  Eye,
-  Download,
-  FileText,
-  MoreVertical,
-  CheckCircle,
-  Clock,
-  AlertCircle,
-  XCircle,
+  Package, Search, Filter, Plus, Edit, Eye,
+  Download, FileText, MoreVertical,
+  CheckCircle, Clock, AlertCircle, XCircle,
+  ChevronLeft, ChevronRight, RefreshCw,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from './ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Card, CardContent } from './ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import * as svc from '../../services/inventarioService';
+import type { EquipoResponse } from '../../services/inventarioService';
 
-const inventoryData = [
-  {
-    id: 1,
-    codigo: 'EJ-2024-001234',
-    tipo: 'Laptop',
-    marca: 'HP',
-    modelo: 'EliteBook 840 G8',
-    serie: 'SN123456789',
-    area: 'Académica',
-    usuario: 'Cap. Juan Pérez',
-    estado: 'Asignado',
-    fechaAsignacion: '2024-01-15',
-    observaciones: 'En buen estado',
-  },
-  {
-    id: 2,
-    codigo: 'EJ-2024-001235',
-    tipo: 'Desktop',
-    marca: 'Dell',
-    modelo: 'OptiPlex 7080',
-    serie: 'SN987654321',
-    area: 'DTIC',
-    usuario: 'Tte. María García',
-    estado: 'En Reparación',
-    fechaAsignacion: '2024-02-20',
-    observaciones: 'Placa madre dañada',
-  },
-  {
-    id: 3,
-    codigo: 'EJ-2024-001236',
-    tipo: 'Monitor',
-    marca: 'LG',
-    modelo: '24MK430H-B',
-    serie: 'SN456789123',
-    area: 'Bodega',
-    usuario: '-',
-    estado: 'En Bodega',
-    fechaAsignacion: '-',
-    observaciones: 'Nuevo sin uso',
-  },
-  {
-    id: 4,
-    codigo: 'EJ-2024-001237',
-    tipo: 'Impresora',
-    marca: 'Canon',
-    modelo: 'PIXMA G3110',
-    serie: 'SN741852963',
-    area: 'Logística',
-    usuario: 'Sgt. Carlos López',
-    estado: 'Asignado',
-    fechaAsignacion: '2024-03-10',
-    observaciones: 'Requiere mantenimiento preventivo',
-  },
-  {
-    id: 5,
-    codigo: 'EJ-2024-001238',
-    tipo: 'Laptop',
-    marca: 'Lenovo',
-    modelo: 'ThinkPad T14',
-    serie: 'SN852963741',
-    area: 'Comando',
-    usuario: 'May. Roberto Silva',
-    estado: 'Asignado',
-    fechaAsignacion: '2024-01-05',
-    observaciones: 'Actualizado a Windows 11',
-  },
-  {
-    id: 6,
-    codigo: 'EJ-2024-001239',
-    tipo: 'Desktop',
-    marca: 'HP',
-    modelo: 'ProDesk 400 G7',
-    serie: 'SN369258147',
-    area: 'Admin',
-    usuario: 'Tte. Ana Vargas',
-    estado: 'Prestado',
-    fechaAsignacion: '2024-04-01',
-    observaciones: 'Préstamo temporal por 30 días',
-  },
-  {
-    id: 7,
-    codigo: 'EJ-2023-009876',
-    tipo: 'Laptop',
-    marca: 'Dell',
-    modelo: 'Latitude 5420',
-    serie: 'SN147258369',
-    area: 'Bodega',
-    usuario: '-',
-    estado: 'Dado de Baja',
-    fechaAsignacion: '-',
-    observaciones: 'Equipo obsoleto - Más de 7 años',
-  },
-  {
-    id: 8,
-    codigo: 'EJ-2024-001240',
-    tipo: 'Mouse',
-    marca: 'Logitech',
-    modelo: 'M185',
-    serie: 'SN963741852',
-    area: 'Bodega',
-    usuario: '-',
-    estado: 'En Bodega',
-    fechaAsignacion: '-',
-    observaciones: 'Stock: 15 unidades',
-  },
+// ── Estado config ──────────────────────────────────────────────────────────
+const ESTADOS = [
+  { value: 'EN_BODEGA',     label: 'En Bodega',     color: 'bg-gray-100 text-gray-700 border-gray-300',    icon: Package },
+  { value: 'ASIGNADO',      label: 'Asignado',      color: 'bg-green-100 text-green-700 border-green-300', icon: CheckCircle },
+  { value: 'EN_REPARACION', label: 'En Reparación', color: 'bg-red-100 text-red-700 border-red-300',       icon: AlertCircle },
+  { value: 'PRESTADO',      label: 'Prestado',       color: 'bg-blue-100 text-blue-700 border-blue-300',    icon: Clock },
+  { value: 'DADO_DE_BAJA',  label: 'Dado de Baja',  color: 'bg-gray-100 text-gray-500 border-gray-300',    icon: XCircle },
 ];
 
-const statusConfig = {
-  'En Bodega': { color: 'bg-gray-100 text-gray-700 border-gray-300', icon: Package },
-  'Asignado': { color: 'bg-green-100 text-green-700 border-green-300', icon: CheckCircle },
-  'En Reparación': { color: 'bg-red-100 text-red-700 border-red-300', icon: AlertCircle },
-  'Prestado': { color: 'bg-blue-100 text-blue-700 border-blue-300', icon: Clock },
-  'Dado de Baja': { color: 'bg-gray-100 text-gray-500 border-gray-300', icon: XCircle },
-};
+function estadoInfo(valor: string) {
+  return ESTADOS.find(e => e.value === valor) ?? { label: valor, color: 'bg-gray-100 text-gray-700 border-gray-300', icon: Package };
+}
 
+function EstadoBadge({ estado }: { estado: string }) {
+  const info = estadoInfo(estado);
+  const Icon = info.icon;
+  return (
+    <Badge variant="outline" className={`gap-1 border text-xs ${info.color}`}>
+      <Icon className="w-3 h-3" />{info.label}
+    </Badge>
+  );
+}
+
+// ── Componente principal ───────────────────────────────────────────────────
 export function Inventario() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('Todos');
+  const [equipos, setEquipos]           = useState<EquipoResponse[]>([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState<string | null>(null);
+  const [page, setPage]                 = useState(0);
+  const [totalPages, setTotalPages]     = useState(1);
+  const [totalElements, setTotalElements] = useState(0);
+  const [search, setSearch]             = useState('');
+  const [filterEstado, setFilterEstado] = useState('');
 
-  const filteredData = inventoryData.filter((item) => {
-    const matchesSearch =
-      item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.area.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.usuario.toLowerCase().includes(searchTerm.toLowerCase());
+  // modal cambiar estado
+  const [showEstado,  setShowEstado]  = useState(false);
+  const [selected,    setSelected]    = useState<EquipoResponse | null>(null);
+  const [nuevoEstado, setNuevoEstado] = useState('');
+  const [motivo,      setMotivo]      = useState('');
+  const [saving,      setSaving]      = useState(false);
+  const [apiError,    setApiError]    = useState<string | null>(null);
 
-    const matchesStatus = filterStatus === 'Todos' || item.estado === filterStatus;
+  const load = useCallback(async () => {
+    setLoading(true); setError(null);
+    try {
+      const data = await svc.listarEquipos(page, 20, filterEstado || undefined);
+      setEquipos(data.content);
+      setTotalPages(data.totalPages);
+      setTotalElements(data.totalElements);
+    } catch {
+      setError('No se pudo cargar el inventario.');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, filterEstado]);
 
-    return matchesSearch && matchesStatus;
+  useEffect(() => { load(); }, [load]);
+
+  const filtered = equipos.filter(e => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return e.codigoEjercito.toLowerCase().includes(q)
+      || e.nombreTipo.toLowerCase().includes(q)
+      || e.nombreModelo.toLowerCase().includes(q)
+      || e.numeroSerie.toLowerCase().includes(q)
+      || e.nombreArea.toLowerCase().includes(q)
+      || e.nombreResponsable.toLowerCase().includes(q);
   });
+
+  function openEstadoModal(equipo: EquipoResponse) {
+    setSelected(equipo);
+    setNuevoEstado(equipo.estado);
+    setMotivo('');
+    setApiError(null);
+    setShowEstado(true);
+  }
+
+  async function handleCambiarEstado() {
+    if (!selected || !nuevoEstado) return;
+    setSaving(true); setApiError(null);
+    try {
+      await svc.cambiarEstado(selected.idEquipo, { estado: nuevoEstado, motivo: motivo || undefined });
+      setShowEstado(false);
+      await load();
+    } catch (e: unknown) {
+      setApiError(e instanceof Error ? e.message : 'Error al cambiar estado');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
-          <h2 className="text-[#2C3E1F] uppercase tracking-wider mb-1" style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em' }}>
+          <h2 className="text-[#2C3E1F] uppercase tracking-wider mb-1"
+            style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em' }}>
             Inventario de Equipos
           </h2>
           <p className="text-[#5C6064]">Gestión completa del inventario de equipos informáticos</p>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
-            <Download className="w-4 h-4" />
-            Excel
+            <Download className="w-4 h-4" /> Excel
           </Button>
           <Button variant="outline" className="gap-2 border-[#D91E18] text-[#D91E18] hover:bg-[#D91E18] hover:text-white">
-            <FileText className="w-4 h-4" />
-            PDF
+            <FileText className="w-4 h-4" /> PDF
           </Button>
           <Link to="/inventario/nuevo">
             <Button className="gap-2 bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
-              <Plus className="w-4 h-4" />
-              Nuevo Equipo
+              <Plus className="w-4 h-4" /> Nuevo Equipo
             </Button>
           </Link>
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filtros */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#5C6064]" />
-              <Input
-                placeholder="Buscar por código, tipo, marca, modelo, área o usuario..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 border-[#4A5D23]/30 focus:border-[#4A5D23]"
-              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C6064]" />
+              <Input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar por código, tipo, modelo, serie, área o responsable..."
+                className="pl-10 h-10 border-[#4A5D23]/30 focus:border-[#4A5D23]" />
             </div>
-            <div className="flex gap-3">
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-[200px] border-[#4A5D23]/30 h-11">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Todos">Todos los estados</SelectItem>
-                  <SelectItem value="En Bodega">En Bodega</SelectItem>
-                  <SelectItem value="Asignado">Asignado</SelectItem>
-                  <SelectItem value="En Reparación">En Reparación</SelectItem>
-                  <SelectItem value="Prestado">Prestado</SelectItem>
-                  <SelectItem value="Dado de Baja">Dado de Baja</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <Select
+              value={filterEstado || 'TODOS'}
+              onValueChange={v => { setFilterEstado(v === 'TODOS' ? '' : v); setPage(0); }}>
+              <SelectTrigger className="w-[200px] border-[#4A5D23]/30 h-10">
+                <Filter className="w-4 h-4 mr-2 text-[#5C6064]" />
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="TODOS">Todos los estados</SelectItem>
+                {ESTADOS.map(e => (
+                  <SelectItem key={e.value} value={e.value}>{e.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="mt-4 flex items-center gap-2 text-sm text-[#5C6064]">
-            <span>Mostrando <strong className="text-[#2C3E1F]">{filteredData.length}</strong> de <strong className="text-[#2C3E1F]">{inventoryData.length}</strong> equipos</span>
-          </div>
+          <p className="mt-3 text-sm text-[#5C6064]">
+            Mostrando <strong className="text-[#2C3E1F]">{filtered.length}</strong> de{' '}
+            <strong className="text-[#2C3E1F]">{totalElements}</strong> equipos
+          </p>
         </CardContent>
       </Card>
 
-      {/* Table */}
+      {/* Tabla */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-[#4A5D23] hover:bg-[#4A5D23]">
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Código Ejército</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Tipo</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Marca/Modelo</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Serie</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Área</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Usuario</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Estado</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide text-right" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((item, index) => {
-                  const statusInfo = statusConfig[item.estado as keyof typeof statusConfig];
-                  const StatusIcon = statusInfo.icon;
-
-                  return (
-                    <motion.tr
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className="border-b border-[#E8E8E3] hover:bg-[#F9F9F6] transition-colors"
-                    >
-                      <TableCell className="font-mono text-[#2C3E1F]" style={{ fontWeight: 600 }}>
-                        {item.codigo}
+          {loading ? (
+            <p className="text-center py-12 text-[#5C6064]">Cargando inventario...</p>
+          ) : error ? (
+            <p className="text-center py-12 text-[#D91E18]">{error}</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-[#4A5D23] hover:bg-[#4A5D23]">
+                    {['Código Ejército', 'Tipo', 'Modelo', 'N° Serie', 'Área', 'Responsable', 'Estado', 'Acciones'].map(h => (
+                      <TableHead key={h}
+                        className={`text-white uppercase tracking-wide text-xs ${h === 'Acciones' ? 'text-right' : ''}`}>
+                        {h}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-10 text-[#5C6064]">
+                        No se encontraron equipos
                       </TableCell>
-                      <TableCell className="text-[#5C6064]">{item.tipo}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="text-[#2C3E1F]" style={{ fontWeight: 600 }}>{item.marca}</p>
-                          <p className="text-sm text-[#5C6064]">{item.modelo}</p>
-                        </div>
+                    </TableRow>
+                  ) : filtered.map((e, i) => (
+                    <motion.tr key={e.idEquipo}
+                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.03 }}
+                      className="border-b border-[#E8E8E3] hover:bg-[#F9F9F6] transition-colors">
+                      <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm">
+                        {e.codigoEjercito}
                       </TableCell>
-                      <TableCell className="font-mono text-sm text-[#5C6064]">{item.serie}</TableCell>
+                      <TableCell className="text-[#5C6064] text-sm">{e.nombreTipo}</TableCell>
+                      <TableCell className="text-sm text-[#2C3E1F] font-medium">{e.nombreModelo}</TableCell>
+                      <TableCell className="font-mono text-sm text-[#5C6064]">{e.numeroSerie}</TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23]">
-                          {item.area}
+                        <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23] text-xs">
+                          {e.nombreArea}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-[#5C6064]">{item.usuario}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`gap-1 ${statusInfo.color} border`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {item.estado}
-                        </Badge>
-                      </TableCell>
+                      <TableCell className="text-sm text-[#5C6064]">{e.nombreResponsable}</TableCell>
+                      <TableCell><EstadoBadge estado={e.estado} /></TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -301,30 +223,82 @@ export function Inventario() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem asChild>
-                              <Link to={`/inventario/${item.id}`} className="flex items-center gap-2 cursor-pointer">
-                                <Eye className="w-4 h-4" />
-                                Ver Detalle
+                              <Link to={`/inventario/${e.idEquipo}`} className="flex items-center gap-2 cursor-pointer">
+                                <Eye className="w-4 h-4" /> Ver Detalle
                               </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                              <Edit className="w-4 h-4" />
-                              Editar
+                            <DropdownMenuItem asChild>
+                              <Link to={`/inventario/${e.idEquipo}/editar`} className="flex items-center gap-2 cursor-pointer">
+                                <Edit className="w-4 h-4" /> Editar
+                              </Link>
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                              <Download className="w-4 h-4" />
-                              Exportar
+                            <DropdownMenuItem
+                              onClick={() => openEstadoModal(e)}
+                              className="flex items-center gap-2 cursor-pointer">
+                              <RefreshCw className="w-4 h-4" /> Cambiar Estado
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
                     </motion.tr>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {!loading && !error && totalPages > 1 && (
+            <div className="flex items-center justify-between px-6 py-4 border-t border-[#E8E8E3]">
+              <span className="text-sm text-[#5C6064]">Página {page + 1} de {totalPages}</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="icon" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" size="icon" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Modal Cambiar Estado */}
+      <Dialog open={showEstado} onOpenChange={setShowEstado}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-[#2C3E1F]">
+              <RefreshCw className="w-5 h-5 text-[#4A5D23]" /> Cambiar Estado
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-[#5C6064]">
+            Equipo: <span className="font-semibold text-[#2C3E1F]">{selected?.codigoEjercito}</span>
+          </p>
+          <div className="space-y-3 mt-1">
+            <div className="space-y-1">
+              <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Nuevo Estado *</Label>
+              <select value={nuevoEstado} onChange={e => setNuevoEstado(e.target.value)}
+                className="w-full h-9 rounded-md border border-[#4A5D23]/30 bg-white px-3 text-sm focus:outline-none focus:border-[#4A5D23]">
+                {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Motivo</Label>
+              <Textarea value={motivo} onChange={e => setMotivo(e.target.value)}
+                placeholder="Descripción del motivo del cambio..."
+                className="min-h-[80px] border-[#4A5D23]/30 focus:border-[#4A5D23] resize-none" />
+            </div>
+          </div>
+          {apiError && <p className="text-sm text-[#D91E18] mt-1">{apiError}</p>}
+          <DialogFooter className="mt-2">
+            <Button variant="outline" onClick={() => setShowEstado(false)}>Cancelar</Button>
+            <Button onClick={handleCambiarEstado} disabled={saving}
+              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
+              {saving ? 'Guardando...' : 'Confirmar'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

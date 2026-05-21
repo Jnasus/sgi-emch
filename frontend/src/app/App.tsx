@@ -43,6 +43,7 @@ export default function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/inventario" element={<Inventario />} />
           <Route path="/inventario/nuevo" element={<InventarioNuevo />} />
+          <Route path="/inventario/:id/editar" element={<InventarioNuevo />} />
           <Route path="/inventario/:id" element={<InventarioDetalle />} />
           <Route path="/incidentes" element={<Incidentes />} />
           <Route path="/incidentes/nuevo" element={<IncidenteNuevo />} />
