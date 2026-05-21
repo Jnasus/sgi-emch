@@ -166,7 +166,7 @@ public class CatalogoController {
     public ResponseEntity<ApiResponse<SistemaOperativoResponse>> crearSistemaOperativo(
             @Valid @RequestBody SistemaOperativoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok("Sistema operativo creado",
+            .body(ApiResponse.ok("Sistema operativo creado correctamente",
                 catalogoService.crearSistemaOperativo(request)));
     }
 
@@ -192,7 +192,7 @@ public class CatalogoController {
     public ResponseEntity<ApiResponse<AreaResponse>> crearArea(
             @Valid @RequestBody AreaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-            .body(ApiResponse.ok("Área creada", catalogoService.crearArea(request)));
+            .body(ApiResponse.ok("Área creada correctamente", catalogoService.crearArea(request)));
     }
 
     @PutMapping("/areas/{idArea}")
