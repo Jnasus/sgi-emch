@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface AreaRepository extends JpaRepository<Area, Integer> {
     List<Area> findByActivoTrue();
     Optional<Area> findByCodigoArea(String codigoArea);
+    boolean existsByCodigoArea(String codigoArea);
+    boolean existsByCodigoAreaAndIdAreaNot(String codigoArea, Integer idArea);
 }
