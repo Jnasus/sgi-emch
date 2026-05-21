@@ -15,6 +15,7 @@ import pe.edu.emch.sgi.repository.UsuarioRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Component
@@ -56,7 +57,7 @@ public class DataSeeder implements ApplicationRunner {
             area.setCodigoArea("DTIC");
             area.setNombreArea("Departamento de Tecnologías de la Información");
             area.setDescripcion("Área responsable de la gestión TI institucional");
-            area.setAnioVigencia(LocalDate.of(LocalDate.now().getYear(), 1, 1));
+            area.setAnioVigencia(LocalDate.now().getYear());
             area.setActivo(true);
             area.setCreatedAt(LocalDateTime.now());
             areaRepository.save(area);

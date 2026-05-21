@@ -200,7 +200,7 @@ public class CatalogoService {
         r.setCodigoArea(a.getCodigoArea());
         r.setNombreArea(a.getNombreArea());
         r.setDescripcion(a.getDescripcion());
-        r.setAnioVigencia(a.getAnioVigencia().getYear());
+        r.setAnioVigencia(a.getAnioVigencia());
         return r;
     }
 
