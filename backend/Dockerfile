@@ -16,8 +16,6 @@ RUN ./mvnw package -DskipTests -q
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
-RUN mkdir -p storage/actas
-
 COPY --from=builder /app/target/*.jar app.jar
 
 EXPOSE 8080

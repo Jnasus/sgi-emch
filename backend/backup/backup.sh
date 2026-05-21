@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -eo pipefail
 
 # crond no hereda las variables de entorno del contenedor Docker.
 # El entrypoint del servicio las escribe en /etc/env_backup al arrancar.

@@ -2,6 +2,10 @@
 frontend/dist/
 frontend/node_modules/
 
+# Secrets — never commit
+backend/.env
+**/.env.local
+
 # Claude Code internal config
 .claude/
 

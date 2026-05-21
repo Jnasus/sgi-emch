@@ -39,6 +39,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO /dev/null http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 8
+      start_period: 60s
 
   backup:
     build:
@@ -51,6 +57,7 @@ services:
     command: >
       sh -c "
         printenv | grep -E '^(MYSQL_|MAX_BACKUPS)' > /etc/env_backup &&
+        chmod 600 /etc/env_backup &&
         chmod +x /backup.sh &&
         crond -f -l 2
       "
