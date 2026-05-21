@@ -40,6 +40,36 @@ services:
       db:
         condition: service_healthy
 
+  backup:
+    build:
+      context: ./backup
+      dockerfile: Dockerfile
+    container_name: sgi-emch-backup
+    restart: unless-stopped
+    # Escribe las variables de entorno para que crond las pueda leer,
+    # luego da permisos al script y arranca el demonio de cron.
+    command: >
+      sh -c "
+        printenv | grep -E '^(MYSQL_|MAX_BACKUPS)' > /etc/env_backup &&
+        chmod +x /backup.sh &&
+        crond -f -l 2
+      "
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASS: ${DB_PASSWORD:-root}
+      MYSQL_DB: db_sgi_emch
+      MAX_BACKUPS: "7"
+    volumes:
+      - ./backups:/backups          # archivos .sql.gz visibles en el servidor
+      - ./backup/backup.sh:/backup.sh         # editable sin rebuild
+      - ./backup/crontab:/etc/crontabs/root   # horario editable sin rebuild
+    networks:
+      - sgi_internal
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   mysql_data:
   pdf_storage:

@@ -1,0 +1,15 @@
+# Cron para el servicio de backup de MySQL
+# Formato: minuto  hora  dia  mes  diasemana  comando
+#
+# Para cambiar el horario: edita este archivo y ejecuta:
+#   docker compose restart backup
+#
+# El script backup.sh puede editarse sin reiniciar el contenedor.
+# Los cambios se aplican en el próximo ciclo automáticamente.
+#
+# Ejemplos de horarios:
+#   0 2 * * *     → todos los días a las 02:00 AM
+#   0 */6 * * *   → cada 6 horas
+#   0 2 * * 0     → solo los domingos a las 02:00 AM
+
+0 2 * * *   /backup.sh >> /var/log/backup.log 2>&1

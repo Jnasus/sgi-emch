@@ -38,5 +38,9 @@ src/main/resources/application-local.yml
 .env
 .env.local
 
+### Backups de base de datos ###
+backups/*.sql.gz
+backups/*.log
+
 ### Claude Code ###
 .claude/
