@@ -9,4 +9,5 @@ public class AreaResponse {
     private String nombreArea;
     private String descripcion;
     private Integer anioVigencia;
+    private Boolean activo;
 }

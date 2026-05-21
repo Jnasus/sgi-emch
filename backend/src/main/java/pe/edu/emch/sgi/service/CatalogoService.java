@@ -36,6 +36,7 @@ import pe.edu.emch.sgi.repository.TipoEquipoRepository;
 import pe.edu.emch.sgi.repository.TipoIncidenteRepository;
 import pe.edu.emch.sgi.repository.UsuarioRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -229,29 +230,31 @@ public class CatalogoService {
 
     @Transactional
     public AreaResponse crearArea(AreaRequest request) {
-        if (areaRepository.existsByCodigoArea(request.getCodigoArea())) {
+        String codigo = request.getCodigoArea().toUpperCase();
+        if (areaRepository.existsByCodigoArea(codigo)) {
             throw new DuplicateResourceException(
-                "Ya existe un área con código: " + request.getCodigoArea());
+                "Ya existe un área con código: " + codigo);
         }
         Area area = new Area();
-        area.setCodigoArea(request.getCodigoArea().toUpperCase());
+        area.setCodigoArea(codigo);
         area.setNombreArea(request.getNombreArea());
         area.setDescripcion(request.getDescripcion());
         area.setAnioVigencia(request.getAnioVigencia());
         area.setActivo(true);
-        area.setCreatedAt(java.time.LocalDateTime.now());
+        area.setCreatedAt(LocalDateTime.now());
         return toAreaResponse(areaRepository.save(area));
     }
 
     @Transactional
     public AreaResponse actualizarArea(Integer idArea, AreaRequest request) {
+        String codigo = request.getCodigoArea().toUpperCase();
         Area area = areaRepository.findById(idArea)
             .orElseThrow(() -> new ResourceNotFoundException("Área no encontrada: " + idArea));
-        if (areaRepository.existsByCodigoAreaAndIdAreaNot(request.getCodigoArea(), idArea)) {
+        if (areaRepository.existsByCodigoAreaAndIdAreaNot(codigo, idArea)) {
             throw new DuplicateResourceException(
-                "Ya existe un área con código: " + request.getCodigoArea());
+                "Ya existe un área con código: " + codigo);
         }
-        area.setCodigoArea(request.getCodigoArea().toUpperCase());
+        area.setCodigoArea(codigo);
         area.setNombreArea(request.getNombreArea());
         area.setDescripcion(request.getDescripcion());
         area.setAnioVigencia(request.getAnioVigencia());
@@ -267,6 +270,7 @@ public class CatalogoService {
         r.setNombreArea(a.getNombreArea());
         r.setDescripcion(a.getDescripcion());
         r.setAnioVigencia(a.getAnioVigencia());
+        r.setActivo(a.getActivo());
         return r;
     }
 
