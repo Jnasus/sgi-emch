@@ -31,7 +31,11 @@
 
 API REST del Sistema de Gestión de Inventario para el Centro de Formación y Bienestar (CFB) del Ejército del Perú. Gestiona el ciclo de vida completo del inventario de equipos tecnológicos: registro, asignación, mantenimiento, incidencias y alertas de stock.
 
-- **Base URL:** `http://localhost:8080`
+| Entorno | Base URL |
+|---|---|
+| Producción | `https://api.escuelamilitar.edu.pe` |
+| Local (Maven) | `http://localhost:8080` |
+
 - **Prefijo de rutas:** `/api`
 - **Formato:** JSON
 
@@ -922,20 +926,24 @@ GET /api/equipos?estado=ASIGNADO&page=0&size=10&sort=codigoEjercito,asc
 
 ## Swagger UI
 
-La documentación interactiva de la API está disponible en:
+| Entorno | URL |
+|---|---|
+| Producción | `https://api.escuelamilitar.edu.pe/swagger-ui.html` |
+| Local | `http://localhost:8080/swagger-ui.html` |
 
-```
-http://localhost:8080/swagger-ui.html
-```
+El esquema OpenAPI en JSON:
 
-El esquema OpenAPI en JSON está en:
-
-```
-http://localhost:8080/api-docs
-```
+| Entorno | URL |
+|---|---|
+| Producción | `https://api.escuelamilitar.edu.pe/api-docs` |
+| Local | `http://localhost:8080/api-docs` |
 
 > Para probar endpoints protegidos en Swagger, usa **Authorize** e ingresa:  
 > `Bearer eyJhbGci...` (el accessToken obtenido del login)
+
+> **Nota HTTPS:** el backend corre detrás de Nginx Proxy Manager que termina SSL.
+> `server.forward-headers-strategy=FRAMEWORK` está configurado para que Spring Boot
+> respete `X-Forwarded-Proto` y Swagger genere URLs `https://` correctamente.
 
 ---
 
