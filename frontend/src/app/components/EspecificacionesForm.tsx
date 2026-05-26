@@ -1,15 +1,21 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Save, Cpu, Database, HardDrive, Layers, Monitor, Network } from 'lucide-react';
+import {
+  ArrowLeft, Save, Cpu, Database, HardDrive, Layers, Monitor,
+  Network, Copy, Search, CheckCircle,
+} from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 import * as svc from '../../services/inventarioService';
 import type {
   EspecificacionTecnicaResponse,
   EspecificacionTecnicaRequest,
+  EquipoResponse,
 } from '../../services/inventarioService';
 
 // ── Form state (todo string para manejar inputs numéricos vacíos) ──────────
@@ -84,6 +90,16 @@ function toRequest(f: EspecForm): EspecificacionTecnicaRequest {
   };
 }
 
+/** Devuelve true si el equipo ya tiene al menos un campo de specs cargado */
+function tieneSpecs(e: EquipoResponse): boolean {
+  const s = e.especificaciones;
+  if (!s) return false;
+  return !!(
+    s.procesador || s.nucleos != null || s.ramTotalGb != null ||
+    s.discoCapacidadGb != null || s.gpuModelo || s.monitorModelo || s.redModelo
+  );
+}
+
 // ── Campo de texto / número reutilizable ───────────────────────────────────
 function Field({
   label, value, onChange,
@@ -110,12 +126,22 @@ export function EspecificacionesForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
+  // ── Estado del formulario ────────────────────────────────────────────────
   const [form, setForm]           = useState<EspecForm>(EMPTY);
   const [loading, setLoading]     = useState(true);
   const [saving, setSaving]       = useState(false);
   const [apiError, setApiError]   = useState<string | null>(null);
   const [codigoEquipo, setCodigoEquipo] = useState('');
 
+  // ── Estado del modal "Precargar de otro equipo" ──────────────────────────
+  const [showPrecargar,    setShowPrecargar]    = useState(false);
+  const [precargarBusqueda, setPrecargarBusqueda] = useState('');
+  const [precargarEquipos, setPrecargarEquipos]  = useState<EquipoResponse[]>([]);
+  const [precargarLoading, setPrecargarLoading]  = useState(false);
+  const [precargarError,   setPrecargarError]    = useState<string | null>(null);
+  const [aplicandoId,      setAplicandoId]       = useState<number | null>(null);
+
+  // ── Carga inicial del equipo actual ─────────────────────────────────────
   useEffect(() => {
     if (!id) return;
     svc.obtenerEquipo(Number(id))
@@ -131,6 +157,7 @@ export function EspecificacionesForm() {
     setForm(prev => ({ ...prev, [key]: value }));
   }
 
+  // ── Guardar ──────────────────────────────────────────────────────────────
   async function handleSave() {
     if (!id) return;
     setSaving(true); setApiError(null);
@@ -143,6 +170,55 @@ export function EspecificacionesForm() {
       setSaving(false);
     }
   }
+
+  // ── Modal: abrir y cargar lista de equipos ───────────────────────────────
+  async function openPrecargar() {
+    setPrecargarBusqueda('');
+    setPrecargarError(null);
+    setShowPrecargar(true);
+
+    // Solo cargamos la lista una vez; recargamos si estaba vacía
+    if (precargarEquipos.length > 0) return;
+
+    setPrecargarLoading(true);
+    try {
+      // Carga hasta 200 equipos para cubrir inventarios medianos
+      const data = await svc.listarEquipos(0, 200);
+      setPrecargarEquipos(data.content);
+    } catch {
+      setPrecargarError('No se pudo cargar la lista de equipos.');
+    } finally {
+      setPrecargarLoading(false);
+    }
+  }
+
+  // ── Modal: aplicar specs del equipo seleccionado ─────────────────────────
+  async function aplicarEspecsDe(equipoId: number) {
+    setAplicandoId(equipoId);
+    try {
+      const eq = await svc.obtenerEquipo(equipoId);
+      setForm(toForm(eq.especificaciones));
+      setShowPrecargar(false);
+    } catch {
+      setPrecargarError('No se pudieron obtener las especificaciones del equipo seleccionado.');
+    } finally {
+      setAplicandoId(null);
+    }
+  }
+
+  // ── Filtrado en el modal ─────────────────────────────────────────────────
+  const precargarFiltrado = precargarEquipos.filter(e => {
+    if (e.idEquipo === Number(id)) return false; // excluir equipo actual
+    if (!precargarBusqueda.trim()) return true;
+    const q = precargarBusqueda.toLowerCase();
+    return (
+      e.codigoEjercito.toLowerCase().includes(q) ||
+      e.nombreTipo.toLowerCase().includes(q) ||
+      e.nombreModelo.toLowerCase().includes(q) ||
+      e.nombreArea.toLowerCase().includes(q) ||
+      e.nombreResponsable.toLowerCase().includes(q)
+    );
+  });
 
   const backTo = `/inventario/${id}`;
 
@@ -170,6 +246,16 @@ export function EspecificacionesForm() {
         </div>
 
         <div className="flex gap-3">
+          {/* Botón precargar */}
+          <Button
+            variant="outline"
+            onClick={openPrecargar}
+            disabled={loading}
+            className="gap-2 border-[#4A5D23]/60 text-[#4A5D23] hover:bg-[#4A5D23]/10">
+            <Copy className="w-4 h-4" />
+            Precargar de otro equipo
+          </Button>
+
           <Link to={backTo}>
             <Button variant="outline"
               className="border-[#5C6064] text-[#5C6064] hover:bg-[#5C6064] hover:text-white">
@@ -347,6 +433,119 @@ export function EspecificacionesForm() {
           {apiError}
         </p>
       )}
+
+      {/* ── Modal: Precargar especificaciones de otro equipo ─────────────── */}
+      <Dialog open={showPrecargar} onOpenChange={setShowPrecargar}>
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col gap-0 p-0">
+
+          {/* Cabecera fija */}
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#E8E8E3]">
+            <DialogTitle className="flex items-center gap-2 text-[#2C3E1F]">
+              <Copy className="w-5 h-5 text-[#4A5D23]" />
+              Precargar especificaciones de otro equipo
+            </DialogTitle>
+            <p className="text-sm text-[#5C6064] mt-1">
+              Selecciona un equipo para copiar sus especificaciones al formulario.
+              Podrás ajustar los campos que difieran antes de guardar.
+            </p>
+          </DialogHeader>
+
+          {/* Buscador */}
+          <div className="px-6 py-3 border-b border-[#E8E8E3]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C6064]" />
+              <Input
+                value={precargarBusqueda}
+                onChange={e => setPrecargarBusqueda(e.target.value)}
+                placeholder="Buscar por código, tipo, modelo, área o responsable..."
+                className="pl-10 h-9 border-[#4A5D23]/30 focus:border-[#4A5D23]"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Lista de equipos */}
+          <div className="flex-1 overflow-y-auto">
+            {precargarLoading ? (
+              <p className="text-center py-10 text-[#5C6064]">Cargando equipos...</p>
+            ) : precargarError ? (
+              <p className="text-center py-10 text-[#D91E18] text-sm">{precargarError}</p>
+            ) : precargarFiltrado.length === 0 ? (
+              <p className="text-center py-10 text-[#5C6064] text-sm">
+                {precargarBusqueda ? 'Sin resultados para la búsqueda.' : 'No hay otros equipos disponibles.'}
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-[#F9F9F6] border-b border-[#E8E8E3]">
+                  <tr>
+                    {['Código', 'Tipo', 'Modelo', 'Área', 'Specs'].map(h => (
+                      <th key={h}
+                        className="px-4 py-2 text-left text-xs text-[#5C6064] uppercase tracking-wide font-semibold">
+                        {h}
+                      </th>
+                    ))}
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {precargarFiltrado.map(e => {
+                    const conSpecs = tieneSpecs(e);
+                    const cargando = aplicandoId === e.idEquipo;
+                    return (
+                      <tr
+                        key={e.idEquipo}
+                        className="border-b border-[#E8E8E3] hover:bg-[#F0F4E8] transition-colors cursor-pointer"
+                        onClick={() => !aplicandoId && aplicarEspecsDe(e.idEquipo)}>
+                        <td className="px-4 py-3 font-mono font-semibold text-[#2C3E1F]">
+                          {e.codigoEjercito}
+                        </td>
+                        <td className="px-4 py-3 text-[#5C6064]">{e.nombreTipo}</td>
+                        <td className="px-4 py-3 text-[#2C3E1F]">{e.nombreModelo}</td>
+                        <td className="px-4 py-3">
+                          <Badge variant="outline"
+                            className="border-[#4A5D23] text-[#4A5D23] text-xs">
+                            {e.nombreArea}
+                          </Badge>
+                        </td>
+                        <td className="px-4 py-3">
+                          {conSpecs && (
+                            <span className="inline-flex items-center gap-1 text-xs text-green-700">
+                              <CheckCircle className="w-3.5 h-3.5" /> Con specs
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            variant="outline" size="sm"
+                            disabled={!!aplicandoId}
+                            className="text-xs gap-1 border-[#4A5D23]/40 text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
+                            {cargando ? 'Cargando...' : 'Usar estas specs'}
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Pie fijo */}
+          <div className="px-6 py-4 border-t border-[#E8E8E3] flex items-center justify-between bg-[#F9F9F6]">
+            <p className="text-xs text-[#5C6064]">
+              {precargarFiltrado.length > 0 && !precargarLoading
+                ? `${precargarFiltrado.length} equipo${precargarFiltrado.length !== 1 ? 's' : ''} disponible${precargarFiltrado.length !== 1 ? 's' : ''}`
+                : ''}
+            </p>
+            <Button variant="outline" onClick={() => setShowPrecargar(false)}
+              className="border-[#5C6064] text-[#5C6064] hover:bg-[#5C6064] hover:text-white">
+              Cancelar
+            </Button>
+          </div>
+
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
