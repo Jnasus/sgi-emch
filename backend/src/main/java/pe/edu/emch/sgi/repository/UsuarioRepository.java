@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import pe.edu.emch.sgi.entity.Usuario;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
@@ -31,4 +32,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Modifying
     @Query("UPDATE Usuario u SET u.ultimoAcceso = :ahora WHERE u.idUsuario = :idUsuario")
     void actualizarUltimoAcceso(@Param("idUsuario") Integer idUsuario, @Param("ahora") LocalDateTime ahora);
+
+    @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol = 'TECNICO_CAMPO' AND u.activo = true ORDER BY u.apellidos")
+    List<Usuario> findTecnicosCampoActivos();
 }

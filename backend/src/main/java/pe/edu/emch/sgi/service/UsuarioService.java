@@ -55,6 +55,12 @@ public class UsuarioService {
             .map(this::toRolResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> listarTecnicos() {
+        return usuarioRepository.findTecnicosCampoActivos()
+            .stream().map(this::toUsuarioResponse).toList();
+    }
+
     @Transactional
     public UsuarioResponse crearUsuario(UsuarioCreateRequest request) {
         if (usuarioRepository.existsByDni(request.getDni())) {

@@ -55,6 +55,13 @@ public class UsuarioController {
         return ResponseEntity.ok(ApiResponse.ok("OK", usuarioService.listarRoles()));
     }
 
+    @GetMapping("/tecnicos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','TECNICO_CAMPO')")
+    @Operation(summary = "Listar técnicos de campo activos")
+    public ResponseEntity<ApiResponse<List<UsuarioResponse>>> listarTecnicos() {
+        return ResponseEntity.ok(ApiResponse.ok("OK", usuarioService.listarTecnicos()));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener usuario por ID")
     public ResponseEntity<ApiResponse<UsuarioResponse>> obtenerUsuario(@PathVariable Integer id) {
