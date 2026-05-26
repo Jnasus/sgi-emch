@@ -1,144 +1,283 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { Link } from 'react-router';
-import { AlertTriangle, Search, Filter, Plus, CheckCircle, Clock, XCircle } from 'lucide-react';
+import {
+  Plus, AlertCircle, Clock, CheckCircle2, XCircle, ChevronDown,
+  type LucideIcon,
+} from 'lucide-react';
 import { Button } from './ui/button';
-import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import * as ticketSvc from '../../services/ticketService';
+import type { TicketResponse, TecnicoResponse } from '../../services/ticketService';
 
-const incidentsData = [
-  { id: 1234, codigo: 'EJ-2024-001234', tipo: 'Hardware', descripcion: 'Laptop no enciende - posible problema con placa madre', tecnico: 'Tte. García', fecha: '2024-04-14 09:30', estado: 'Abierto', prioridad: 'Alta' },
-  { id: 1235, codigo: 'EJ-2024-001240', tipo: 'Software', descripcion: 'Sistema operativo lento - requiere optimización', tecnico: 'Sgt. López', fecha: '2024-04-14 10:15', estado: 'En Proceso', prioridad: 'Media' },
-  { id: 1236, codigo: 'EJ-2024-001237', tipo: 'Impresora', descripcion: 'Impresora sin conectividad de red', tecnico: 'Tte. García', fecha: '2024-04-13 14:20', estado: 'Abierto', prioridad: 'Alta' },
-  { id: 1237, codigo: 'EJ-2024-001235', tipo: 'Hardware', descripcion: 'Monitor con pantalla parpadeante', tecnico: 'Sgt. Vargas', fecha: '2024-04-13 11:45', estado: 'Resuelto', prioridad: 'Baja' },
-  { id: 1238, codigo: 'EJ-2024-001242', tipo: 'Red', descripcion: 'Sin acceso a internet - problema de DNS', tecnico: 'Tte. García', fecha: '2024-04-12 16:30', estado: 'Cerrado', prioridad: 'Media' },
-];
+// ── Constantes ────────────────────────────────────────────────────────────────
 
-const statusConfig = {
-  'Abierto': { color: 'bg-red-100 text-red-700 border-red-300', icon: AlertTriangle },
-  'En Proceso': { color: 'bg-yellow-100 text-yellow-700 border-yellow-300', icon: Clock },
-  'Resuelto': { color: 'bg-blue-100 text-blue-700 border-blue-300', icon: CheckCircle },
-  'Cerrado': { color: 'bg-gray-100 text-gray-500 border-gray-300', icon: XCircle },
+const ESTADOS = ['ABIERTO', 'EN_PROCESO', 'RESUELTO', 'CERRADO'] as const;
+type EstadoTicket = typeof ESTADOS[number];
+
+const COL_CONFIG: Record<EstadoTicket, {
+  label: string;
+  headerClass: string;
+  borderClass: string;
+  Icon: LucideIcon;
+}> = {
+  ABIERTO:    { label: 'Abierto',    headerClass: 'bg-amber-50 border-b border-amber-200',  borderClass: 'border-2 border-amber-400',  Icon: AlertCircle  },
+  EN_PROCESO: { label: 'En Proceso', headerClass: 'bg-blue-50 border-b border-blue-200',    borderClass: 'border-2 border-blue-400',   Icon: Clock        },
+  RESUELTO:   { label: 'Resuelto',   headerClass: 'bg-green-50 border-b border-green-200',  borderClass: 'border-2 border-green-400',  Icon: CheckCircle2 },
+  CERRADO:    { label: 'Cerrado',    headerClass: 'bg-gray-50 border-b border-gray-200',    borderClass: 'border-2 border-gray-300',   Icon: XCircle      },
 };
 
-export function Incidentes() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('Todos');
+const PRIORIDAD_CLASS: Record<string, string> = {
+  BAJA:    'bg-gray-100 text-gray-600 border-gray-300',
+  MEDIA:   'bg-blue-100 text-blue-700 border-blue-300',
+  ALTA:    'bg-orange-100 text-orange-700 border-orange-300',
+  CRITICA: 'bg-red-100 text-red-700 border-red-300',
+};
 
-  const filteredData = incidentsData.filter((item) => {
-    const matchesSearch =
-      item.id.toString().includes(searchTerm) ||
-      item.codigo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.tipo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.descripcion.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'Todos' || item.estado === filterStatus;
-    return matchesSearch && matchesStatus;
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function tiempoRelativo(fechaIso: string): string {
+  const mins = Math.floor((Date.now() - new Date(fechaIso).getTime()) / 60000);
+  if (mins < 60) return `hace ${mins} min`;
+  const hs = Math.floor(mins / 60);
+  if (hs < 24) return `hace ${hs} h`;
+  const dias = Math.floor(hs / 24);
+  return `hace ${dias} día${dias !== 1 ? 's' : ''}`;
+}
+
+// ── Tipos internos ────────────────────────────────────────────────────────────
+
+interface ColState {
+  tickets: TicketResponse[];
+  pagina: number;
+  totalElements: number;
+  cargandoMas: boolean;
+}
+
+function colInicial(): ColState {
+  return { tickets: [], pagina: 0, totalElements: 0, cargandoMas: false };
+}
+
+type ColsMap = Record<EstadoTicket, ColState>;
+
+// ── Componente ────────────────────────────────────────────────────────────────
+
+export function Incidentes() {
+  const navigate = useNavigate();
+
+  const [cols, setCols] = useState<ColsMap>({
+    ABIERTO: colInicial(), EN_PROCESO: colInicial(),
+    RESUELTO: colInicial(), CERRADO: colInicial(),
   });
+  const [cargandoInicial, setCargandoInicial] = useState(true);
+  const [error, setError]                     = useState<string | null>(null);
+  const [tecnicos, setTecnicos]               = useState<TecnicoResponse[]>([]);
+  const [filtroPrioridad, setFiltroPrioridad] = useState('');
+  const [filtroTecnico, setFiltroTecnico]     = useState('');
+
+  // Cargar lista de técnicos para el filtro (una sola vez)
+  useEffect(() => {
+    ticketSvc.listarTecnicos().then(setTecnicos).catch(() => {});
+  }, []);
+
+  // Recargar todas las columnas cuando cambien los filtros
+  useEffect(() => {
+    const filtros = {
+      prioridad: filtroPrioridad || undefined,
+      idTecnico: filtroTecnico ? Number(filtroTecnico) : undefined,
+    };
+    setCargandoInicial(true);
+    setError(null);
+    Promise.all(ESTADOS.map(e => ticketSvc.listarTicketsPorEstado(e, filtros, 0)))
+      .then(resultados => {
+        const nuevasCols = {} as ColsMap;
+        ESTADOS.forEach((e, i) => {
+          nuevasCols[e] = {
+            tickets: resultados[i].content,
+            pagina: 0,
+            totalElements: resultados[i].totalElements,
+            cargandoMas: false,
+          };
+        });
+        setCols(nuevasCols);
+      })
+      .catch(() => setError('Error al cargar los tickets. Intente nuevamente.'))
+      .finally(() => setCargandoInicial(false));
+  }, [filtroPrioridad, filtroTecnico]);
+
+  function verMas(estado: EstadoTicket) {
+    const col = cols[estado];
+    const siguientePagina = col.pagina + 1;
+    const filtros = {
+      prioridad: filtroPrioridad || undefined,
+      idTecnico: filtroTecnico ? Number(filtroTecnico) : undefined,
+    };
+    setCols(prev => ({ ...prev, [estado]: { ...prev[estado], cargandoMas: true } }));
+    ticketSvc.listarTicketsPorEstado(estado, filtros, siguientePagina)
+      .then(resp => {
+        setCols(prev => ({
+          ...prev,
+          [estado]: {
+            tickets: [...prev[estado].tickets, ...resp.content],
+            pagina: siguientePagina,
+            totalElements: resp.totalElements,
+            cargandoMas: false,
+          },
+        }));
+      })
+      .catch(() => {
+        setCols(prev => ({ ...prev, [estado]: { ...prev[estado], cargandoMas: false } }));
+      });
+  }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
-          <h2 className="text-[#2C3E1F] uppercase tracking-wider mb-1" style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em' }}>
-            Mesa de Ayuda - Incidentes
+          <h2 className="text-[#2C3E1F] uppercase tracking-wider mb-1"
+              style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em' }}>
+            Mesa de Ayuda — Incidentes
           </h2>
           <p className="text-[#5C6064]">Gestión de tickets e incidentes técnicos</p>
         </div>
-        <Link to="/incidentes/nuevo">
-          <Button className="gap-2 bg-[#D91E18] hover:bg-[#B81614] text-white">
-            <Plus className="w-4 h-4" />
-            Nuevo Ticket
-          </Button>
-        </Link>
+        <Button
+          className="gap-2 bg-[#D91E18] hover:bg-[#B81614] text-white"
+          onClick={() => navigate('/incidentes/nuevo')}
+        >
+          <Plus className="w-4 h-4" />
+          Nuevo Ticket
+        </Button>
       </div>
 
+      {/* Filtros */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-[#5C6064]" />
-              <Input
-                placeholder="Buscar por ticket, código, tipo o descripción..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-11 border-[#4A5D23]/30 focus:border-[#4A5D23]"
-              />
-            </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[200px] border-[#4A5D23]/30 h-11">
-                <Filter className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Estado" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Todos">Todos</SelectItem>
-                <SelectItem value="Abierto">Abierto</SelectItem>
-                <SelectItem value="En Proceso">En Proceso</SelectItem>
-                <SelectItem value="Resuelto">Resuelto</SelectItem>
-                <SelectItem value="Cerrado">Cerrado</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <CardContent className="p-4 flex flex-wrap gap-3">
+          <Select value={filtroPrioridad} onValueChange={setFiltroPrioridad}>
+            <SelectTrigger className="w-[200px] border-[#4A5D23]/30 h-10">
+              <SelectValue placeholder="Todas las prioridades" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las prioridades</SelectItem>
+              <SelectItem value="CRITICA">Crítica</SelectItem>
+              <SelectItem value="ALTA">Alta</SelectItem>
+              <SelectItem value="MEDIA">Media</SelectItem>
+              <SelectItem value="BAJA">Baja</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={filtroTecnico} onValueChange={setFiltroTecnico}>
+            <SelectTrigger className="w-[230px] border-[#4A5D23]/30 h-10">
+              <SelectValue placeholder="Todos los técnicos" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos los técnicos</SelectItem>
+              {tecnicos.map(t => (
+                <SelectItem key={t.idUsuario} value={String(t.idUsuario)}>
+                  {t.nombres} {t.apellidos}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-[#D91E18] hover:bg-[#D91E18]">
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>N° Ticket</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Código Equipo</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Tipo</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Descripción</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Técnico</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Fecha</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Estado</TableHead>
-                  <TableHead className="text-white uppercase tracking-wide" style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>Prioridad</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredData.map((item, index) => {
-                  const statusInfo = statusConfig[item.estado as keyof typeof statusConfig];
-                  const StatusIcon = statusInfo.icon;
-                  return (
-                    <motion.tr
-                      key={item.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      className="border-b border-[#E8E8E3] hover:bg-[#F9F9F6] transition-colors cursor-pointer"
+      {/* Error global */}
+      {error && (
+        <div className="flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* Kanban */}
+      {cargandoInicial ? (
+        <div className="flex items-center justify-center h-64 text-[#5C6064]">
+          Cargando tickets...
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-start">
+          {ESTADOS.map(estado => {
+            const cfg = COL_CONFIG[estado];
+            const { Icon } = cfg;
+            const col = cols[estado];
+            const hayMas = col.tickets.length < col.totalElements;
+            return (
+              <div key={estado} className={`rounded-xl overflow-hidden flex flex-col ${cfg.borderClass}`}>
+                {/* Cabecera de columna */}
+                <div className={`px-4 py-3 flex items-center justify-between ${cfg.headerClass}`}>
+                  <div className="flex items-center gap-2">
+                    <Icon className="w-4 h-4" />
+                    <span className="font-semibold text-sm uppercase tracking-wide">
+                      {cfg.label}
+                    </span>
+                  </div>
+                  <Badge variant="outline" className="text-xs">{col.totalElements}</Badge>
+                </div>
+
+                {/* Tarjetas */}
+                <div className="overflow-y-auto max-h-[600px] p-3 space-y-3 bg-white">
+                  {col.tickets.length === 0 ? (
+                    <p className="text-center text-[#5C6064] text-sm py-10">Sin tickets</p>
+                  ) : (
+                    col.tickets.map((ticket, idx) => (
+                      <motion.div
+                        key={ticket.idTicket}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.03 }}
+                        className="bg-white border border-[#E8E8E3] rounded-lg p-3 cursor-pointer hover:shadow-md hover:border-[#4A5D23]/40 transition-all"
+                        onClick={() => navigate(`/incidentes/${ticket.idTicket}`)}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <span className="font-mono text-xs text-[#5C6064] truncate">
+                            {ticket.numeroTicket}
+                          </span>
+                          <Badge variant="outline"
+                                 className={`text-xs shrink-0 ${PRIORIDAD_CLASS[ticket.prioridad] ?? ''}`}>
+                            {ticket.prioridad}
+                          </Badge>
+                        </div>
+                        <p className="text-[#2C3E1F] text-sm font-medium leading-snug mb-2 line-clamp-2">
+                          {ticket.titulo}
+                        </p>
+                        <div className="space-y-0.5 text-xs text-[#5C6064]">
+                          <div className="flex items-center gap-1">
+                            <span>💻</span>
+                            <span className="font-mono">{ticket.codigoEjercito}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>👤</span>
+                            <span>{ticket.nombresTecnico} {ticket.apellidosTecnico}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <span>🕐</span>
+                            <span>{tiempoRelativo(ticket.fechaApertura)}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+
+                  {hayMas && (
+                    <Button
+                      variant="ghost" size="sm"
+                      className="w-full text-[#5C6064] hover:text-[#2C3E1F]"
+                      disabled={col.cargandoMas}
+                      onClick={() => verMas(estado)}
                     >
-                      <TableCell className="font-mono text-[#2C3E1F]" style={{ fontWeight: 600 }}>#{item.id}</TableCell>
-                      <TableCell className="font-mono text-[#5C6064]">{item.codigo}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="border-[#5C6064] text-[#5C6064]">{item.tipo}</Badge>
-                      </TableCell>
-                      <TableCell className="text-[#2C3E1F] max-w-md">{item.descripcion}</TableCell>
-                      <TableCell className="text-[#5C6064]">{item.tecnico}</TableCell>
-                      <TableCell className="text-sm text-[#5C6064]">{item.fecha}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`gap-1 ${statusInfo.color} border`}>
-                          <StatusIcon className="w-3 h-3" />
-                          {item.estado}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={`${item.prioridad === 'Alta' ? 'border-red-500 text-red-700' : item.prioridad === 'Media' ? 'border-yellow-500 text-yellow-700' : 'border-gray-500 text-gray-700'}`}>
-                          {item.prioridad}
-                        </Badge>
-                      </TableCell>
-                    </motion.tr>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                      <ChevronDown className="w-4 h-4 mr-1" />
+                      {col.cargandoMas ? 'Cargando...' : 'Ver más'}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
