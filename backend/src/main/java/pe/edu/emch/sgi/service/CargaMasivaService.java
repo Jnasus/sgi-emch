@@ -249,7 +249,11 @@ public class CargaMasivaService {
         Equipo guardado = equipoRepository.save(equipo);
 
         if (tieneSpecs(d)) {
-            EspecificacionTecnica espec = new EspecificacionTecnica();
+            // Upsert: si existe una spec huérfana para este id_equipo, reutilizarla
+            // en lugar de insertar una nueva (evita violación de uq_espec_equipo)
+            EspecificacionTecnica espec = especificacionTecnicaRepository
+                .findByEquipo(guardado)
+                .orElse(new EspecificacionTecnica());
             espec.setEquipo(guardado);
             espec.setProcesador(isBlank(d.procesador()) ? null : d.procesador().trim());
             espec.setNucleos(parseShort(d.nucleos()));

@@ -179,6 +179,7 @@ export function CargaMasiva() {
   const [revalidando, setRevalidando] = useState<Set<number>>(new Set());
   const [revalidandoTodo, setRevalidandoTodo] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  const [errorConfirmar, setErrorConfirmar] = useState<string | null>(null);
   // Filas marcadas como "omitir" (por índice en el array filas)
   const [descartados, setDescartados] = useState<Set<number>>(new Set());
 
@@ -292,12 +293,13 @@ export function CargaMasiva() {
 
   const handleConfirmar = async () => {
     setConfirmando(true);
+    setErrorConfirmar(null);
     try {
       const resp = await confirmarCarga(filasAConfirmar);
       setResultado(resp);
       setPaso(3);
     } catch (err) {
-      setErrorSubida(err instanceof Error ? err.message : 'Error al confirmar la carga');
+      setErrorConfirmar(err instanceof Error ? err.message : 'Error al confirmar la carga');
     } finally {
       setConfirmando(false);
     }
@@ -310,6 +312,7 @@ export function CargaMasiva() {
     setCatalogos(null);
     setResultado(null);
     setErrorSubida(null);
+    setErrorConfirmar(null);
     setDescartados(new Set());
   };
 
@@ -582,6 +585,14 @@ export function CargaMasiva() {
                 );
               })}
             </div>
+
+            {/* Error al confirmar */}
+            {errorConfirmar && (
+              <div className="mt-4 flex items-center gap-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded-lg px-4 py-2.5">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span>{errorConfirmar}</span>
+              </div>
+            )}
 
             {/* Footer: confirmar */}
             <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
