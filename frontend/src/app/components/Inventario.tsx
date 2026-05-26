@@ -391,19 +391,26 @@ export function Inventario() {
                     </TableRow>
                   ) : filtered.map((e, i) => {
                     const isChecked = selectedIds.has(e.idEquipo);
+
+                    // En modo selección las celdas de datos alternan selección;
+                    // en modo normal navegan al detalle. La celda Acciones
+                    // nunca tiene onClick propio para no interferir con el dropdown.
+                    const handleCellClick = selectionMode
+                      ? () => toggleItem(e.idEquipo)
+                      : () => navigate(`/inventario/${e.idEquipo}`);
+
                     return (
                       <motion.tr key={e.idEquipo}
                         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: i * 0.03 }}
-                        onClick={() => selectionMode ? toggleItem(e.idEquipo) : navigate(`/inventario/${e.idEquipo}`)}
-                        className={`border-b border-[#E8E8E3] transition-colors cursor-pointer
+                        className={`border-b border-[#E8E8E3] transition-colors
                           ${isChecked && selectionMode
                             ? 'bg-[#EDF3E0] hover:bg-[#E3EDD6]'
                             : 'hover:bg-[#F0F4E8]'}`}>
 
                         {/* Checkbox de fila — solo en modo selección */}
                         {selectionMode && (
-                          <TableCell className="w-10 text-center" onClick={ev => ev.stopPropagation()}>
+                          <TableCell className="w-10 text-center cursor-pointer" onClick={handleCellClick}>
                             <Checkbox
                               checked={isChecked}
                               onCheckedChange={() => toggleItem(e.idEquipo)}
@@ -413,20 +420,22 @@ export function Inventario() {
                           </TableCell>
                         )}
 
-                        <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm">
+                        <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm cursor-pointer" onClick={handleCellClick}>
                           {e.codigoEjercito}
                         </TableCell>
-                        <TableCell className="text-[#5C6064] text-sm">{e.nombreTipo}</TableCell>
-                        <TableCell className="text-sm text-[#2C3E1F] font-medium">{e.nombreModelo}</TableCell>
-                        <TableCell className="font-mono text-sm text-[#5C6064]">{e.numeroSerie}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-[#5C6064] text-sm cursor-pointer" onClick={handleCellClick}>{e.nombreTipo}</TableCell>
+                        <TableCell className="text-sm text-[#2C3E1F] font-medium cursor-pointer" onClick={handleCellClick}>{e.nombreModelo}</TableCell>
+                        <TableCell className="font-mono text-sm text-[#5C6064] cursor-pointer" onClick={handleCellClick}>{e.numeroSerie}</TableCell>
+                        <TableCell className="cursor-pointer" onClick={handleCellClick}>
                           <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23] text-xs">
                             {e.nombreArea}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-[#5C6064]">{e.nombreResponsable}</TableCell>
-                        <TableCell><EstadoBadge estado={e.estado} /></TableCell>
-                        <TableCell className="text-right" onClick={ev => ev.stopPropagation()}>
+                        <TableCell className="text-sm text-[#5C6064] cursor-pointer" onClick={handleCellClick}>{e.nombreResponsable}</TableCell>
+                        <TableCell className="cursor-pointer" onClick={handleCellClick}><EstadoBadge estado={e.estado} /></TableCell>
+
+                        {/* Celda Acciones: SIN onClick en el td — el dropdown maneja sus propios eventos */}
+                        <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon" className="h-8 w-8">
