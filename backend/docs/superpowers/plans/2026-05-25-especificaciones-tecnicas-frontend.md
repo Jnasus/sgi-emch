@@ -1,10 +1,113 @@
-import { useEffect, useState } from 'react';
-import { motion } from 'motion/react';
-import { Link, useParams } from 'react-router';
+# Especificaciones Técnicas — Frontend UI Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Agregar al detalle de equipo un botón "Agregar/Editar Especificaciones" y un dialog modal con formulario de 18 campos (6 grupos: CPU, RAM, Disco, GPU, Monitor, Red) que guarda via `PUT /api/equipos/{id}/especificaciones`.
+
+**Architecture:** Se modifica únicamente `inventarioService.ts` (nuevo tipo + función) y `InventarioDetalle.tsx` (nuevo estado, handlers y dialog JSX). El backend endpoint ya existe y funciona. El dialog sigue exactamente el mismo patrón que el dialog "Cambiar Estado" existente.
+
+**Tech Stack:** React 18, TypeScript, shadcn-ui (Dialog, Input, Label, Button, ScrollArea), fetch nativo con JWT.
+
+---
+
+## File Map
+
+| Archivo | Acción | Responsabilidad |
+|---|---|---|
+| `frontend/src/services/inventarioService.ts` | Modificar | Agregar `EspecificacionTecnicaRequest` + `upsertEspecificaciones()` |
+| `frontend/src/app/components/InventarioDetalle.tsx` | Modificar | Agregar estado modal, handlers, botón en card header, Dialog JSX |
+
+**Working directory:** `C:\Users\jtorr\OneDrive\Documentos\Drive_Recuperado\1_UTP\Noveno\INTEGRADOR II\sgi-emch`
+
+---
+
+## Task 1: Agregar tipo y función al servicio
+
+**Files:**
+- Modify: `frontend/src/services/inventarioService.ts`
+
+- [ ] **Step 1: Agregar `EspecificacionTecnicaRequest` después de `EspecificacionTecnicaResponse` (línea 25)**
+
+Insertar el siguiente bloque inmediatamente después del cierre `}` de `EspecificacionTecnicaResponse`:
+
+```typescript
+export interface EspecificacionTecnicaRequest {
+  procesador?: string;
+  nucleos?: number;
+  hilos?: number;
+  ramModulos?: number;
+  ramTotalGb?: number;
+  ramVelocidadMhz?: number;
+  ramMarca?: string;
+  discoModelo?: string;
+  discoInterface?: string;
+  discoCapacidadGb?: number;
+  discoUsadoGb?: number;
+  discoLibreGb?: number;
+  gpuMarca?: string;
+  gpuModelo?: string;
+  gpuVramGb?: number;
+  monitorMarca?: string;
+  monitorModelo?: string;
+  redModelo?: string;
+}
+```
+
+- [ ] **Step 2: Agregar `upsertEspecificaciones` al final del archivo (después de `listarAreas`)**
+
+```typescript
+export const upsertEspecificaciones = (id: number, data: EspecificacionTecnicaRequest) =>
+  putJson<EspecificacionTecnicaResponse>(`/api/equipos/${id}/especificaciones`, data);
+```
+
+- [ ] **Step 3: Commit del servicio**
+
+```
+cd "C:\Users\jtorr\OneDrive\Documentos\Drive_Recuperado\1_UTP\Noveno\INTEGRADOR II\sgi-emch"
+git add frontend/src/services/inventarioService.ts
+git commit -m "feat(frontend): add EspecificacionTecnicaRequest type and upsertEspecificaciones()"
+```
+
+---
+
+## Task 2: Editar `InventarioDetalle.tsx` — imports y helpers
+
+**Files:**
+- Modify: `frontend/src/app/components/InventarioDetalle.tsx`
+
+- [ ] **Step 1: Ampliar los imports de lucide-react** — agregar `Settings2` a la lista existente
+
+Reemplazar:
+```tsx
+import {
+  ArrowLeft, Package, Calendar, User, MapPin, FileText, Edit,
+  CheckCircle, Clock, AlertCircle, XCircle, RefreshCw, Cpu,
+} from 'lucide-react';
+```
+
+Con:
+```tsx
 import {
   ArrowLeft, Package, Calendar, User, MapPin, FileText, Edit,
   CheckCircle, Clock, AlertCircle, XCircle, RefreshCw, Cpu, Settings2,
 } from 'lucide-react';
+```
+
+- [ ] **Step 2: Agregar imports de componentes UI faltantes**
+
+Reemplazar las líneas de imports UI existentes:
+```tsx
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Separator } from './ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+```
+
+Con:
+```tsx
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
@@ -14,12 +117,28 @@ import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
-import * as svc from '../../services/inventarioService';
+```
+
+- [ ] **Step 3: Ampliar el import de tipos del servicio**
+
+Reemplazar:
+```tsx
+import type { EquipoResponse, HistorialEstadoResponse } from '../../services/inventarioService';
+```
+
+Con:
+```tsx
 import type {
   EquipoResponse, HistorialEstadoResponse,
   EspecificacionTecnicaResponse, EspecificacionTecnicaRequest,
 } from '../../services/inventarioService';
+```
 
+- [ ] **Step 4: Agregar el bloque de helpers del formulario de especificaciones**
+
+Insertar el siguiente bloque completo **antes** de la función `EstadoBadge` (después del bloque `// ── Estado config` con los ESTADOS):
+
+```tsx
 // ── Espec form ────────────────────────────────────────────────────────────
 interface EspecForm {
   procesador: string; nucleos: string; hilos: string;
@@ -89,113 +208,32 @@ function toEspecRequest(f: EspecForm): EspecificacionTecnicaRequest {
     redModelo: str(f.redModelo),
   };
 }
+```
 
-// ── Estado config (igual que Inventario.tsx) ───────────────────────────────
-const ESTADOS = [
-  { value: 'EN_BODEGA',     label: 'En Bodega',     color: 'bg-gray-100 text-gray-700 border-gray-300',    icon: Package },
-  { value: 'ASIGNADO',      label: 'Asignado',      color: 'bg-green-100 text-green-700 border-green-300', icon: CheckCircle },
-  { value: 'EN_REPARACION', label: 'En Reparación', color: 'bg-red-100 text-red-700 border-red-300',       icon: AlertCircle },
-  { value: 'PRESTADO',      label: 'Prestado',       color: 'bg-blue-100 text-blue-700 border-blue-300',    icon: Clock },
-  { value: 'DADO_DE_BAJA',  label: 'Dado de Baja',  color: 'bg-gray-100 text-gray-500 border-gray-300',    icon: XCircle },
-];
+---
 
-function estadoInfo(v: string) {
-  return ESTADOS.find(e => e.value === v) ?? { label: v, color: 'bg-gray-100 text-gray-700 border-gray-300', icon: Package };
-}
+## Task 3: Editar `InventarioDetalle.tsx` — estado y handlers
 
-function EstadoBadge({ estado }: { estado: string }) {
-  const info = estadoInfo(estado);
-  const Icon = info.icon;
-  return (
-    <Badge variant="outline" className={`gap-1 border text-xs ${info.color}`}>
-      <Icon className="w-3 h-3" />{info.label}
-    </Badge>
-  );
-}
+**Files:**
+- Modify: `frontend/src/app/components/InventarioDetalle.tsx`
 
-// ── Helpers ────────────────────────────────────────────────────────────────
-function fecha(iso: string | null | undefined) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-PE');
-}
+- [ ] **Step 1: Agregar estado del modal de especificaciones dentro de `InventarioDetalle`**
 
-function fechaHora(iso: string | null | undefined) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleString('es-PE', { dateStyle: 'short', timeStyle: 'short' });
-}
+Dentro de la función `InventarioDetalle`, después del bloque de estado del modal de estado (`// modal cambiar estado`):
 
-function InfoField({ label, value }: { label: string; value: string | null | undefined }) {
-  return (
-    <div>
-      <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-1">{label}</p>
-      <p className="text-[#2C3E1F] font-semibold text-sm">{value || '—'}</p>
-    </div>
-  );
-}
-
-// ── Componente principal ───────────────────────────────────────────────────
-export function InventarioDetalle() {
-  const { id } = useParams<{ id: string }>();
-
-  const [equipo, setEquipo]       = useState<EquipoResponse | null>(null);
-  const [historial, setHistorial] = useState<HistorialEstadoResponse[]>([]);
-  const [loading, setLoading]     = useState(true);
-  const [error, setError]         = useState<string | null>(null);
-
-  // modal cambiar estado
-  const [showEstado,  setShowEstado]  = useState(false);
-  const [nuevoEstado, setNuevoEstado] = useState('');
-  const [motivo,      setMotivo]      = useState('');
-  const [saving,      setSaving]      = useState(false);
-  const [apiError,    setApiError]    = useState<string | null>(null);
-
+```tsx
   // modal especificaciones
   const [showEspec,   setShowEspec]   = useState(false);
   const [especForm,   setEspecForm]   = useState<EspecForm>(EMPTY_ESPEC);
   const [especSaving, setEspecSaving] = useState(false);
   const [especError,  setEspecError]  = useState<string | null>(null);
+```
 
-  async function loadAll(idNum: number) {
-    const [eq, hist] = await Promise.all([
-      svc.obtenerEquipo(idNum),
-      svc.listarHistorial(idNum),
-    ]);
-    setEquipo(eq);
-    setHistorial(hist);
-  }
+- [ ] **Step 2: Agregar funciones `openEspecModal`, `handleSaveEspec` y `setEspec`**
 
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    loadAll(Number(id))
-      .catch(() => setError('No se pudo cargar el equipo.'))
-      .finally(() => setLoading(false));
-  }, [id]);
+Después de la función `handleCambiarEstado` (y antes del bloque de renders `if (loading) ...`):
 
-  function openEstadoModal() {
-    if (!equipo) return;
-    setNuevoEstado(equipo.estado);
-    setMotivo('');
-    setApiError(null);
-    setShowEstado(true);
-  }
-
-  async function handleCambiarEstado() {
-    if (!equipo || !nuevoEstado) return;
-    setSaving(true); setApiError(null);
-    try {
-      const updated = await svc.cambiarEstado(equipo.idEquipo, { estado: nuevoEstado, motivo: motivo || undefined });
-      setEquipo(updated);
-      const hist = await svc.listarHistorial(equipo.idEquipo);
-      setHistorial(hist);
-      setShowEstado(false);
-    } catch (e: unknown) {
-      setApiError(e instanceof Error ? e.message : 'Error al cambiar estado');
-    } finally {
-      setSaving(false);
-    }
-  }
-
+```tsx
   function openEspecModal() {
     setEspecForm(toEspecForm(equipo?.especificaciones));
     setEspecError(null);
@@ -220,84 +258,56 @@ export function InventarioDetalle() {
   function setEspec(key: keyof EspecForm, value: string) {
     setEspecForm(prev => ({ ...prev, [key]: value }));
   }
+```
 
-  if (loading) return <p className="text-center py-12 text-[#5C6064]">Cargando...</p>;
-  if (error || !equipo) return <p className="text-center py-12 text-[#D91E18]">{error ?? 'Equipo no encontrado'}</p>;
+---
 
-  const specs = equipo.especificaciones;
+## Task 4: Editar `InventarioDetalle.tsx` — specs card y dialog JSX
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link to="/inventario">
-            <Button variant="outline" size="icon"
-              className="border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div>
-            <h2 className="text-[#2C3E1F] uppercase tracking-wider mb-1"
-              style={{ fontSize: '1.5rem', fontWeight: 700, letterSpacing: '0.1em' }}>
-              Detalle de Equipo
-            </h2>
-            <p className="text-[#5C6064] font-mono font-semibold">{equipo.codigoEjercito}</p>
-          </div>
-        </div>
-        <div className="flex gap-3">
-          <Link to={`/inventario/${id}/editar`}>
-            <Button variant="outline" className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
-              <Edit className="w-4 h-4" /> Editar
-            </Button>
-          </Link>
-          <Button onClick={openEstadoModal} variant="outline"
-            className="gap-2 border-[#5C6064] text-[#5C6064] hover:bg-[#5C6064] hover:text-white">
-            <RefreshCw className="w-4 h-4" /> Cambiar Estado
-          </Button>
-        </div>
-      </div>
+**Files:**
+- Modify: `frontend/src/app/components/InventarioDetalle.tsx`
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Columna principal */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 space-y-6">
+- [ ] **Step 1: Reemplazar el bloque de la specs card (líneas 195-227 aproximadamente)**
 
-          {/* Información general */}
-          <Card className="border-l-4 border-l-[#4A5D23]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
-                <Package className="w-5 h-5 text-[#4A5D23]" /> Información General
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <InfoField label="Tipo" value={equipo.nombreTipo} />
-                <InfoField label="Modelo" value={equipo.nombreModelo} />
-                <div>
-                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-1">Estado</p>
-                  <EstadoBadge estado={equipo.estado} />
+Localizar y reemplazar **todo** el bloque:
+```tsx
+          {/* Especificaciones técnicas (solo si existen) */}
+          {specs && (
+            <Card className="border-l-4 border-l-[#5C6064]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
+                  <Cpu className="w-5 h-5 text-[#5C6064]" /> Especificaciones Técnicas
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {specs.procesador && <InfoField label="Procesador" value={specs.procesador} />}
+                  {specs.nucleos != null && (
+                    <InfoField label="Núcleos / Hilos" value={`${specs.nucleos} / ${specs.hilos ?? '?'}`} />
+                  )}
+                  {specs.ramTotalGb != null && (
+                    <InfoField label="RAM"
+                      value={`${specs.ramTotalGb} GB${specs.ramMarca ? ` ${specs.ramMarca}` : ''}`} />
+                  )}
+                  {specs.discoCapacidadGb != null && (
+                    <InfoField label="Disco"
+                      value={`${specs.discoCapacidadGb} GB${specs.discoInterface ? ` ${specs.discoInterface}` : ''}`} />
+                  )}
+                  {specs.gpuModelo && (
+                    <InfoField label="GPU" value={`${specs.gpuMarca ?? ''} ${specs.gpuModelo}`.trim()} />
+                  )}
+                  {specs.monitorModelo && (
+                    <InfoField label="Monitor" value={`${specs.monitorMarca ?? ''} ${specs.monitorModelo}`.trim()} />
+                  )}
+                  {specs.redModelo && <InfoField label="Tarjeta de red" value={specs.redModelo} />}
                 </div>
-                <InfoField label="N° Serie" value={equipo.numeroSerie} />
-                <InfoField label="Sistema Operativo"
-                  value={equipo.nombreSo ? `${equipo.nombreSo} ${equipo.versionSo ?? ''}`.trim() : null} />
-                <InfoField label="Tipo de Red" value={equipo.tipoRed} />
-                <InfoField label="MAC Address" value={equipo.macAddress} />
-                <InfoField label="IP Address" value={equipo.ipAddress} />
-                <InfoField label="Fecha Adquisición" value={fecha(equipo.fechaAdquisicion)} />
-              </div>
-              {equipo.observaciones && (
-                <>
-                  <Separator className="my-4" />
-                  <div>
-                    <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-1">Observaciones</p>
-                    <p className="text-[#2C3E1F] text-sm">{equipo.observaciones}</p>
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
+```
 
+Con:
+```tsx
           {/* Especificaciones técnicas */}
           <Card className="border-l-4 border-l-[#5C6064]">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
@@ -343,86 +353,13 @@ export function InventarioDetalle() {
               )}
             </CardContent>
           </Card>
+```
 
-          {/* Historial de estados */}
-          <Card className="border-l-4 border-l-[#4A5D23]/40">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
-                <FileText className="w-5 h-5 text-[#5C6064]" /> Historial de Estados
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {historial.length === 0 ? (
-                <p className="text-sm text-[#5C6064]">Sin movimientos registrados.</p>
-              ) : (
-                <div className="space-y-3">
-                  {historial.map(h => (
-                    <div key={h.idHistorial}
-                      className="flex gap-3 pb-3 border-b last:border-0 border-[#E8E8E3]">
-                      <div className="w-2 h-2 rounded-full bg-[#4A5D23] mt-2 flex-shrink-0" />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <EstadoBadge estado={h.estadoAnterior} />
-                          <span className="text-[#5C6064] text-xs">→</span>
-                          <EstadoBadge estado={h.estadoNuevo} />
-                        </div>
-                        {h.motivo && (
-                          <p className="text-sm text-[#2C3E1F] mt-1">{h.motivo}</p>
-                        )}
-                        <div className="flex items-center gap-3 mt-1">
-                          <span className="text-xs text-[#5C6064]">{fechaHora(h.fechaCambio)}</span>
-                          <span className="text-[#5C6064]">•</span>
-                          <span className="text-xs text-[#5C6064]">
-                            {h.apellidosUsuario}, {h.nombresUsuario}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+- [ ] **Step 2: Agregar el Dialog de especificaciones técnicas**
 
-        {/* Sidebar */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }} className="space-y-6">
+Insertar el siguiente bloque **inmediatamente antes** del cierre final `</div>` del componente (después del `{/* Modal Cambiar Estado */}` ya existente, y antes del último `</div>` y `)`):
 
-          <Card className="border-t-4 border-t-[#4A5D23]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
-                <User className="w-5 h-5 text-[#4A5D23]" /> Asignación
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <InfoField label="Responsable" value={equipo.nombreResponsable} />
-              <div>
-                <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-1">Área</p>
-                <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23] gap-1">
-                  <MapPin className="w-3 h-3" />{equipo.nombreArea}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-t-4 border-t-[#D91E18]">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
-                <Calendar className="w-5 h-5 text-[#D91E18]" /> Fechas
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <InfoField label="Registro" value={fecha(equipo.fechaRegistro)} />
-              <InfoField label="Adquisición" value={fecha(equipo.fechaAdquisicion)} />
-              {equipo.fechaBaja && (
-                <InfoField label="Fecha de Baja" value={fecha(equipo.fechaBaja)} />
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
+```tsx
       {/* Dialog Especificaciones Técnicas */}
       <Dialog open={showEspec} onOpenChange={setShowEspec}>
         <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
@@ -590,7 +527,7 @@ export function InventarioDetalle() {
                     <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo Monitor</Label>
                     <Input value={especForm.monitorModelo}
                       onChange={e => setEspec('monitorModelo', e.target.value)}
-                      placeholder='ej. P2422H 24"'
+                      placeholder="ej. P2422H 24\""
                       className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
                   </div>
                 </div>
@@ -626,43 +563,54 @@ export function InventarioDetalle() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+```
 
-      {/* Modal Cambiar Estado */}
-      <Dialog open={showEstado} onOpenChange={setShowEstado}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[#2C3E1F]">
-              <RefreshCw className="w-5 h-5 text-[#4A5D23]" /> Cambiar Estado
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-[#5C6064]">
-            Equipo: <span className="font-semibold text-[#2C3E1F]">{equipo.codigoEjercito}</span>
-          </p>
-          <div className="space-y-3 mt-1">
-            <div className="space-y-1">
-              <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Nuevo Estado *</Label>
-              <select value={nuevoEstado} onChange={e => setNuevoEstado(e.target.value)}
-                className="w-full h-9 rounded-md border border-[#4A5D23]/30 bg-white px-3 text-sm focus:outline-none focus:border-[#4A5D23]">
-                {ESTADOS.map(e => <option key={e.value} value={e.value}>{e.label}</option>)}
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Motivo</Label>
-              <Textarea value={motivo} onChange={e => setMotivo(e.target.value)}
-                placeholder="Descripción del motivo del cambio..."
-                className="min-h-[80px] border-[#4A5D23]/30 focus:border-[#4A5D23] resize-none" />
-            </div>
-          </div>
-          {apiError && <p className="text-sm text-[#D91E18] mt-1">{apiError}</p>}
-          <DialogFooter className="mt-2">
-            <Button variant="outline" onClick={() => setShowEstado(false)}>Cancelar</Button>
-            <Button onClick={handleCambiarEstado} disabled={saving}
-              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
-              {saving ? 'Guardando...' : 'Confirmar'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+- [ ] **Step 3: Commit del componente**
+
+```
+git add frontend/src/app/components/InventarioDetalle.tsx
+git commit -m "feat(frontend): add EspecificacionTecnica edit dialog to InventarioDetalle"
+```
+
+---
+
+## Task 5: Verificación manual
+
+- [ ] **Step 1: Levantar el frontend**
+
+```
+cd "C:\Users\jtorr\OneDrive\Documentos\Drive_Recuperado\1_UTP\Noveno\INTEGRADOR II\sgi-emch\frontend"
+npm run dev
+```
+
+Abrir `http://localhost:5173`, iniciar sesión, navegar a Inventario → click en cualquier equipo.
+
+- [ ] **Step 2: Verificar UI cuando NO hay specs**
+
+Comprobar:
+- La card "Especificaciones Técnicas" se muestra siempre (ya no está oculta)
+- Muestra el texto "Sin especificaciones técnicas registradas..."
+- El botón dice **"Agregar Specs"** con el ícono ⚙️
+
+- [ ] **Step 3: Verificar el dialog**
+
+Hacer clic en "Agregar Specs":
+- Se abre el dialog con 6 secciones: Procesador, Memoria RAM, Almacenamiento, GPU, Monitor, Red
+- Todos los campos están vacíos
+- El scroll funciona (puede desplazarse hacia abajo)
+- Los campos numéricos solo aceptan números
+
+- [ ] **Step 4: Guardar y verificar round-trip**
+
+Llenar algunos campos (ej. Procesador: "Intel Core i5-10400", RAM Total: 8, Interfaz: SATA, Capacidad: 500):
+- Clic en **"Guardar Especificaciones"**
+- El dialog se cierra
+- La card se actualiza mostrando los datos recién guardados
+- El botón cambia a **"Editar Specs"**
+
+- [ ] **Step 5: Commit final (si hay ajustes menores)**
+
+```
+git add frontend/src/
+git commit -m "fix(frontend): minor adjustments after manual verification of EspecificacionTecnica dialog"
+```

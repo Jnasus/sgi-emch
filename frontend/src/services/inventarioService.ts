@@ -24,6 +24,27 @@ export interface EspecificacionTecnicaResponse {
   redModelo: string | null;
 }
 
+export interface EspecificacionTecnicaRequest {
+  procesador?: string;
+  nucleos?: number;
+  hilos?: number;
+  ramModulos?: number;
+  ramTotalGb?: number;
+  ramVelocidadMhz?: number;
+  ramMarca?: string;
+  discoModelo?: string;
+  discoInterface?: string;
+  discoCapacidadGb?: number;
+  discoUsadoGb?: number;
+  discoLibreGb?: number;
+  gpuMarca?: string;
+  gpuModelo?: string;
+  gpuVramGb?: number;
+  monitorMarca?: string;
+  monitorModelo?: string;
+  redModelo?: string;
+}
+
 export interface EquipoResponse {
   idEquipo: number;
   codigoEjercito: string;
@@ -200,3 +221,6 @@ export const listarSO = () =>
 
 export const listarAreas = () =>
   getJson<AreaCatResponse[]>('/api/catalogos/areas');
+
+export const upsertEspecificaciones = (id: number, data: EspecificacionTecnicaRequest) =>
+  putJson<EspecificacionTecnicaResponse>(`/api/equipos/${id}/especificaciones`, data);
