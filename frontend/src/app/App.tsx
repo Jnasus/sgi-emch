@@ -8,6 +8,7 @@ import { InventarioDetalle } from './components/InventarioDetalle';
 import { InventarioNuevo } from './components/InventarioNuevo';
 import { Incidentes } from './components/Incidentes';
 import { IncidenteNuevo } from './components/IncidenteNuevo';
+import { IncidenteDetalle } from './components/IncidenteDetalle';
 import { Reportes } from './components/Reportes';
 import { Notificaciones } from './components/Notificaciones';
 import { Usuarios } from './components/Usuarios';
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="/inventario/:id" element={<InventarioDetalle />} />
           <Route path="/incidentes" element={<Incidentes />} />
           <Route path="/incidentes/nuevo" element={<IncidenteNuevo />} />
+          <Route path="/incidentes/:id" element={<IncidenteDetalle />} />
           <Route path="/reportes" element={<Reportes />} />
           <Route path="/notificaciones" element={<Notificaciones />} />
           <Route path="/usuarios" element={<Usuarios />} />
