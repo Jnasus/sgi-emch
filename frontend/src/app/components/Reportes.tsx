@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import {
   FileSpreadsheet,
   FileText,
-  Download,
   Filter,
   Clock,
   Loader2,
@@ -34,21 +33,13 @@ import { listarAreas } from '../../services/inventarioService';
 import type { AreaCatResponse } from '../../services/inventarioService';
 import * as reporteService from '../../services/reporteService';
 
-// ── Tipos ───────────────────────────────────────────────────────────────────
+// ── Constantes ──────────────────────────────────────────────────────────────
 
-interface ReportCard {
-  id: string;
-  name: string;
-  description: string;
-  color: string;
-  Icon: React.ComponentType<{ className?: string; strokeWidth?: number }>;
-  onExcel: () => Promise<void>;
-  onPdf: () => Promise<void>;
-  comingSoon?: boolean;
-}
+const ESTADO_TODOS  = 'TODOS';
+const AREA_TODAS    = '_todas';
 
 const ESTADOS: { value: string; label: string }[] = [
-  { value: '',              label: 'Todos los estados'  },
+  { value: ESTADO_TODOS,    label: 'Todos los estados'  },
   { value: 'ASIGNADO',      label: 'Asignado'           },
   { value: 'EN_BODEGA',     label: 'En Bodega'          },
   { value: 'EN_REPARACION', label: 'En Reparación'      },
@@ -56,13 +47,26 @@ const ESTADOS: { value: string; label: string }[] = [
   { value: 'DADO_DE_BAJA',  label: 'Dado de Baja'       },
 ];
 
+// ── Tipos ───────────────────────────────────────────────────────────────────
+
+interface ReportCard {
+  id: string;
+  name: string;
+  description: string;
+  color: string;
+  Icon: React.ComponentType<{ className?: string; strokeWidth?: number; style?: React.CSSProperties }>;
+  onExcel: () => Promise<void>;
+  onPdf:   () => Promise<void>;
+  comingSoon?: boolean;
+}
+
 // ── Componente ──────────────────────────────────────────────────────────────
 
 export function Reportes() {
-  const [areas, setAreas]   = useState<AreaCatResponse[]>([]);
-  const [estado, setEstado] = useState('');
-  const [idArea, setIdArea] = useState<number | undefined>();
-  const [anios, setAnios]   = useState(5);
+  const [areas,   setAreas]   = useState<AreaCatResponse[]>([]);
+  const [estado,  setEstado]  = useState<string>(ESTADO_TODOS);
+  const [areaVal, setAreaVal] = useState<string>(AREA_TODAS);
+  const [anios,   setAnios]   = useState(5);
 
   // loading: 'excel' | 'pdf' | null por cada tarjeta
   const [loading, setLoading] = useState<Record<string, 'excel' | 'pdf' | null>>({});
@@ -71,8 +75,12 @@ export function Reportes() {
   useEffect(() => {
     listarAreas()
       .then(setAreas)
-      .catch(() => {/* silencioso – UI no bloquea */});
+      .catch(() => {/* silencioso */});
   }, []);
+
+  // Helpers que convierten sentinel → undefined para la API
+  const estadoParam = () => estado === ESTADO_TODOS ? undefined : estado;
+  const idAreaParam = () => areaVal === AREA_TODAS  ? undefined : Number(areaVal);
 
   // ── Descarga ──────────────────────────────────────────────────────────────
 
@@ -82,7 +90,7 @@ export function Reportes() {
     fn: () => Promise<void>,
   ) => {
     setLoading(prev => ({ ...prev, [key]: tipo }));
-    setErrors(prev => ({ ...prev, [key]: null }));
+    setErrors(prev =>  ({ ...prev, [key]: null }));
     try {
       await fn();
     } catch (err: unknown) {
@@ -95,8 +103,8 @@ export function Reportes() {
     }
   };
 
-  // ── Definición de tarjetas ─────────────────────────────────────────────────
-  // Se recalcula en cada render para capturar los filtros actuales
+  // ── Tarjetas ───────────────────────────────────────────────────────────────
+  // Se recalcula en cada render para capturar los valores de filtro actuales
 
   const reports: ReportCard[] = [
     {
@@ -106,18 +114,18 @@ export function Reportes() {
         'Reporte completo del inventario aplicando el estado y el área seleccionados en los filtros.',
       color: '#4A5D23',
       Icon: LayoutList,
-      onExcel: () => reporteService.inventarioExcel(estado || undefined, idArea),
-      onPdf:   () => reporteService.inventarioPdf(estado || undefined, idArea),
+      onExcel: () => reporteService.inventarioExcel(estadoParam(), idAreaParam()),
+      onPdf:   () => reporteService.inventarioPdf(estadoParam(), idAreaParam()),
     },
     {
       id: 'por-area',
       name: 'Equipos por Área',
       description:
-        'Lista todos los equipos del área seleccionada sin importar su estado. Seleccione un área en los filtros.',
+        'Lista todos los equipos del área seleccionada sin importar su estado.',
       color: '#2C3E1F',
       Icon: Filter,
-      onExcel: () => reporteService.inventarioExcel(undefined, idArea),
-      onPdf:   () => reporteService.inventarioPdf(undefined, idArea),
+      onExcel: () => reporteService.inventarioExcel(undefined, idAreaParam()),
+      onPdf:   () => reporteService.inventarioPdf(undefined, idAreaParam()),
     },
     {
       id: 'reparacion',
@@ -126,8 +134,8 @@ export function Reportes() {
         'Todos los equipos con estado "En Reparación". El filtro de área se aplica si está seleccionado.',
       color: '#D97706',
       Icon: Wrench,
-      onExcel: () => reporteService.inventarioExcel('EN_REPARACION', idArea),
-      onPdf:   () => reporteService.inventarioPdf('EN_REPARACION', idArea),
+      onExcel: () => reporteService.inventarioExcel('EN_REPARACION', idAreaParam()),
+      onPdf:   () => reporteService.inventarioPdf('EN_REPARACION', idAreaParam()),
     },
     {
       id: 'baja',
@@ -136,8 +144,8 @@ export function Reportes() {
         'Historial de equipos retirados del servicio. El filtro de área se aplica si está seleccionado.',
       color: '#D91E18',
       Icon: ArchiveX,
-      onExcel: () => reporteService.inventarioExcel('DADO_DE_BAJA', idArea),
-      onPdf:   () => reporteService.inventarioPdf('DADO_DE_BAJA', idArea),
+      onExcel: () => reporteService.inventarioExcel('DADO_DE_BAJA', idAreaParam()),
+      onPdf:   () => reporteService.inventarioPdf('DADO_DE_BAJA', idAreaParam()),
     },
     {
       id: 'antiguos',
@@ -204,12 +212,9 @@ export function Reportes() {
               >
                 Estado
               </Label>
-              <Select
-                value={estado}
-                onValueChange={setEstado}
-              >
+              <Select value={estado} onValueChange={setEstado}>
                 <SelectTrigger className="h-11 border-[#4A5D23]/30 focus:border-[#4A5D23]">
-                  <SelectValue placeholder="Todos los estados" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {ESTADOS.map(e => (
@@ -232,15 +237,12 @@ export function Reportes() {
               >
                 Área
               </Label>
-              <Select
-                value={idArea !== undefined ? String(idArea) : ''}
-                onValueChange={v => setIdArea(v ? Number(v) : undefined)}
-              >
+              <Select value={areaVal} onValueChange={setAreaVal}>
                 <SelectTrigger className="h-11 border-[#4A5D23]/30 focus:border-[#4A5D23]">
-                  <SelectValue placeholder="Todas las áreas" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas las áreas</SelectItem>
+                  <SelectItem value={AREA_TODAS}>Todas las áreas</SelectItem>
                   {areas.map(a => (
                     <SelectItem key={a.idArea} value={String(a.idArea)}>
                       {a.nombreArea}
@@ -283,7 +285,7 @@ export function Reportes() {
       {/* Tarjetas de reportes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {reports.map((report, index) => {
-          const Icon     = report.Icon;
+          const Icon           = report.Icon;
           const isLoadingExcel = loading[report.id] === 'excel';
           const isLoadingPdf   = loading[report.id] === 'pdf';
           const error          = errors[report.id];
@@ -305,7 +307,6 @@ export function Reportes() {
                       <Icon
                         className="w-6 h-6"
                         strokeWidth={1.5}
-                        // @ts-expect-error style override
                         style={{ color: report.color }}
                       />
                     </div>
