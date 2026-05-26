@@ -41,7 +41,7 @@ export interface TicketCreateRequest {
   idTipoIncidente: number;
   titulo: string;
   descripcion: string;
-  prioridad?: string;
+  prioridad?: 'BAJA' | 'MEDIA' | 'ALTA' | 'CRITICA';
 }
 
 export interface TipoIncidenteResponse {
@@ -127,7 +127,7 @@ export const obtenerTicket = (id: number): Promise<TicketResponse> =>
 export const crearTicket = (data: TicketCreateRequest): Promise<TicketResponse> =>
   postJson<TicketResponse>('/api/tickets', data);
 
-export const cambiarEstado = (id: number, estado: string): Promise<TicketResponse> =>
+export const cambiarEstado = (id: number, estado: 'ABIERTO' | 'EN_PROCESO' | 'RESUELTO' | 'CERRADO'): Promise<TicketResponse> =>
   patchJson<TicketResponse>(`/api/tickets/${id}/estado`, { estado });
 
 export const listarHistorial = (id: number): Promise<HistorialTicketResponse[]> =>
