@@ -74,8 +74,8 @@ export function Incidentes() {
   const [cargandoInicial, setCargandoInicial] = useState(true);
   const [error, setError]                     = useState<string | null>(null);
   const [tecnicos, setTecnicos]               = useState<TecnicoResponse[]>([]);
-  const [filtroPrioridad, setFiltroPrioridad] = useState('');
-  const [filtroTecnico, setFiltroTecnico]     = useState('');
+  const [filtroPrioridad, setFiltroPrioridad] = useState('TODAS');
+  const [filtroTecnico, setFiltroTecnico]     = useState('TODOS');
 
   // Cargar lista de técnicos para el filtro (una sola vez)
   useEffect(() => {
@@ -85,8 +85,8 @@ export function Incidentes() {
   // Recargar todas las columnas cuando cambien los filtros
   useEffect(() => {
     const filtros = {
-      prioridad: filtroPrioridad || undefined,
-      idTecnico: filtroTecnico ? Number(filtroTecnico) : undefined,
+      prioridad: filtroPrioridad !== 'TODAS' ? filtroPrioridad : undefined,
+      idTecnico: filtroTecnico !== 'TODOS' ? Number(filtroTecnico) : undefined,
     };
     setCargandoInicial(true);
     setError(null);
@@ -111,8 +111,8 @@ export function Incidentes() {
     const col = cols[estado];
     const siguientePagina = col.pagina + 1;
     const filtros = {
-      prioridad: filtroPrioridad || undefined,
-      idTecnico: filtroTecnico ? Number(filtroTecnico) : undefined,
+      prioridad: filtroPrioridad !== 'TODAS' ? filtroPrioridad : undefined,
+      idTecnico: filtroTecnico !== 'TODOS' ? Number(filtroTecnico) : undefined,
     };
     setCols(prev => ({ ...prev, [estado]: { ...prev[estado], cargandoMas: true } }));
     ticketSvc.listarTicketsPorEstado(estado, filtros, siguientePagina)
@@ -160,7 +160,7 @@ export function Incidentes() {
               <SelectValue placeholder="Todas las prioridades" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas las prioridades</SelectItem>
+              <SelectItem value="TODAS">Todas las prioridades</SelectItem>
               <SelectItem value="CRITICA">Crítica</SelectItem>
               <SelectItem value="ALTA">Alta</SelectItem>
               <SelectItem value="MEDIA">Media</SelectItem>
@@ -173,7 +173,7 @@ export function Incidentes() {
               <SelectValue placeholder="Todos los técnicos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los técnicos</SelectItem>
+              <SelectItem value="TODOS">Todos los técnicos</SelectItem>
               {tecnicos.map(t => (
                 <SelectItem key={t.idUsuario} value={String(t.idUsuario)}>
                   {t.nombres} {t.apellidos}
