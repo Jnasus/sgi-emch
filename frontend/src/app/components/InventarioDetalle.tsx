@@ -12,83 +12,11 @@ import { Separator } from './ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
-import { Input } from './ui/input';
-import { ScrollArea } from './ui/scroll-area';
 import * as svc from '../../services/inventarioService';
 import type {
   EquipoResponse, HistorialEstadoResponse,
-  EspecificacionTecnicaResponse, EspecificacionTecnicaRequest,
+  EspecificacionTecnicaResponse,
 } from '../../services/inventarioService';
-
-// ── Espec form ────────────────────────────────────────────────────────────
-interface EspecForm {
-  procesador: string; nucleos: string; hilos: string;
-  ramModulos: string; ramTotalGb: string; ramVelocidadMhz: string; ramMarca: string;
-  discoModelo: string; discoInterface: string;
-  discoCapacidadGb: string; discoUsadoGb: string; discoLibreGb: string;
-  gpuMarca: string; gpuModelo: string; gpuVramGb: string;
-  monitorMarca: string; monitorModelo: string;
-  redModelo: string;
-}
-
-const EMPTY_ESPEC: EspecForm = {
-  procesador: '', nucleos: '', hilos: '',
-  ramModulos: '', ramTotalGb: '', ramVelocidadMhz: '', ramMarca: '',
-  discoModelo: '', discoInterface: '',
-  discoCapacidadGb: '', discoUsadoGb: '', discoLibreGb: '',
-  gpuMarca: '', gpuModelo: '', gpuVramGb: '',
-  monitorMarca: '', monitorModelo: '',
-  redModelo: '',
-};
-
-function toEspecForm(s: EspecificacionTecnicaResponse | null | undefined): EspecForm {
-  if (!s) return { ...EMPTY_ESPEC };
-  return {
-    procesador: s.procesador ?? '',
-    nucleos: s.nucleos != null ? String(s.nucleos) : '',
-    hilos: s.hilos != null ? String(s.hilos) : '',
-    ramModulos: s.ramModulos != null ? String(s.ramModulos) : '',
-    ramTotalGb: s.ramTotalGb != null ? String(s.ramTotalGb) : '',
-    ramVelocidadMhz: s.ramVelocidadMhz != null ? String(s.ramVelocidadMhz) : '',
-    ramMarca: s.ramMarca ?? '',
-    discoModelo: s.discoModelo ?? '',
-    discoInterface: s.discoInterface ?? '',
-    discoCapacidadGb: s.discoCapacidadGb != null ? String(s.discoCapacidadGb) : '',
-    discoUsadoGb: s.discoUsadoGb != null ? String(s.discoUsadoGb) : '',
-    discoLibreGb: s.discoLibreGb != null ? String(s.discoLibreGb) : '',
-    gpuMarca: s.gpuMarca ?? '',
-    gpuModelo: s.gpuModelo ?? '',
-    gpuVramGb: s.gpuVramGb != null ? String(s.gpuVramGb) : '',
-    monitorMarca: s.monitorMarca ?? '',
-    monitorModelo: s.monitorModelo ?? '',
-    redModelo: s.redModelo ?? '',
-  };
-}
-
-function toEspecRequest(f: EspecForm): EspecificacionTecnicaRequest {
-  const num = (v: string) => v.trim() !== '' ? Number(v) : undefined;
-  const str = (v: string) => v.trim() !== '' ? v.trim() : undefined;
-  return {
-    procesador: str(f.procesador),
-    nucleos: num(f.nucleos),
-    hilos: num(f.hilos),
-    ramModulos: num(f.ramModulos),
-    ramTotalGb: num(f.ramTotalGb),
-    ramVelocidadMhz: num(f.ramVelocidadMhz),
-    ramMarca: str(f.ramMarca),
-    discoModelo: str(f.discoModelo),
-    discoInterface: str(f.discoInterface),
-    discoCapacidadGb: num(f.discoCapacidadGb),
-    discoUsadoGb: num(f.discoUsadoGb),
-    discoLibreGb: num(f.discoLibreGb),
-    gpuMarca: str(f.gpuMarca),
-    gpuModelo: str(f.gpuModelo),
-    gpuVramGb: num(f.gpuVramGb),
-    monitorMarca: str(f.monitorMarca),
-    monitorModelo: str(f.monitorModelo),
-    redModelo: str(f.redModelo),
-  };
-}
 
 // ── Estado config (igual que Inventario.tsx) ───────────────────────────────
 const ESTADOS = [
@@ -149,12 +77,6 @@ export function InventarioDetalle() {
   const [saving,      setSaving]      = useState(false);
   const [apiError,    setApiError]    = useState<string | null>(null);
 
-  // modal especificaciones
-  const [showEspec,   setShowEspec]   = useState(false);
-  const [especForm,   setEspecForm]   = useState<EspecForm>(EMPTY_ESPEC);
-  const [especSaving, setEspecSaving] = useState(false);
-  const [especError,  setEspecError]  = useState<string | null>(null);
-
   async function loadAll(idNum: number) {
     const [eq, hist] = await Promise.all([
       svc.obtenerEquipo(idNum),
@@ -194,31 +116,6 @@ export function InventarioDetalle() {
     } finally {
       setSaving(false);
     }
-  }
-
-  function openEspecModal() {
-    setEspecForm(toEspecForm(equipo?.especificaciones));
-    setEspecError(null);
-    setShowEspec(true);
-  }
-
-  async function handleSaveEspec() {
-    if (!equipo) return;
-    setEspecSaving(true); setEspecError(null);
-    try {
-      await svc.upsertEspecificaciones(equipo.idEquipo, toEspecRequest(especForm));
-      const refreshed = await svc.obtenerEquipo(equipo.idEquipo);
-      setEquipo(refreshed);
-      setShowEspec(false);
-    } catch (e: unknown) {
-      setEspecError(e instanceof Error ? e.message : 'Error al guardar especificaciones');
-    } finally {
-      setEspecSaving(false);
-    }
-  }
-
-  function setEspec(key: keyof EspecForm, value: string) {
-    setEspecForm(prev => ({ ...prev, [key]: value }));
   }
 
   if (loading) return <p className="text-center py-12 text-[#5C6064]">Cargando...</p>;
@@ -304,12 +201,14 @@ export function InventarioDetalle() {
               <CardTitle className="flex items-center gap-2 uppercase tracking-wide" style={{ fontSize: '1rem' }}>
                 <Cpu className="w-5 h-5 text-[#5C6064]" /> Especificaciones Técnicas
               </CardTitle>
-              <Button variant="outline" size="sm" onClick={openEspecModal}
-                className="gap-1 border-[#5C6064] text-[#5C6064] hover:bg-[#5C6064] hover:text-white">
-                <Settings2 className="w-4 h-4" />
-                {specs && (specs.procesador || specs.ramTotalGb != null || specs.discoCapacidadGb != null)
-                  ? 'Editar Specs' : 'Agregar Specs'}
-              </Button>
+              <Link to={`/inventario/${id}/especificaciones`}>
+                <Button variant="outline" size="sm"
+                  className="gap-1 border-[#5C6064] text-[#5C6064] hover:bg-[#5C6064] hover:text-white">
+                  <Settings2 className="w-4 h-4" />
+                  {specs && (specs.procesador || specs.ramTotalGb != null || specs.discoCapacidadGb != null)
+                    ? 'Editar Especificaciones' : 'Registrar Especificaciones'}
+                </Button>
+              </Link>
             </CardHeader>
             <CardContent>
               {specs && (specs.procesador || specs.nucleos != null || specs.ramTotalGb != null ||
@@ -422,210 +321,6 @@ export function InventarioDetalle() {
           </Card>
         </motion.div>
       </div>
-
-      {/* Dialog Especificaciones Técnicas */}
-      <Dialog open={showEspec} onOpenChange={setShowEspec}>
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-[#2C3E1F]">
-              <Cpu className="w-5 h-5 text-[#5C6064]" /> Especificaciones Técnicas
-            </DialogTitle>
-          </DialogHeader>
-
-          <ScrollArea className="flex-1 pr-4 -mr-4">
-            <div className="space-y-6 py-1 pr-4">
-
-              {/* CPU */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">🖥️ Procesador</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="col-span-3">
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo de Procesador</Label>
-                    <Input value={especForm.procesador}
-                      onChange={e => setEspec('procesador', e.target.value)}
-                      placeholder="ej. Intel Core i7-1165G7"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Núcleos</Label>
-                    <Input type="number" min={0} value={especForm.nucleos}
-                      onChange={e => setEspec('nucleos', e.target.value)}
-                      placeholder="ej. 4"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Hilos</Label>
-                    <Input type="number" min={0} value={especForm.hilos}
-                      onChange={e => setEspec('hilos', e.target.value)}
-                      placeholder="ej. 8"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* RAM */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">🧠 Memoria RAM</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Módulos</Label>
-                    <Input type="number" min={0} value={especForm.ramModulos}
-                      onChange={e => setEspec('ramModulos', e.target.value)}
-                      placeholder="ej. 2"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Total (GB)</Label>
-                    <Input type="number" min={0} value={especForm.ramTotalGb}
-                      onChange={e => setEspec('ramTotalGb', e.target.value)}
-                      placeholder="ej. 16"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Velocidad (MHz)</Label>
-                    <Input type="number" min={0} value={especForm.ramVelocidadMhz}
-                      onChange={e => setEspec('ramVelocidadMhz', e.target.value)}
-                      placeholder="ej. 3200"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Marca RAM</Label>
-                    <Input value={especForm.ramMarca}
-                      onChange={e => setEspec('ramMarca', e.target.value)}
-                      placeholder="ej. Kingston"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Disco */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">💾 Almacenamiento</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo de Disco</Label>
-                    <Input value={especForm.discoModelo}
-                      onChange={e => setEspec('discoModelo', e.target.value)}
-                      placeholder="ej. Samsung 870 EVO"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Interfaz</Label>
-                    <select value={especForm.discoInterface}
-                      onChange={e => setEspec('discoInterface', e.target.value)}
-                      className="mt-1 w-full h-9 rounded-md border border-[#4A5D23]/30 bg-white px-3 text-sm focus:outline-none focus:border-[#4A5D23]">
-                      <option value="">— Seleccionar —</option>
-                      <option>SATA</option>
-                      <option>NVMe</option>
-                      <option>M.2</option>
-                      <option>HDD</option>
-                      <option>eMMC</option>
-                      <option>SSD</option>
-                    </select>
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Capacidad (GB)</Label>
-                    <Input type="number" min={0} step="0.01" value={especForm.discoCapacidadGb}
-                      onChange={e => setEspec('discoCapacidadGb', e.target.value)}
-                      placeholder="ej. 512"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Usado (GB)</Label>
-                    <Input type="number" min={0} step="0.01" value={especForm.discoUsadoGb}
-                      onChange={e => setEspec('discoUsadoGb', e.target.value)}
-                      placeholder="ej. 120.50"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Libre (GB)</Label>
-                    <Input type="number" min={0} step="0.01" value={especForm.discoLibreGb}
-                      onChange={e => setEspec('discoLibreGb', e.target.value)}
-                      placeholder="ej. 391.50"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* GPU */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">🎮 Tarjeta Gráfica (GPU)</p>
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Marca GPU</Label>
-                    <Input value={especForm.gpuMarca}
-                      onChange={e => setEspec('gpuMarca', e.target.value)}
-                      placeholder="ej. NVIDIA"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo GPU</Label>
-                    <Input value={especForm.gpuModelo}
-                      onChange={e => setEspec('gpuModelo', e.target.value)}
-                      placeholder="ej. RTX 3060"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">VRAM (GB)</Label>
-                    <Input type="number" min={0} step="0.01" value={especForm.gpuVramGb}
-                      onChange={e => setEspec('gpuVramGb', e.target.value)}
-                      placeholder="ej. 6"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Monitor */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">🖥️ Monitor</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Marca Monitor</Label>
-                    <Input value={especForm.monitorMarca}
-                      onChange={e => setEspec('monitorMarca', e.target.value)}
-                      placeholder="ej. Dell"
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                  <div>
-                    <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo Monitor</Label>
-                    <Input value={especForm.monitorModelo}
-                      onChange={e => setEspec('monitorModelo', e.target.value)}
-                      placeholder='ej. P2422H 24"'
-                      className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Red */}
-              <div>
-                <p className="text-xs font-semibold text-[#4A5D23] uppercase tracking-wide mb-3">🌐 Tarjeta de Red</p>
-                <div>
-                  <Label className="text-xs text-[#5C6064] uppercase tracking-wide">Modelo</Label>
-                  <Input value={especForm.redModelo}
-                    onChange={e => setEspec('redModelo', e.target.value)}
-                    placeholder="ej. Intel I219-LM Gigabit"
-                    className="mt-1 border-[#4A5D23]/30 focus-visible:ring-[#4A5D23]" />
-                </div>
-              </div>
-
-            </div>
-          </ScrollArea>
-
-          {especError && (
-            <p className="text-sm text-[#D91E18] mt-2">{especError}</p>
-          )}
-
-          <DialogFooter className="mt-4 pt-4 border-t border-[#E8E8E3]">
-            <Button variant="outline" onClick={() => setShowEspec(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveEspec} disabled={especSaving}
-              className="bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
-              {especSaving ? 'Guardando...' : 'Guardar Especificaciones'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Modal Cambiar Estado */}
       <Dialog open={showEstado} onOpenChange={setShowEstado}>
