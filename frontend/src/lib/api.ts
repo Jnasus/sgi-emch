@@ -2,10 +2,13 @@ export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8080'
 
 export async function fetchWithAuth(path: string, options: RequestInit = {}): Promise<Response> {
   const token = localStorage.getItem('sgi_token');
+  // No forzar Content-Type cuando el body es FormData;
+  // el browser lo establece automáticamente con el boundary correcto.
+  const isFormData = options.body instanceof FormData;
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
