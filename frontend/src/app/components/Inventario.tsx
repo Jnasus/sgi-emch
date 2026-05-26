@@ -6,7 +6,7 @@ import {
   FileSpreadsheet, FileText, MoreVertical,
   CheckCircle, Clock, AlertCircle, XCircle,
   ChevronLeft, ChevronRight, RefreshCw,
-  ListChecks, Loader2, X,
+  ListChecks, Loader2, X, Upload,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -280,6 +280,14 @@ export function Inventario() {
               ? <Loader2 className="w-4 h-4 animate-spin" />
               : <FileText className="w-4 h-4" />}
             {exportingPdf ? 'Generando...' : 'PDF'}
+          </Button>
+
+          <Button
+            variant="outline"
+            className="gap-2 border-[#6B7F3A] text-[#6B7F3A] hover:bg-[#6B7F3A] hover:text-white"
+            onClick={() => navigate('/inventario/carga-masiva')}
+          >
+            <Upload className="w-4 h-4" /> Carga masiva
           </Button>
 
           <Link to="/inventario/nuevo">

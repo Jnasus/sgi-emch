@@ -13,6 +13,7 @@ import { Notificaciones } from './components/Notificaciones';
 import { Usuarios } from './components/Usuarios';
 import { Catalogos } from './components/Catalogos';
 import { EspecificacionesForm } from './components/EspecificacionesForm';
+import { CargaMasiva } from './components/CargaMasiva';
 import * as authService from '../services/authService';
 
 export default function App() {
@@ -47,6 +48,7 @@ export default function App() {
           <Route path="/inventario/nuevo" element={<InventarioNuevo />} />
           <Route path="/inventario/:id/editar" element={<InventarioNuevo />} />
           <Route path="/inventario/:id/especificaciones" element={<EspecificacionesForm />} />
+          <Route path="/inventario/carga-masiva" element={<CargaMasiva />} />
           <Route path="/inventario/:id" element={<InventarioDetalle />} />
           <Route path="/incidentes" element={<Incidentes />} />
           <Route path="/incidentes/nuevo" element={<IncidenteNuevo />} />
