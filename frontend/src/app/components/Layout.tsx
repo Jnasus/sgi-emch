@@ -1,6 +1,7 @@
-import { useState, ReactNode } from 'react';
+import { useState, useEffect, ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Link, useLocation } from 'react-router';
+import { listarTicketsPorEstado } from '../../services/ticketService';
 import {
   LayoutDashboard,
   Package,
@@ -25,19 +26,27 @@ interface LayoutProps {
   userRole?: string;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
-  { icon: Package, label: 'Inventario', path: '/inventario' },
-  { icon: AlertTriangle, label: 'Incidentes', path: '/incidentes', badge: 3 },
-  { icon: FileText, label: 'Reportes', path: '/reportes' },
-  { icon: Bell, label: 'Notificaciones', path: '/notificaciones', badge: 5 },
-  { icon: Users, label: 'Usuarios', path: '/usuarios' },
-  { icon: Settings, label: 'Configuración', path: '/configuracion' },
+const BASE_MENU = [
+  { icon: LayoutDashboard, label: 'Dashboard',      path: '/dashboard' },
+  { icon: Package,         label: 'Inventario',     path: '/inventario' },
+  { icon: AlertTriangle,   label: 'Incidentes',     path: '/incidentes', badgeKey: 'incidentes' },
+  { icon: FileText,        label: 'Reportes',       path: '/reportes' },
+  { icon: Bell,            label: 'Notificaciones', path: '/notificaciones' },
+  { icon: Users,           label: 'Usuarios',       path: '/usuarios' },
+  { icon: Settings,        label: 'Configuración',  path: '/configuracion' },
 ];
 
 export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole = 'Administrador' }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
+  const [ticketsAbiertos, setTicketsAbiertos] = useState<number | null>(null);
+
+  // Cargar conteo de tickets ABIERTOS para el badge del menú
+  useEffect(() => {
+    listarTicketsPorEstado('ABIERTO', {}, 0, 1)
+      .then(r => setTicketsAbiertos(r.totalElements))
+      .catch(() => {}); // silencioso — el badge es informativo
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#F5F5F0] flex">
@@ -106,9 +115,11 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-6 px-3">
           <div className="space-y-1">
-            {menuItems.map((item, index) => {
-              const isActive = location.pathname === item.path;
+            {BASE_MENU.map((item, index) => {
+              const isActive = location.pathname === item.path ||
+                (item.path !== '/dashboard' && location.pathname.startsWith(item.path + '/'));
               const Icon = item.icon;
+              const badgeCount = item.badgeKey === 'incidentes' ? ticketsAbiertos : null;
 
               return (
                 <motion.div
@@ -138,9 +149,9 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
                           <span className="flex-1 uppercase tracking-wide" style={{ fontSize: '0.8125rem', fontWeight: 500, letterSpacing: '0.05em' }}>
                             {item.label}
                           </span>
-                          {item.badge && (
+                          {badgeCount != null && badgeCount > 0 && (
                             <Badge className="bg-[#D91E18] text-white hover:bg-[#D91E18] h-5 px-2 text-xs">
-                              {item.badge}
+                              {badgeCount > 99 ? '99+' : badgeCount}
                             </Badge>
                           )}
                           <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -180,7 +191,10 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
               <div className="h-8 w-1 bg-[#4A5D23]" />
               <div>
                 <h1 className="text-[#2C3E1F] uppercase tracking-wider" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.1em' }}>
-                  {menuItems.find(item => item.path === location.pathname)?.label || 'Sistema DTIC'}
+                  {BASE_MENU.find(item =>
+                    item.path === location.pathname ||
+                    (item.path !== '/dashboard' && location.pathname.startsWith(item.path + '/'))
+                  )?.label || 'Sistema DTIC'}
                 </h1>
                 <p className="text-[#5C6064] text-sm">
                   Gestión de Inventario de Equipos Informáticos

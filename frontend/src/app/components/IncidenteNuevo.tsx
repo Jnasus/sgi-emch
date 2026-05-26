@@ -58,8 +58,22 @@ export function IncidenteNuevo() {
 
   const equiposFiltrados = busqEquipo.trim()
     ? equipos.filter(e =>
-        e.codigoEjercito.toLowerCase().includes(busqEquipo.toLowerCase()))
+        e.codigoEjercito.toLowerCase().includes(busqEquipo.toLowerCase()) ||
+        e.nombreModelo.toLowerCase().includes(busqEquipo.toLowerCase()))
     : equipos;
+
+  // Al seleccionar equipo del dropdown → mostrar su código en el input
+  function handleEquipoSelect(val: string) {
+    setIdEquipo(val);
+    const eq = equipos.find(e => String(e.idEquipo) === val);
+    if (eq) setBusqEquipo(eq.codigoEjercito);
+  }
+
+  // Al escribir en el filtro → limpiar selección para forzar nueva elección
+  function handleBusqChange(val: string) {
+    setBusqEquipo(val);
+    setIdEquipo('');
+  }
 
   async function handleSubmit(ev: React.FormEvent) {
     ev.preventDefault();
@@ -132,26 +146,34 @@ export function IncidenteNuevo() {
                   <div className="space-y-2">
                     <Label className="uppercase tracking-wide text-[#2C3E1F]"
                            style={{ fontSize: '0.75rem', letterSpacing: '0.05em' }}>
-                      Código de Equipo *
+                      Equipo *
                     </Label>
                     <Input
-                      placeholder="Filtrar equipo..."
+                      placeholder="Buscar por código o nombre de modelo..."
                       value={busqEquipo}
-                      onChange={e => setBusqEquipo(e.target.value)}
-                      className="h-9 border-[#4A5D23]/30 focus:border-[#4A5D23] text-sm"
+                      onChange={e => handleBusqChange(e.target.value)}
+                      className={`h-9 border-[#4A5D23]/30 focus:border-[#4A5D23] text-sm ${
+                        idEquipo ? 'border-green-400 bg-green-50' : ''
+                      }`}
                     />
-                    <Select value={idEquipo} onValueChange={setIdEquipo}>
-                      <SelectTrigger className="h-11 border-[#4A5D23]/30">
-                        <SelectValue placeholder="Seleccione equipo" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {equiposFiltrados.slice(0, 100).map(e => (
-                          <SelectItem key={e.idEquipo} value={String(e.idEquipo)}>
-                            {e.codigoEjercito} — {e.nombreModelo}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {idEquipo ? (
+                      <p className="text-xs text-green-700 flex items-center gap-1">
+                        ✓ Equipo seleccionado — escriba para buscar otro
+                      </p>
+                    ) : (
+                      <Select value={idEquipo} onValueChange={handleEquipoSelect}>
+                        <SelectTrigger className="h-11 border-[#4A5D23]/30">
+                          <SelectValue placeholder="Seleccione de la lista" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {equiposFiltrados.slice(0, 100).map(e => (
+                            <SelectItem key={e.idEquipo} value={String(e.idEquipo)}>
+                              {e.codigoEjercito} — {e.nombreModelo}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
                   </div>
 
                   {/* Tipo de incidente */}
