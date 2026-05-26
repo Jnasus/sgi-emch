@@ -11,4 +11,5 @@ public interface AreaRepository extends JpaRepository<Area, Integer> {
     Optional<Area> findByCodigoArea(String codigoArea);
     boolean existsByCodigoArea(String codigoArea);
     boolean existsByCodigoAreaAndIdAreaNot(String codigoArea, Integer idArea);
+    Optional<Area> findByNombreAreaIgnoreCase(String nombreArea);
 }
