@@ -224,3 +224,34 @@ export const listarAreas = () =>
 
 export const upsertEspecificaciones = (id: number, data: EspecificacionTecnicaRequest) =>
   putJson<EspecificacionTecnicaResponse>(`/api/equipos/${id}/especificaciones`, data);
+
+// ── Exportación de reportes ──────────────────────────────────────────────────
+
+async function descargarArchivo(path: string, nombreArchivo: string): Promise<void> {
+  const res = await fetchWithAuth(path);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.message ?? `HTTP ${res.status}`);
+  }
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = nombreArchivo;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+export const exportarInventarioExcel = () =>
+  descargarArchivo(
+    '/api/reportes/inventario/excel',
+    `inventario-equipos-${new Date().toISOString().slice(0, 10)}.xlsx`,
+  );
+
+export const exportarInventarioPdf = () =>
+  descargarArchivo(
+    '/api/reportes/inventario/pdf',
+    `inventario-equipos-${new Date().toISOString().slice(0, 10)}.pdf`,
+  );

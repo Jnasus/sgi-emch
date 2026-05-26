@@ -63,6 +63,10 @@ export function Inventario() {
   const [saving,      setSaving]      = useState(false);
   const [apiError,    setApiError]    = useState<string | null>(null);
 
+  const [exportingExcel, setExportingExcel] = useState(false);
+  const [exportingPdf,   setExportingPdf]   = useState(false);
+  const [exportError,    setExportError]    = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true); setError(null);
     try {
@@ -89,6 +93,20 @@ export function Inventario() {
       || e.nombreArea.toLowerCase().includes(q)
       || e.nombreResponsable.toLowerCase().includes(q);
   });
+
+  async function handleExportExcel() {
+    setExportingExcel(true); setExportError(null);
+    try { await svc.exportarInventarioExcel(); }
+    catch (e: unknown) { setExportError(e instanceof Error ? e.message : 'Error al exportar Excel'); }
+    finally { setExportingExcel(false); }
+  }
+
+  async function handleExportPdf() {
+    setExportingPdf(true); setExportError(null);
+    try { await svc.exportarInventarioPdf(); }
+    catch (e: unknown) { setExportError(e instanceof Error ? e.message : 'Error al exportar PDF'); }
+    finally { setExportingPdf(false); }
+  }
 
   function openEstadoModal(equipo: EquipoResponse, presetEstado?: string) {
     setSelected(equipo);
@@ -124,11 +142,15 @@ export function Inventario() {
           <p className="text-[#5C6064]">Gestión completa del inventario de equipos informáticos</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
-            <Download className="w-4 h-4" /> Excel
+          <Button onClick={handleExportExcel} disabled={exportingExcel}
+            variant="outline" className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
+            <Download className="w-4 h-4" />
+            {exportingExcel ? 'Generando...' : 'Excel'}
           </Button>
-          <Button variant="outline" className="gap-2 border-[#D91E18] text-[#D91E18] hover:bg-[#D91E18] hover:text-white">
-            <FileText className="w-4 h-4" /> PDF
+          <Button onClick={handleExportPdf} disabled={exportingPdf}
+            variant="outline" className="gap-2 border-[#D91E18] text-[#D91E18] hover:bg-[#D91E18] hover:text-white">
+            <FileText className="w-4 h-4" />
+            {exportingPdf ? 'Generando...' : 'PDF'}
           </Button>
           <Link to="/inventario/nuevo">
             <Button className="gap-2 bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
@@ -137,6 +159,13 @@ export function Inventario() {
           </Link>
         </div>
       </div>
+
+      {/* Error de exportación */}
+      {exportError && (
+        <p className="text-sm text-[#D91E18] bg-red-50 border border-red-200 rounded-md px-4 py-2">
+          {exportError}
+        </p>
+      )}
 
       {/* Filtros */}
       <Card>
