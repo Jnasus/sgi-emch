@@ -56,7 +56,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/tecnicos")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR','TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR','TECNICO')")
     @Operation(summary = "Listar técnicos de campo activos")
     public ResponseEntity<ApiResponse<List<UsuarioResponse>>> listarTecnicos() {
         return ResponseEntity.ok(ApiResponse.ok("OK", usuarioService.listarTecnicos()));

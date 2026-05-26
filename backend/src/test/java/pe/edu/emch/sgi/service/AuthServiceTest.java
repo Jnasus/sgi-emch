@@ -49,7 +49,7 @@ class AuthServiceTest {
     void setUp() {
         Rol rol = new Rol();
         rol.setIdRol(1);
-        rol.setNombreRol("TECNICO_CAMPO");
+        rol.setNombreRol("TECNICO");
 
         Area area = new Area();
         area.setIdArea(3);
@@ -83,7 +83,7 @@ class AuthServiceTest {
         assertThat(response.getAccessToken()).isEqualTo("access.token.jwt");
         assertThat(response.getRefreshToken()).isEqualTo("refresh.token.jwt");
         assertThat(response.getUsername()).isEqualTo("jperez");
-        assertThat(response.getRol()).isEqualTo("TECNICO_CAMPO");
+        assertThat(response.getRol()).isEqualTo("TECNICO");
         assertThat(response.getIdUsuario()).isEqualTo(5);
         assertThat(response.getTokenType()).isEqualTo("Bearer");
         verify(usuarioRepository).actualizarUltimoAcceso(eq(5), any());

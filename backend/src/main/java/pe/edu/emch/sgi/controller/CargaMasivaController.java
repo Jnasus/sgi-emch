@@ -30,7 +30,7 @@ public class CargaMasivaController {
 
     /** Descarga la plantilla Excel dinámica con dropdowns de catálogos actuales. */
     @GetMapping("/plantilla")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Descargar plantilla Excel para carga masiva")
     public ResponseEntity<byte[]> descargarPlantilla() {
         byte[] content  = cargaMasivaService.generarPlantilla();
@@ -45,7 +45,7 @@ public class CargaMasivaController {
      * Recibe el archivo Excel subido, lo parsea fila a fila y valida sin escribir en BD.
      */
     @PostMapping(value = "/validar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Subir y validar archivo Excel (sin guardar)")
     public ResponseEntity<ApiResponse<ValidacionResponse>> validarArchivo(
             @RequestParam("file") MultipartFile file) {
@@ -59,7 +59,7 @@ public class CargaMasivaController {
      * No escribe nada en BD.
      */
     @PostMapping("/validar-json")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Validar filas enviadas como JSON (re-validación desde UI)")
     public ResponseEntity<ApiResponse<ValidacionResponse>> validarJson(
             @RequestBody ValidacionRequest request) {
@@ -71,7 +71,7 @@ public class CargaMasivaController {
      * Persiste todas las filas con estado "OK" en una sola transacción all-or-nothing.
      */
     @PostMapping("/confirmar")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Confirmar y guardar el lote validado")
     public ResponseEntity<ApiResponse<ConfirmacionResponse>> confirmar(
             @RequestBody ConfirmacionRequest request) {

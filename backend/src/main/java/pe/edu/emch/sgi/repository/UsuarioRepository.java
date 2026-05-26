@@ -33,6 +33,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
     @Query("UPDATE Usuario u SET u.ultimoAcceso = :ahora WHERE u.idUsuario = :idUsuario")
     void actualizarUltimoAcceso(@Param("idUsuario") Integer idUsuario, @Param("ahora") LocalDateTime ahora);
 
-    @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol = 'TECNICO_CAMPO' AND u.activo = true ORDER BY u.apellidos")
+    @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol = 'TECNICO' AND u.activo = true ORDER BY u.apellidos")
     List<Usuario> findTecnicosCampoActivos();
 }

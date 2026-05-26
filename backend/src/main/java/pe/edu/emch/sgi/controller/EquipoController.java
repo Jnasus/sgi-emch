@@ -44,7 +44,7 @@ public class EquipoController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Registrar nuevo equipo")
     public ResponseEntity<ApiResponse<EquipoResponse>> crearEquipo(
             @Valid @RequestBody EquipoRequest request) {
@@ -54,7 +54,7 @@ public class EquipoController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Actualizar datos del equipo")
     public ResponseEntity<ApiResponse<EquipoResponse>> actualizarEquipo(
             @PathVariable Integer id,
@@ -64,7 +64,7 @@ public class EquipoController {
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Cambiar estado del equipo y registrar historial")
     public ResponseEntity<ApiResponse<EquipoResponse>> cambiarEstado(
             @PathVariable Integer id,
@@ -76,7 +76,7 @@ public class EquipoController {
     }
 
     @PutMapping("/{id}/especificaciones")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO_CAMPO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUBJEFE_DTIC', 'TECNICO')")
     @Operation(summary = "Crear o actualizar especificaciones técnicas del equipo")
     public ResponseEntity<ApiResponse<EspecificacionTecnicaResponse>> upsertEspecificaciones(
             @PathVariable Integer id,

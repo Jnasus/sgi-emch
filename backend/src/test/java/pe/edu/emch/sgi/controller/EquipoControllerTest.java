@@ -154,7 +154,7 @@ class EquipoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TECNICO_CAMPO")
+    @WithMockUser(roles = "TECNICO")
     void upsertEspecificaciones_tecnico_retorna200() throws Exception {
         EspecificacionTecnicaRequest req = new EspecificacionTecnicaRequest();
         req.setProcesador("Intel Core i5");

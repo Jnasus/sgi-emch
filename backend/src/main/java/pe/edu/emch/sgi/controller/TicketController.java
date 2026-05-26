@@ -54,7 +54,7 @@ public class TicketController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('TECNICO_CAMPO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('TECNICO')")
     @Operation(summary = "Crear ticket")
     public ResponseEntity<ApiResponse<TicketResponse>> crearTicket(
             @Valid @RequestBody TicketCreateRequest request) {
@@ -63,7 +63,7 @@ public class TicketController {
     }
 
     @PatchMapping("/{id}/estado")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('TECNICO_CAMPO')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('TECNICO')")
     @Operation(summary = "Cambiar estado del ticket")
     public ResponseEntity<ApiResponse<TicketResponse>> cambiarEstado(
             @PathVariable Integer id,

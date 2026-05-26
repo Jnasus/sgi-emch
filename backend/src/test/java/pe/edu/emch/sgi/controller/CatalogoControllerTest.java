@@ -118,7 +118,7 @@ class CatalogoControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TECNICO_CAMPO")
+    @WithMockUser(roles = "TECNICO")
     void crearTipoEquipo_noAdminRechazo() throws Exception {
         TipoEquipoRequest req = new TipoEquipoRequest();
         req.setNombreTipo("Servidor");

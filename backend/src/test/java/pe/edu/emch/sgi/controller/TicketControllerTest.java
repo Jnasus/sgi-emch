@@ -95,7 +95,7 @@ class TicketControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "TECNICO_CAMPO")
+    @WithMockUser(roles = "TECNICO")
     void crearTicket_tecnico_retorna201() throws Exception {
         TicketCreateRequest req = buildCreateRequest();
         TicketResponse resp = new TicketResponse();
