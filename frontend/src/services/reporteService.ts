@@ -1,13 +1,8 @@
 import { fetchWithAuth } from '../lib/api';
 
-// ── Helper para descargar archivos autenticados ─────────────────────────────
+// ── Helpers de descarga ─────────────────────────────────────────────────────
 
-async function descargarArchivo(path: string, nombreArchivo: string): Promise<void> {
-  const res = await fetchWithAuth(path);
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error((body as { message?: string }).message ?? `Error HTTP ${res.status}`);
-  }
+async function descargarBlob(res: Response, nombreArchivo: string): Promise<void> {
   const blob = await res.blob();
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -17,6 +12,28 @@ async function descargarArchivo(path: string, nombreArchivo: string): Promise<vo
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+async function descargarArchivo(path: string, nombreArchivo: string): Promise<void> {
+  const res = await fetchWithAuth(path);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error((body as { message?: string }).message ?? `Error HTTP ${res.status}`);
+  }
+  await descargarBlob(res, nombreArchivo);
+}
+
+async function postDescargarArchivo(
+  path: string,
+  body: unknown,
+  nombreArchivo: string,
+): Promise<void> {
+  const res = await fetchWithAuth(path, { method: 'POST', body: JSON.stringify(body) });
+  if (!res.ok) {
+    const b = await res.json().catch(() => ({}));
+    throw new Error((b as { message?: string }).message ?? `Error HTTP ${res.status}`);
+  }
+  await descargarBlob(res, nombreArchivo);
 }
 
 function buildParams(
@@ -44,6 +61,22 @@ export const inventarioPdf = (estado?: string, idArea?: number) =>
   descargarArchivo(
     `/api/reportes/inventario/pdf${buildParams({ estado, idArea })}`,
     `inventario-general-${hoy()}.pdf`,
+  );
+
+// ── Selección manual (por IDs) ──────────────────────────────────────────────
+
+export const seleccionExcel = (ids: number[]) =>
+  postDescargarArchivo(
+    '/api/reportes/seleccion/excel',
+    { ids },
+    `seleccion-equipos-${hoy()}.xlsx`,
+  );
+
+export const seleccionPdf = (ids: number[]) =>
+  postDescargarArchivo(
+    '/api/reportes/seleccion/pdf',
+    { ids },
+    `seleccion-equipos-${hoy()}.pdf`,
   );
 
 // ── Equipos Antiguos ────────────────────────────────────────────────────────

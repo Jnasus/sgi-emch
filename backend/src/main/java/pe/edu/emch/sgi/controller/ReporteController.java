@@ -8,10 +8,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pe.edu.emch.sgi.service.ReporteService;
+
+import java.util.List;
 
 import java.time.LocalDate;
 
@@ -22,6 +26,9 @@ import java.time.LocalDate;
 public class ReporteController {
 
     private final ReporteService reporteService;
+
+    /** DTO para selección manual de equipos por IDs. */
+    public record IdsRequest(List<Integer> ids) {}
 
     private static final MediaType EXCEL_TYPE =
         MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -48,6 +55,30 @@ public class ReporteController {
             @RequestParam(required = false) Integer idArea) {
         byte[] content  = reporteService.generarPdf(estado, idArea);
         String filename = "inventario-equipos-" + LocalDate.now() + ".pdf";
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(content);
+    }
+
+    @PostMapping("/seleccion/excel")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC')")
+    @Operation(summary = "Exportar selección manual de equipos a Excel (.xlsx)")
+    public ResponseEntity<byte[]> seleccionExcel(@RequestBody IdsRequest req) {
+        byte[] content  = reporteService.generarExcelSeleccion(req.ids());
+        String filename = "seleccion-equipos-" + LocalDate.now() + ".xlsx";
+        return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+            .contentType(EXCEL_TYPE)
+            .body(content);
+    }
+
+    @PostMapping("/seleccion/pdf")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'JEFE_DTIC', 'SUBJEFE_DTIC')")
+    @Operation(summary = "Exportar selección manual de equipos a PDF")
+    public ResponseEntity<byte[]> seleccionPdf(@RequestBody IdsRequest req) {
+        byte[] content  = reporteService.generarPdfSeleccion(req.ids());
+        String filename = "seleccion-equipos-" + LocalDate.now() + ".pdf";
         return ResponseEntity.ok()
             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
             .contentType(MediaType.APPLICATION_PDF)

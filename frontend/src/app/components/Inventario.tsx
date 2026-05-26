@@ -3,13 +3,15 @@ import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
 import {
   Package, Search, Filter, Plus, Edit, Eye,
-  Download, FileText, MoreVertical,
+  FileSpreadsheet, FileText, MoreVertical,
   CheckCircle, Clock, AlertCircle, XCircle,
   ChevronLeft, ChevronRight, RefreshCw,
+  ListChecks, Loader2, X,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
+import { Checkbox } from './ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
@@ -18,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import * as svc from '../../services/inventarioService';
+import * as reporteSvc from '../../services/reporteService';
 import type { EquipoResponse } from '../../services/inventarioService';
 
 // ── Estado config ──────────────────────────────────────────────────────────
@@ -46,16 +49,16 @@ function EstadoBadge({ estado }: { estado: string }) {
 // ── Componente principal ───────────────────────────────────────────────────
 export function Inventario() {
   const navigate = useNavigate();
-  const [equipos, setEquipos]           = useState<EquipoResponse[]>([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState<string | null>(null);
-  const [page, setPage]                 = useState(0);
-  const [totalPages, setTotalPages]     = useState(1);
+  const [equipos, setEquipos]             = useState<EquipoResponse[]>([]);
+  const [loading, setLoading]             = useState(true);
+  const [error, setError]                 = useState<string | null>(null);
+  const [page, setPage]                   = useState(0);
+  const [totalPages, setTotalPages]       = useState(1);
   const [totalElements, setTotalElements] = useState(0);
-  const [search, setSearch]             = useState('');
-  const [filterEstado, setFilterEstado] = useState('');
+  const [search, setSearch]               = useState('');
+  const [filterEstado, setFilterEstado]   = useState('');
 
-  // modal cambiar estado
+  // Modal cambiar estado
   const [showEstado,  setShowEstado]  = useState(false);
   const [selected,    setSelected]    = useState<EquipoResponse | null>(null);
   const [nuevoEstado, setNuevoEstado] = useState('');
@@ -63,9 +66,17 @@ export function Inventario() {
   const [saving,      setSaving]      = useState(false);
   const [apiError,    setApiError]    = useState<string | null>(null);
 
+  // Exportación (para selección)
   const [exportingExcel, setExportingExcel] = useState(false);
   const [exportingPdf,   setExportingPdf]   = useState(false);
   const [exportError,    setExportError]    = useState<string | null>(null);
+
+  // Modo selección
+  const [selectionMode,    setSelectionMode]    = useState(false);
+  const [selectedIds,      setSelectedIds]      = useState<Set<number>>(new Set());
+  const [selectionLoading, setSelectionLoading] = useState(false);
+
+  // ── Carga ──────────────────────────────────────────────────────────────────
 
   const load = useCallback(async () => {
     setLoading(true); setError(null);
@@ -83,6 +94,14 @@ export function Inventario() {
 
   useEffect(() => { load(); }, [load]);
 
+  // Salir de selección si el filtro cambia
+  useEffect(() => {
+    if (selectionMode) exitSelectionMode();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterEstado]);
+
+  // ── Filtro cliente (búsqueda de texto sobre la página actual) ─────────────
+
   const filtered = equipos.filter(e => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -94,19 +113,86 @@ export function Inventario() {
       || e.nombreResponsable.toLowerCase().includes(q);
   });
 
+  // ── Modo selección ─────────────────────────────────────────────────────────
+
+  async function enterSelectionMode() {
+    setSelectionLoading(true);
+    try {
+      // Carga todos los equipos que coinciden con el filtro actual (sin paginación)
+      const all = await svc.listarEquipos(0, 9999, filterEstado || undefined);
+      setSelectedIds(new Set(all.content.map(e => e.idEquipo)));
+      setSelectionMode(true);
+    } catch {
+      // Fallback: solo la página actual visible
+      setSelectedIds(new Set(filtered.map(e => e.idEquipo)));
+      setSelectionMode(true);
+    } finally {
+      setSelectionLoading(false);
+    }
+  }
+
+  function exitSelectionMode() {
+    setSelectionMode(false);
+    setSelectedIds(new Set());
+    setExportError(null);
+  }
+
+  function toggleSelectionMode() {
+    if (selectionMode) exitSelectionMode();
+    else void enterSelectionMode();
+  }
+
+  // Toggle de un equipo individual
+  function toggleItem(id: number) {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  // Seleccionar / deseleccionar todos los de la página actual (visible en pantalla)
+  const allOnPageSelected = filtered.length > 0 && filtered.every(e => selectedIds.has(e.idEquipo));
+  const someOnPageSelected = filtered.some(e => selectedIds.has(e.idEquipo));
+
+  function togglePageSelection() {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (allOnPageSelected) {
+        filtered.forEach(e => next.delete(e.idEquipo));
+      } else {
+        filtered.forEach(e => next.add(e.idEquipo));
+      }
+      return next;
+    });
+  }
+
+  // ── Exportación ────────────────────────────────────────────────────────────
+
   async function handleExportExcel() {
     setExportingExcel(true); setExportError(null);
-    try { await svc.exportarInventarioExcel(); }
-    catch (e: unknown) { setExportError(e instanceof Error ? e.message : 'Error al exportar Excel'); }
-    finally { setExportingExcel(false); }
+    try {
+      await reporteSvc.seleccionExcel(Array.from(selectedIds));
+    } catch (e: unknown) {
+      setExportError(e instanceof Error ? e.message : 'Error al exportar Excel');
+    } finally {
+      setExportingExcel(false);
+    }
   }
 
   async function handleExportPdf() {
     setExportingPdf(true); setExportError(null);
-    try { await svc.exportarInventarioPdf(); }
-    catch (e: unknown) { setExportError(e instanceof Error ? e.message : 'Error al exportar PDF'); }
-    finally { setExportingPdf(false); }
+    try {
+      await reporteSvc.seleccionPdf(Array.from(selectedIds));
+    } catch (e: unknown) {
+      setExportError(e instanceof Error ? e.message : 'Error al exportar PDF');
+    } finally {
+      setExportingPdf(false);
+    }
   }
+
+  // ── Modal cambiar estado ───────────────────────────────────────────────────
 
   function openEstadoModal(equipo: EquipoResponse, presetEstado?: string) {
     setSelected(equipo);
@@ -130,8 +216,14 @@ export function Inventario() {
     }
   }
 
+  // ── Número de columnas (cambia al entrar en modo selección) ───────────────
+  const colSpanTotal = selectionMode ? 9 : 8;
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
   return (
     <div className="space-y-6">
+
       {/* Header */}
       <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
         <div>
@@ -141,17 +233,55 @@ export function Inventario() {
           </h2>
           <p className="text-[#5C6064]">Gestión completa del inventario de equipos informáticos</p>
         </div>
-        <div className="flex gap-3">
-          <Button onClick={handleExportExcel} disabled={exportingExcel}
-            variant="outline" className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white">
-            <Download className="w-4 h-4" />
+
+        <div className="flex gap-2 flex-wrap justify-end">
+          {/* Botón modo selección */}
+          <Button
+            variant={selectionMode ? 'default' : 'outline'}
+            disabled={selectionLoading}
+            onClick={toggleSelectionMode}
+            className={selectionMode
+              ? 'gap-2 bg-[#2C3E1F] hover:bg-[#1a2512] text-white'
+              : 'gap-2 border-[#2C3E1F] text-[#2C3E1F] hover:bg-[#2C3E1F] hover:text-white'}
+          >
+            {selectionLoading
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : selectionMode
+                ? <X className="w-4 h-4" />
+                : <ListChecks className="w-4 h-4" />}
+            {selectionLoading
+              ? 'Cargando...'
+              : selectionMode
+                ? 'Cancelar Selección'
+                : 'Seleccionar para Reporte'}
+          </Button>
+
+          {/* Excel — solo activo en modo selección con ≥1 elemento */}
+          <Button
+            onClick={handleExportExcel}
+            disabled={!selectionMode || selectedIds.size === 0 || exportingExcel || exportingPdf}
+            variant="outline"
+            className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white disabled:opacity-40"
+          >
+            {exportingExcel
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <FileSpreadsheet className="w-4 h-4" />}
             {exportingExcel ? 'Generando...' : 'Excel'}
           </Button>
-          <Button onClick={handleExportPdf} disabled={exportingPdf}
-            variant="outline" className="gap-2 border-[#D91E18] text-[#D91E18] hover:bg-[#D91E18] hover:text-white">
-            <FileText className="w-4 h-4" />
+
+          {/* PDF — solo activo en modo selección con ≥1 elemento */}
+          <Button
+            onClick={handleExportPdf}
+            disabled={!selectionMode || selectedIds.size === 0 || exportingExcel || exportingPdf}
+            variant="outline"
+            className="gap-2 border-[#D91E18] text-[#D91E18] hover:bg-[#D91E18] hover:text-white disabled:opacity-40"
+          >
+            {exportingPdf
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <FileText className="w-4 h-4" />}
             {exportingPdf ? 'Generando...' : 'PDF'}
           </Button>
+
           <Link to="/inventario/nuevo">
             <Button className="gap-2 bg-[#4A5D23] hover:bg-[#3A4D29] text-white">
               <Plus className="w-4 h-4" /> Nuevo Equipo
@@ -159,6 +289,24 @@ export function Inventario() {
           </Link>
         </div>
       </div>
+
+      {/* Banner de selección activa */}
+      {selectionMode && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between gap-4 rounded-md border border-[#4A5D23]/40 bg-[#F0F4E8] px-4 py-2.5"
+        >
+          <span className="text-sm text-[#2C3E1F]">
+            <strong>{selectedIds.size}</strong> equipo{selectedIds.size !== 1 ? 's' : ''} seleccionado{selectedIds.size !== 1 ? 's' : ''}.
+            {' '}Marque o desmarque filas individualmente, o use el checkbox del encabezado para esta página.
+          </span>
+          <Button variant="ghost" size="sm" className="text-[#5C6064] h-7 px-2"
+            onClick={() => setSelectedIds(new Set())}>
+            Deseleccionar todos
+          </Button>
+        </motion.div>
+      )}
 
       {/* Error de exportación */}
       {exportError && (
@@ -211,6 +359,20 @@ export function Inventario() {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-[#4A5D23] hover:bg-[#4A5D23]">
+
+                    {/* Columna checkbox — solo en modo selección */}
+                    {selectionMode && (
+                      <TableHead className="w-10 text-center">
+                        <Checkbox
+                          checked={allOnPageSelected}
+                          data-state={someOnPageSelected && !allOnPageSelected ? 'indeterminate' : undefined}
+                          onCheckedChange={togglePageSelection}
+                          className="border-white data-[state=checked]:bg-white data-[state=checked]:text-[#4A5D23]"
+                          aria-label="Seleccionar todos en esta página"
+                        />
+                      </TableHead>
+                    )}
+
                     {['Código Ejército', 'Tipo', 'Modelo', 'N° Serie', 'Área', 'Responsable', 'Estado', 'Acciones'].map(h => (
                       <TableHead key={h}
                         className={`text-white uppercase tracking-wide text-xs ${h === 'Acciones' ? 'text-right' : ''}`}>
@@ -219,72 +381,92 @@ export function Inventario() {
                     ))}
                   </TableRow>
                 </TableHeader>
+
                 <TableBody>
                   {filtered.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="text-center py-10 text-[#5C6064]">
+                      <TableCell colSpan={colSpanTotal} className="text-center py-10 text-[#5C6064]">
                         No se encontraron equipos
                       </TableCell>
                     </TableRow>
-                  ) : filtered.map((e, i) => (
-                    <motion.tr key={e.idEquipo}
-                      initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.03 }}
-                      onClick={() => navigate(`/inventario/${e.idEquipo}`)}
-                      className="border-b border-[#E8E8E3] hover:bg-[#F0F4E8] transition-colors cursor-pointer">
-                      <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm">
-                        {e.codigoEjercito}
-                      </TableCell>
-                      <TableCell className="text-[#5C6064] text-sm">{e.nombreTipo}</TableCell>
-                      <TableCell className="text-sm text-[#2C3E1F] font-medium">{e.nombreModelo}</TableCell>
-                      <TableCell className="font-mono text-sm text-[#5C6064]">{e.numeroSerie}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23] text-xs">
-                          {e.nombreArea}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-[#5C6064]">{e.nombreResponsable}</TableCell>
-                      <TableCell><EstadoBadge estado={e.estado} /></TableCell>
-                      <TableCell className="text-right" onClick={ev => ev.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="w-4 h-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              <Link to={`/inventario/${e.idEquipo}`} className="flex items-center gap-2 cursor-pointer">
-                                <Eye className="w-4 h-4" /> Ver Detalle
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <Link to={`/inventario/${e.idEquipo}/editar`} className="flex items-center gap-2 cursor-pointer">
-                                <Edit className="w-4 h-4" /> Editar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => openEstadoModal(e)}
-                              className="flex items-center gap-2 cursor-pointer">
-                              <RefreshCw className="w-4 h-4" /> Cambiar Estado
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => openEstadoModal(e, 'DADO_DE_BAJA')}
-                              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
-                              <XCircle className="w-4 h-4" /> Dar de Baja
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </motion.tr>
-                  ))}
+                  ) : filtered.map((e, i) => {
+                    const isChecked = selectedIds.has(e.idEquipo);
+                    return (
+                      <motion.tr key={e.idEquipo}
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        onClick={() => selectionMode ? toggleItem(e.idEquipo) : navigate(`/inventario/${e.idEquipo}`)}
+                        className={`border-b border-[#E8E8E3] transition-colors cursor-pointer
+                          ${isChecked && selectionMode
+                            ? 'bg-[#EDF3E0] hover:bg-[#E3EDD6]'
+                            : 'hover:bg-[#F0F4E8]'}`}>
+
+                        {/* Checkbox de fila — solo en modo selección */}
+                        {selectionMode && (
+                          <TableCell className="w-10 text-center" onClick={ev => ev.stopPropagation()}>
+                            <Checkbox
+                              checked={isChecked}
+                              onCheckedChange={() => toggleItem(e.idEquipo)}
+                              className="border-[#4A5D23] data-[state=checked]:bg-[#4A5D23]"
+                              aria-label={`Seleccionar ${e.codigoEjercito}`}
+                            />
+                          </TableCell>
+                        )}
+
+                        <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm">
+                          {e.codigoEjercito}
+                        </TableCell>
+                        <TableCell className="text-[#5C6064] text-sm">{e.nombreTipo}</TableCell>
+                        <TableCell className="text-sm text-[#2C3E1F] font-medium">{e.nombreModelo}</TableCell>
+                        <TableCell className="font-mono text-sm text-[#5C6064]">{e.numeroSerie}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="border-[#4A5D23] text-[#4A5D23] text-xs">
+                            {e.nombreArea}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-[#5C6064]">{e.nombreResponsable}</TableCell>
+                        <TableCell><EstadoBadge estado={e.estado} /></TableCell>
+                        <TableCell className="text-right" onClick={ev => ev.stopPropagation()}>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem asChild>
+                                <Link to={`/inventario/${e.idEquipo}`} className="flex items-center gap-2 cursor-pointer">
+                                  <Eye className="w-4 h-4" /> Ver Detalle
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link to={`/inventario/${e.idEquipo}/editar`} className="flex items-center gap-2 cursor-pointer">
+                                  <Edit className="w-4 h-4" /> Editar
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => openEstadoModal(e)}
+                                className="flex items-center gap-2 cursor-pointer">
+                                <RefreshCw className="w-4 h-4" /> Cambiar Estado
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onClick={() => openEstadoModal(e, 'DADO_DE_BAJA')}
+                                className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                                <XCircle className="w-4 h-4" /> Dar de Baja
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </motion.tr>
+                    );
+                  })}
                 </TableBody>
               </Table>
-
             </div>
           )}
 
+          {/* Paginación */}
           {!loading && !error && totalPages > 1 && (
             <div className="flex items-center justify-between px-6 py-4 border-t border-[#E8E8E3]">
               <span className="text-sm text-[#5C6064]">Página {page + 1} de {totalPages}</span>
@@ -337,6 +519,7 @@ export function Inventario() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }

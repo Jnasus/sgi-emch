@@ -7,6 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pe.edu.emch.sgi.entity.Equipo;
 
+import java.time.LocalDate;
+import java.util.List;
+
 public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
 
     boolean existsByCodigoEjercito(String codigoEjercito);
@@ -27,4 +30,31 @@ public interface EquipoRepository extends JpaRepository<Equipo, Integer> {
                               @Param("idArea") Integer idArea,
                               @Param("idTipo") Integer idTipo,
                               Pageable pageable);
+
+    /** Lista completa sin paginación, para reportes. */
+    @Query("""
+            SELECT e FROM Equipo e
+            WHERE (:estado IS NULL OR e.estado = :estado)
+              AND (:idArea IS NULL OR e.area.idArea = :idArea)
+            ORDER BY e.codigoEjercito
+            """)
+    List<Equipo> findAllFiltered(@Param("estado") String estado,
+                                 @Param("idArea") Integer idArea);
+
+    /** Lista de equipos por IDs específicos, ordenada por código ejército. */
+    @Query("""
+            SELECT e FROM Equipo e
+            WHERE e.idEquipo IN :ids
+            ORDER BY e.codigoEjercito
+            """)
+    List<Equipo> findAllByIds(@Param("ids") List<Integer> ids);
+
+    /** Equipos cuya fecha de adquisición es anterior o igual a la fecha límite. */
+    @Query("""
+            SELECT e FROM Equipo e
+            WHERE e.fechaAdquisicion IS NOT NULL
+              AND e.fechaAdquisicion <= :fechaLimite
+            ORDER BY e.fechaAdquisicion ASC
+            """)
+    List<Equipo> findAntiguos(@Param("fechaLimite") LocalDate fechaLimite);
 }

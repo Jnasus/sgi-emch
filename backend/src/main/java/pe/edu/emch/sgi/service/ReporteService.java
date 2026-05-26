@@ -251,6 +251,178 @@ public class ReporteService {
     }
 
     // =========================================================================
+    // EXCEL — SELECCIÓN MANUAL DE EQUIPOS
+    // =========================================================================
+
+    @Transactional(readOnly = true)
+    public byte[] generarExcelSeleccion(List<Integer> ids) {
+        List<Equipo> equipos = equipoRepository.findAllByIds(ids);
+
+        try (XSSFWorkbook wb = new XSSFWorkbook();
+             ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+            XSSFSheet sheet = wb.createSheet("Selección de Equipos");
+            XSSFCellStyle titleStyle  = buildTitleStyle(wb);
+            XSSFCellStyle subStyle    = buildSubStyle(wb);
+            XSSFCellStyle headerStyle = buildHeaderStyle(wb);
+            XSSFCellStyle dataStyle   = buildDataStyle(wb, Color.WHITE);
+            XSSFCellStyle altStyle    = buildDataStyle(wb, VERDE_CLARO);
+
+            int lastCol = EXCEL_HEADERS.length - 1;
+
+            Row titleRow = sheet.createRow(0);
+            titleRow.setHeightInPoints(28);
+            Cell titleCell = titleRow.createCell(0);
+            titleCell.setCellValue("SELECCIÓN DE EQUIPOS INFORMÁTICOS — EMCH CFB");
+            titleCell.setCellStyle(titleStyle);
+            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, lastCol));
+
+            Row subRow = sheet.createRow(1);
+            subRow.setHeightInPoints(16);
+            Cell subCell = subRow.createCell(0);
+            subCell.setCellValue("Generado: " + LocalDate.now().format(FMT)
+                + "   |   Equipos seleccionados: " + equipos.size());
+            subCell.setCellStyle(subStyle);
+            sheet.addMergedRegion(new CellRangeAddress(1, 1, 0, lastCol));
+
+            Row headerRow = sheet.createRow(2);
+            headerRow.setHeightInPoints(20);
+            for (int i = 0; i < EXCEL_HEADERS.length; i++) {
+                Cell c = headerRow.createCell(i);
+                c.setCellValue(EXCEL_HEADERS[i]);
+                c.setCellStyle(headerStyle);
+            }
+
+            int rowNum = 3;
+            for (Equipo e : equipos) {
+                Row row = sheet.createRow(rowNum);
+                XSSFCellStyle style = (rowNum % 2 == 0) ? altStyle : dataStyle;
+                addCell(row, 0,  e.getCodigoEjercito(), style);
+                addCell(row, 1,  e.getTipo().getNombreTipo(), style);
+                addCell(row, 2,  e.getModelo().getNombreModelo(), style);
+                addCell(row, 3,  e.getNumeroSerie(), style);
+                addCell(row, 4,  e.getSo().getNombreSo() + " " + nvl(e.getSo().getVersionSo()), style);
+                addCell(row, 5,  e.getArea().getNombreArea(), style);
+                addCell(row, 6,  e.getNombreResponsable(), style);
+                addCell(row, 7,  nvl(e.getMacAddress()), style);
+                addCell(row, 8,  nvl(e.getIpAddress()), style);
+                addCell(row, 9,  nvl(e.getTipoRed()), style);
+                addCell(row, 10, estadoLabel(e.getEstado()), style);
+                addCell(row, 11, fecha(e.getFechaAdquisicion()), style);
+                addCell(row, 12, fecha(e.getFechaRegistro()), style);
+                addCell(row, 13, nvl(e.getObservaciones()), style);
+                rowNum++;
+            }
+
+            int[] widths = { 18, 14, 18, 20, 22, 16, 24, 18, 14, 10, 14, 15, 15, 30 };
+            for (int i = 0; i < widths.length; i++) {
+                sheet.setColumnWidth(i, widths[i] * 256);
+            }
+            sheet.createFreezePane(0, 3);
+
+            wb.write(out);
+            return out.toByteArray();
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Error generando reporte Excel (selección): " + ex.getMessage(), ex);
+        }
+    }
+
+    // =========================================================================
+    // PDF — SELECCIÓN MANUAL DE EQUIPOS
+    // =========================================================================
+
+    @Transactional(readOnly = true)
+    public byte[] generarPdfSeleccion(List<Integer> ids) {
+        List<Equipo> equipos = equipoRepository.findAllByIds(ids);
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4.rotate(), 20f, 20f, 40f, 30f);
+
+        try {
+            PdfWriter writer = PdfWriter.getInstance(doc, out);
+            writer.setPageEvent(new PdfPageEventHelper() {
+                @Override
+                public void onEndPage(PdfWriter w, Document d) {
+                    try {
+                        Font footFont = FontFactory.getFont(FontFactory.HELVETICA, 7f, Font.NORMAL, GRIS_TEXTO);
+                        PdfContentByte cb = w.getDirectContent();
+                        Phrase footer = new Phrase(
+                            "Página " + w.getPageNumber() + "   |   SGI-EMCH — Documento de uso interno",
+                            footFont);
+                        ColumnText.showTextAligned(cb, Element.ALIGN_RIGHT, footer,
+                            d.right(), d.bottom() - 10f, 0);
+                    } catch (Exception ignored) { }
+                }
+            });
+
+            doc.open();
+
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 13f, VERDE_OSCURO);
+            Font subFont   = FontFactory.getFont(FontFactory.HELVETICA,       8f,  GRIS_TEXTO);
+            Font hFont     = FontFactory.getFont(FontFactory.HELVETICA_BOLD,  7f,  Color.WHITE);
+            Font dFont     = FontFactory.getFont(FontFactory.HELVETICA,       7f,  VERDE_OSCURO);
+
+            Paragraph title = new Paragraph("SELECCIÓN DE EQUIPOS INFORMÁTICOS — EMCH CFB", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(4f);
+            doc.add(title);
+
+            Paragraph sub = new Paragraph(
+                "Generado: " + LocalDate.now().format(FMT)
+                + "   |   Equipos seleccionados: " + equipos.size(), subFont);
+            sub.setAlignment(Element.ALIGN_CENTER);
+            sub.setSpacingAfter(12f);
+            doc.add(sub);
+
+            String[] pdfHeaders = {
+                "Código", "Tipo", "Modelo", "N° Serie",
+                "Sistema Operativo", "Área", "Responsable", "Estado", "F. Registro"
+            };
+            int[] relWidths = { 2, 2, 3, 3, 3, 2, 4, 2, 2 };
+
+            PdfPTable table = new PdfPTable(pdfHeaders.length);
+            table.setWidthPercentage(100);
+            table.setWidths(relWidths);
+            table.setHeaderRows(1);
+
+            for (String h : pdfHeaders) {
+                PdfPCell cell = new PdfPCell(new Phrase(h, hFont));
+                cell.setBackgroundColor(VERDE_MEDIO);
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+                cell.setPadding(4f);
+                table.addCell(cell);
+            }
+
+            boolean alt = false;
+            for (Equipo e : equipos) {
+                Color bg = alt ? VERDE_CLARO : Color.WHITE;
+                addPdfCell(table, e.getCodigoEjercito(), dFont, bg, Element.ALIGN_CENTER);
+                addPdfCell(table, e.getTipo().getNombreTipo(), dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, e.getModelo().getNombreModelo(), dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, e.getNumeroSerie(), dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, e.getSo().getNombreSo() + " " + nvl(e.getSo().getVersionSo()),
+                    dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, e.getArea().getNombreArea(), dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, e.getNombreResponsable(), dFont, bg, Element.ALIGN_LEFT);
+                addPdfCell(table, estadoLabel(e.getEstado()), dFont, bg, Element.ALIGN_CENTER);
+                addPdfCell(table, fecha(e.getFechaRegistro()), dFont, bg, Element.ALIGN_CENTER);
+                alt = !alt;
+            }
+
+            doc.add(table);
+
+        } catch (Exception ex) {
+            throw new RuntimeException("Error generando reporte PDF (selección): " + ex.getMessage(), ex);
+        } finally {
+            if (doc.isOpen()) doc.close();
+        }
+
+        return out.toByteArray();
+    }
+
+    // =========================================================================
     // EXCEL — EQUIPOS ANTIGUOS
     // =========================================================================
 
