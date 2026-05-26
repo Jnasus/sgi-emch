@@ -189,28 +189,24 @@ public class CargaMasivaService {
             idTipo, idModelo, idArea, idSo);
     }
 
-    // ── CONFIRMAR (transaccional) ────────────────────────────────────────────
+    // ── CONFIRMAR (transaccional all-or-nothing) ─────────────────────────────
 
+    /**
+     * Persiste todas las filas OK en una sola transacción.
+     * Si cualquier fila falla, toda la transacción se revierte y la excepción
+     * se propaga al GlobalExceptionHandler (no hay try-catch interno para evitar
+     * el antipatrón de capturar excepciones dentro de @Transactional, que provoca
+     * UnexpectedRollbackException al intentar el commit).
+     */
     @Transactional
     public ConfirmacionResponse confirmar(ConfirmacionRequest request) {
-        List<ErrorFila> erroresConfirmacion = new ArrayList<>();
         int guardados = 0;
-
         for (FilaValidada fila : request.filas()) {
             if (!"OK".equals(fila.estado())) continue;
-            try {
-                guardarFila(fila);
-                guardados++;
-            } catch (Exception ex) {
-                erroresConfirmacion.add(new ErrorFila(
-                    "fila_" + fila.numeroFila(),
-                    "Error al guardar fila " + fila.numeroFila() + ": " + ex.getMessage()));
-            }
+            guardarFila(fila);
+            guardados++;
         }
-
-        int totalOk = (int) request.filas().stream().filter(f -> "OK".equals(f.estado())).count();
-        return new ConfirmacionResponse(totalOk, guardados,
-            erroresConfirmacion.size(), erroresConfirmacion);
+        return new ConfirmacionResponse(guardados, guardados, 0, List.of());
     }
 
     private void guardarFila(FilaValidada fila) {
