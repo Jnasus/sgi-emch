@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { motion } from 'motion/react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import {
   Package, Search, Filter, Plus, Edit, Eye,
   Download, FileText, MoreVertical,
@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Card, CardContent } from './ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
@@ -45,6 +45,7 @@ function EstadoBadge({ estado }: { estado: string }) {
 
 // ── Componente principal ───────────────────────────────────────────────────
 export function Inventario() {
+  const navigate = useNavigate();
   const [equipos, setEquipos]           = useState<EquipoResponse[]>([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState<string | null>(null);
@@ -89,9 +90,9 @@ export function Inventario() {
       || e.nombreResponsable.toLowerCase().includes(q);
   });
 
-  function openEstadoModal(equipo: EquipoResponse) {
+  function openEstadoModal(equipo: EquipoResponse, presetEstado?: string) {
     setSelected(equipo);
-    setNuevoEstado(equipo.estado);
+    setNuevoEstado(presetEstado ?? equipo.estado);
     setMotivo('');
     setApiError(null);
     setShowEstado(true);
@@ -200,7 +201,8 @@ export function Inventario() {
                     <motion.tr key={e.idEquipo}
                       initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.03 }}
-                      className="border-b border-[#E8E8E3] hover:bg-[#F9F9F6] transition-colors">
+                      onClick={() => navigate(`/inventario/${e.idEquipo}`)}
+                      className="border-b border-[#E8E8E3] hover:bg-[#F0F4E8] transition-colors cursor-pointer">
                       <TableCell className="font-mono font-semibold text-[#2C3E1F] text-sm">
                         {e.codigoEjercito}
                       </TableCell>
@@ -214,7 +216,7 @@ export function Inventario() {
                       </TableCell>
                       <TableCell className="text-sm text-[#5C6064]">{e.nombreResponsable}</TableCell>
                       <TableCell><EstadoBadge estado={e.estado} /></TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-right" onClick={ev => ev.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -237,6 +239,12 @@ export function Inventario() {
                               className="flex items-center gap-2 cursor-pointer">
                               <RefreshCw className="w-4 h-4" /> Cambiar Estado
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => openEstadoModal(e, 'DADO_DE_BAJA')}
+                              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                              <XCircle className="w-4 h-4" /> Dar de Baja
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -244,6 +252,7 @@ export function Inventario() {
                   ))}
                 </TableBody>
               </Table>
+
             </div>
           )}
 
