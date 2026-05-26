@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Upload, FileSpreadsheet, CheckCircle2, XCircle,
-  AlertCircle, ChevronRight, RotateCcw, Download, ArrowLeft,
+  AlertCircle, ChevronRight, RotateCcw, Download, ArrowLeft, Trash2,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
@@ -179,6 +179,8 @@ export function CargaMasiva() {
   const [revalidando, setRevalidando] = useState<Set<number>>(new Set());
   const [revalidandoTodo, setRevalidandoTodo] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
+  // Filas marcadas como "omitir" (por índice en el array filas)
+  const [descartados, setDescartados] = useState<Set<number>>(new Set());
 
   // Paso 3
   const [resultado, setResultado] = useState<ConfirmacionResponse | null>(null);
@@ -265,13 +267,33 @@ export function CargaMasiva() {
     }
   };
 
-  const todasOk = filas.length > 0 && filas.every(f => f.estado === 'OK');
-  const totalErrores = filas.filter(f => f.estado === 'ERROR').length;
+  // ── Descartar / restaurar filas con error ────────────────────────────────
+
+  const descartar = (idx: number) =>
+    setDescartados(prev => new Set(prev).add(idx));
+
+  const restaurar = (idx: number) =>
+    setDescartados(prev => { const s = new Set(prev); s.delete(idx); return s; });
+
+  const descartarTodosConError = () =>
+    setDescartados(prev => {
+      const s = new Set(prev);
+      filas.forEach((f, i) => { if (f.estado === 'ERROR') s.add(i); });
+      return s;
+    });
+
+  // Filas activas (no descartadas) con error
+  const totalErroresActivos = filas.filter((f, i) => f.estado === 'ERROR' && !descartados.has(i)).length;
+  const totalDescartados = descartados.size;
+  // El lote listo = todas las filas activas son OK
+  const todasOk = filas.length > 0 && filas.every((f, i) => f.estado === 'OK' || descartados.has(i));
+  // Solo se envían las filas OK y no descartadas
+  const filasAConfirmar = filas.filter((f, i) => f.estado === 'OK' && !descartados.has(i));
 
   const handleConfirmar = async () => {
     setConfirmando(true);
     try {
-      const resp = await confirmarCarga(filas.filter(f => f.estado === 'OK'));
+      const resp = await confirmarCarga(filasAConfirmar);
       setResultado(resp);
       setPaso(3);
     } catch (err) {
@@ -288,6 +310,7 @@ export function CargaMasiva() {
     setCatalogos(null);
     setResultado(null);
     setErrorSubida(null);
+    setDescartados(new Set());
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -417,20 +440,35 @@ export function CargaMasiva() {
 
             {/* Barra de resumen */}
             <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-              <div className="flex gap-4 text-sm">
+              <div className="flex gap-4 text-sm flex-wrap">
                 <span className="text-[#5C6064]">
                   Total: <strong className="text-[#2C3E50]">{filas.length}</strong>
                 </span>
                 <span className="text-green-700">
-                  OK: <strong>{filas.length - totalErrores}</strong>
+                  OK: <strong>{filas.filter((f, i) => f.estado === 'OK' && !descartados.has(i)).length}</strong>
                 </span>
-                {totalErrores > 0 && (
+                {totalErroresActivos > 0 && (
                   <span className="text-red-600">
-                    Con errores: <strong>{totalErrores}</strong>
+                    Con errores: <strong>{totalErroresActivos}</strong>
+                  </span>
+                )}
+                {totalDescartados > 0 && (
+                  <span className="text-gray-400">
+                    Omitidos: <strong>{totalDescartados}</strong>
                   </span>
                 )}
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
+                {totalErroresActivos > 0 && (
+                  <Button
+                    variant="outline" size="sm"
+                    className="border-gray-400 text-gray-500 hover:border-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                    onClick={descartarTodosConError}
+                  >
+                    <Trash2 className="w-3 h-3 mr-1.5" />
+                    Omitir con errores ({totalErroresActivos})
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" disabled={revalidandoTodo}
                   onClick={revalidarTodo}>
                   <RotateCcw className={`w-3 h-3 mr-1.5 ${revalidandoTodo ? 'animate-spin' : ''}`} />
@@ -445,86 +483,123 @@ export function CargaMasiva() {
 
             {/* Lista de filas */}
             <div className="space-y-3 max-h-[58vh] overflow-y-auto pr-1">
-              {filas.map((fila, idx) => (
-                <div key={idx}
-                  className={`rounded-xl border p-4 transition-colors
-                    ${fila.estado === 'OK'
-                      ? 'border-green-200 bg-green-50'
-                      : 'border-red-200 bg-red-50'
-                    }`}>
+              {filas.map((fila, idx) => {
+                const esDescartado = descartados.has(idx);
+                return (
+                  <div key={idx}
+                    className={`rounded-xl border p-4 transition-all
+                      ${esDescartado
+                        ? 'border-gray-200 bg-gray-50 opacity-50'
+                        : fila.estado === 'OK'
+                          ? 'border-green-200 bg-green-50'
+                          : 'border-red-200 bg-red-50'
+                      }`}>
 
-                  {/* Header de la fila */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      {fila.estado === 'OK'
-                        ? <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-                        : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
-                      <span className="font-semibold text-[#2C3E50] text-sm">
-                        Fila {fila.numeroFila}
-                        {fila.datos.codigoEjercito && (
-                          <span className="font-normal text-[#5C6064]">
-                            {' '}— {fila.datos.codigoEjercito}
+                    {/* Header de la fila */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {esDescartado
+                          ? <XCircle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                          : fila.estado === 'OK'
+                            ? <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
+                            : <XCircle className="w-4 h-4 text-red-500 flex-shrink-0" />}
+                        <span className={`font-semibold text-sm ${esDescartado ? 'text-gray-400 line-through' : 'text-[#2C3E50]'}`}>
+                          Fila {fila.numeroFila}
+                          {fila.datos.codigoEjercito && (
+                            <span className="font-normal">
+                              {' '}— {fila.datos.codigoEjercito}
+                            </span>
+                          )}
+                        </span>
+                        {esDescartado && (
+                          <span className="text-[10px] font-medium text-gray-400 bg-gray-200 rounded px-1.5 py-0.5">
+                            OMITIDA
                           </span>
                         )}
-                      </span>
+                      </div>
+
+                      {/* Botones de acción */}
+                      <div className="flex gap-1.5">
+                        {esDescartado ? (
+                          <Button
+                            variant="ghost" size="sm"
+                            onClick={() => restaurar(idx)}
+                            className="text-[#6B7F3A] hover:bg-[#F0F4E8] h-7 px-2 text-xs"
+                          >
+                            <RotateCcw className="w-3 h-3 mr-1" />
+                            Restaurar
+                          </Button>
+                        ) : fila.estado === 'ERROR' ? (
+                          <>
+                            <Button
+                              variant="ghost" size="sm"
+                              disabled={revalidando.has(idx)}
+                              onClick={() => revalidarFila(idx)}
+                              className="text-[#6B7F3A] hover:bg-[#F0F4E8] h-7 px-2 text-xs"
+                            >
+                              <RotateCcw className={`w-3 h-3 mr-1 ${revalidando.has(idx) ? 'animate-spin' : ''}`} />
+                              Re-validar
+                            </Button>
+                            <Button
+                              variant="ghost" size="sm"
+                              onClick={() => descartar(idx)}
+                              className="text-gray-400 hover:text-gray-600 hover:bg-gray-100 h-7 px-2 text-xs"
+                            >
+                              <Trash2 className="w-3 h-3 mr-1" />
+                              Omitir
+                            </Button>
+                          </>
+                        ) : null}
+                      </div>
                     </div>
-                    {fila.estado === 'ERROR' && (
-                      <Button
-                        variant="ghost" size="sm"
-                        disabled={revalidando.has(idx)}
-                        onClick={() => revalidarFila(idx)}
-                        className="text-[#6B7F3A] hover:bg-[#F0F4E8] h-7 px-2 text-xs"
-                      >
-                        <RotateCcw className={`w-3 h-3 mr-1 ${revalidando.has(idx) ? 'animate-spin' : ''}`} />
-                        Re-validar
-                      </Button>
+
+                    {/* Errores actuales (no mostrar si está descartada) */}
+                    {!esDescartado && fila.estado === 'ERROR' && fila.errores.length > 0 && (
+                      <div className="mt-2 space-y-0.5">
+                        {fila.errores.map((e, ei) => (
+                          <p key={ei} className="text-red-600 text-xs">
+                            <strong className="font-semibold">{e.columna}:</strong> {e.mensaje}
+                          </p>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Panel de edición (solo filas con error no descartadas) */}
+                    {!esDescartado && fila.estado === 'ERROR' && catalogos && (
+                      <details className="mt-3">
+                        <summary className="text-xs font-medium text-[#6B7F3A] cursor-pointer select-none hover:text-[#4A5D23]">
+                          Editar campos de esta fila
+                        </summary>
+                        <PanelEdicion
+                          filaIdx={idx}
+                          fila={fila}
+                          catalogos={catalogos}
+                          onCambio={actualizarCampo}
+                        />
+                      </details>
                     )}
                   </div>
-
-                  {/* Errores actuales */}
-                  {fila.estado === 'ERROR' && fila.errores.length > 0 && (
-                    <div className="mt-2 space-y-0.5">
-                      {fila.errores.map((e, ei) => (
-                        <p key={ei} className="text-red-600 text-xs">
-                          <strong className="font-semibold">{e.columna}:</strong> {e.mensaje}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Panel de edición (solo filas con error) */}
-                  {fila.estado === 'ERROR' && catalogos && (
-                    <details className="mt-3">
-                      <summary className="text-xs font-medium text-[#6B7F3A] cursor-pointer select-none hover:text-[#4A5D23]">
-                        Editar campos de esta fila
-                      </summary>
-                      <PanelEdicion
-                        filaIdx={idx}
-                        fila={fila}
-                        catalogos={catalogos}
-                        onCambio={actualizarCampo}
-                      />
-                    </details>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Footer: confirmar */}
             <div className="mt-6 flex items-center justify-between flex-wrap gap-3">
               <p className={`text-sm ${todasOk ? 'text-green-700' : 'text-[#5C6064]'}`}>
                 {todasOk
-                  ? '✓ Todas las filas son válidas. Puedes confirmar la carga.'
-                  : `Corrige los ${totalErrores} error(es) y re-valida antes de confirmar.`}
+                  ? totalDescartados > 0
+                    ? `✓ Listo. Se cargarán ${filasAConfirmar.length} equipo${filasAConfirmar.length !== 1 ? 's' : ''} (${totalDescartados} omitido${totalDescartados !== 1 ? 's' : ''}).`
+                    : '✓ Todas las filas son válidas. Puedes confirmar la carga.'
+                  : `Corrige o descarta los ${totalErroresActivos} error(es) antes de confirmar.`}
               </p>
               <Button
-                disabled={!todasOk || confirmando}
+                disabled={!todasOk || confirmando || filasAConfirmar.length === 0}
                 className="bg-[#4A5D23] hover:bg-[#2C3E0D] text-white px-6"
                 onClick={handleConfirmar}
               >
                 {confirmando
                   ? 'Guardando…'
-                  : `Confirmar carga (${filas.length} equipo${filas.length !== 1 ? 's' : ''})`}
+                  : `Confirmar carga (${filasAConfirmar.length} equipo${filasAConfirmar.length !== 1 ? 's' : ''})`}
               </Button>
             </div>
           </motion.div>
