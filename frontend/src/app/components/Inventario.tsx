@@ -421,6 +421,7 @@ export function Inventario() {
                             <Checkbox
                               checked={isChecked}
                               onCheckedChange={() => toggleItem(e.idEquipo)}
+                              onClick={ev => ev.stopPropagation()}
                               className="border-[#4A5D23] data-[state=checked]:bg-[#4A5D23]"
                               aria-label={`Seleccionar ${e.codigoEjercito}`}
                             />
