@@ -355,8 +355,7 @@ export function Inventario() {
           ) : error ? (
             <p className="text-center py-12 text-[#D91E18]">{error}</p>
           ) : (
-            <div className="overflow-x-auto">
-              <Table>
+            <Table>
                 <TableHeader>
                   <TableRow className="bg-[#4A5D23] hover:bg-[#4A5D23]">
 
@@ -438,9 +437,13 @@ export function Inventario() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreVertical className="w-4 h-4" />
-                              </Button>
+                              {/* Usamos <button> nativo para evitar doble-Slot con el Button de shadcn */}
+                              <button
+                                type="button"
+                                className="h-8 w-8 inline-flex items-center justify-center rounded-md hover:bg-[#F0F4E8] transition-colors focus:outline-none"
+                              >
+                                <MoreVertical className="w-4 h-4 text-[#5C6064]" />
+                              </button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem asChild>
@@ -472,7 +475,6 @@ export function Inventario() {
                   })}
                 </TableBody>
               </Table>
-            </div>
           )}
 
           {/* Paginación */}
