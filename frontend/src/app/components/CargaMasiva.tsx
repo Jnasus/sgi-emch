@@ -7,6 +7,11 @@ import {
 } from 'lucide-react';
 import { Button } from './ui/button';
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle,
+} from './ui/alert-dialog';
+import {
   listarTipos, listarMarcas, listarModelos,
   listarAreas, listarSO,
   type TipoEquipoResponse, type MarcaResponse,
@@ -180,6 +185,7 @@ export function CargaMasiva() {
   const [revalidandoTodo, setRevalidandoTodo] = useState(false);
   const [confirmando, setConfirmando] = useState(false);
   const [errorConfirmar, setErrorConfirmar] = useState<string | null>(null);
+  const [showDialogConfirmar, setShowDialogConfirmar] = useState(false);
   // Filas marcadas como "omitir" (por índice en el array filas)
   const [descartados, setDescartados] = useState<Set<number>>(new Set());
 
@@ -606,12 +612,46 @@ export function CargaMasiva() {
               <Button
                 disabled={!todasOk || confirmando || filasAConfirmar.length === 0}
                 className="bg-[#4A5D23] hover:bg-[#2C3E0D] text-white px-6"
-                onClick={handleConfirmar}
+                onClick={() => setShowDialogConfirmar(true)}
               >
                 {confirmando
                   ? 'Guardando…'
                   : `Confirmar carga (${filasAConfirmar.length} equipo${filasAConfirmar.length !== 1 ? 's' : ''})`}
               </Button>
+
+              {/* Diálogo de confirmación irreversible */}
+              <AlertDialog open={showDialogConfirmar} onOpenChange={setShowDialogConfirmar}>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2 text-[#2C3E1F]">
+                      <AlertCircle className="w-5 h-5 text-[#D91E18]" />
+                      ¿Confirmar carga masiva?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="space-y-2 text-[#5C6064]">
+                      <span className="block">
+                        Se registrarán <strong className="text-[#2C3E1F]">{filasAConfirmar.length} equipo{filasAConfirmar.length !== 1 ? 's' : ''}</strong> en el inventario.
+                      </span>
+                      <span className="block font-semibold text-[#D91E18]">
+                        ⚠ Esta acción es irreversible. Los registros no podrán eliminarse una vez guardados.
+                      </span>
+                      <span className="block">
+                        Verifique que todos los datos sean correctos antes de continuar.
+                      </span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="border-[#5C6064] text-[#5C6064]">
+                      Cancelar
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-[#4A5D23] hover:bg-[#2C3E0D] text-white"
+                      onClick={() => { setShowDialogConfirmar(false); handleConfirmar(); }}
+                    >
+                      Sí, confirmar carga
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </motion.div>
         )}
