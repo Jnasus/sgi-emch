@@ -30,6 +30,7 @@ class TicketServiceTest {
     @Mock EquipoRepository equipoRepository;
     @Mock UsuarioRepository usuarioRepository;
     @Mock TipoIncidenteRepository tipoIncidenteRepository;
+    @Mock NotificadorService notificadorService;
 
     @InjectMocks TicketService ticketService;
 
@@ -264,6 +265,51 @@ class TicketServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getEstadoAnterior()).isEqualTo("ABIERTO");
         assertThat(result.get(0).getNombresUsuario()).isEqualTo("Juan");
+    }
+
+    @Test
+    void crearTicket_invocaNotificadorConDatosCorrectos() {
+        TicketCreateRequest req = buildCreateRequest();
+
+        when(equipoRepository.findById(1)).thenReturn(Optional.of(equipo));
+        when(usuarioRepository.findById(2)).thenReturn(Optional.of(tecnico));
+        when(tipoIncidenteRepository.findById(1)).thenReturn(Optional.of(tipoIncidente));
+        when(ticketRepository.findMaxNumeroTicketByAniomes(any())).thenReturn(Optional.empty());
+        when(ticketRepository.save(any())).thenAnswer(inv -> {
+            Ticket t = inv.getArgument(0);
+            t.setIdTicket(10);
+            return t;
+        });
+
+        ticketService.crearTicket(req);
+
+        verify(notificadorService).crearSiNoExiste(
+                eq(tecnico),
+                eq("TICKET_ASIGNADO"),
+                org.mockito.ArgumentMatchers.contains("TKT-"),
+                org.mockito.ArgumentMatchers.contains("TKT-"),
+                eq("/incidentes/10")
+        );
+    }
+
+    @Test
+    void crearTicket_fallaNotificacion_noAfectaCreacionTicket() {
+        TicketCreateRequest req = buildCreateRequest();
+
+        when(equipoRepository.findById(1)).thenReturn(Optional.of(equipo));
+        when(usuarioRepository.findById(2)).thenReturn(Optional.of(tecnico));
+        when(tipoIncidenteRepository.findById(1)).thenReturn(Optional.of(tipoIncidente));
+        when(ticketRepository.findMaxNumeroTicketByAniomes(any())).thenReturn(Optional.empty());
+        when(ticketRepository.save(any())).thenAnswer(inv -> {
+            Ticket t = inv.getArgument(0);
+            t.setIdTicket(10);
+            return t;
+        });
+        doThrow(new RuntimeException("DB error"))
+                .when(notificadorService).crearSiNoExiste(any(), any(), any(), any(), any());
+
+        org.assertj.core.api.Assertions.assertThatNoException()
+                .isThrownBy(() -> ticketService.crearTicket(req));
     }
 
     // ── helpers ────────────────────────────────────────────────────────────────

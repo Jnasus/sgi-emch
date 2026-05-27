@@ -1,6 +1,7 @@
 package pe.edu.emch.sgi.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TicketService {
@@ -36,6 +38,7 @@ public class TicketService {
     private final EquipoRepository equipoRepository;
     private final UsuarioRepository usuarioRepository;
     private final TipoIncidenteRepository tipoIncidenteRepository;
+    private final NotificadorService notificadorService;
 
     @Transactional(readOnly = true)
     public PagedResponse<TicketResponse> listarTickets(
@@ -74,7 +77,20 @@ public class TicketService {
         ticket.setFechaApertura(LocalDateTime.now());
         ticket.setFueraDeSla(false);
 
-        return toTicketResponse(ticketRepository.save(ticket));
+        Ticket saved = ticketRepository.save(ticket);
+        try {
+            notificadorService.crearSiNoExiste(
+                    tecnico,
+                    "TICKET_ASIGNADO",
+                    "Nuevo ticket asignado: " + saved.getNumeroTicket(),
+                    "Se te ha asignado el ticket " + saved.getNumeroTicket() + ": " + saved.getTitulo(),
+                    "/incidentes/" + saved.getIdTicket()
+            );
+        } catch (Exception e) {
+            log.warn("No se pudo crear notificación TICKET_ASIGNADO para {}: {}",
+                     saved.getNumeroTicket(), e.getMessage());
+        }
+        return toTicketResponse(saved);
     }
 
     @Transactional
