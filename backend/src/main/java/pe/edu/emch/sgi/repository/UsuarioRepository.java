@@ -35,4 +35,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol = 'TECNICO' AND u.activo = true ORDER BY u.apellidos")
     List<Usuario> findTecnicosCampoActivos();
+
+    @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol IN :roles AND u.activo = true")
+    List<Usuario> findByRolNombreRolInAndActivoTrue(@Param("roles") List<String> roles);
 }

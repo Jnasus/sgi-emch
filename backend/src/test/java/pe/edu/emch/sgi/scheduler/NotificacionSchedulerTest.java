@@ -12,11 +12,13 @@ import pe.edu.emch.sgi.repository.TicketRepository;
 import pe.edu.emch.sgi.repository.UsuarioRepository;
 import pe.edu.emch.sgi.service.NotificadorService;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class NotificacionSchedulerTest {
@@ -109,5 +111,61 @@ class NotificacionSchedulerTest {
 
         verify(notificadorService).crearSiNoExiste(
                 eq(tecnico), eq("SLA_VENCIDO"), any(), any(), eq("/incidentes/3"));
+    }
+
+    // ── Stock crítico tests ───────────────────────────────────────────────────
+
+    @Test
+    void checkStockCritico_sinAlertas_noNotificaNiConsultaUsuarios() {
+        when(stockCriticoRepository.findAll()).thenReturn(List.of());
+
+        scheduler.checkStockCritico();
+
+        verify(notificadorService, never()).crearSiNoExiste(any(), any(), any(), any(), any());
+        verifyNoInteractions(usuarioRepository);
+    }
+
+    @Test
+    void checkStockCritico_conAlerta_notificaAdminsYSupervisores() {
+        StockCritico alerta = mock(StockCritico.class);
+        when(alerta.getEnAlerta()).thenReturn(true);
+        when(alerta.getIdTipo()).thenReturn(1);
+        when(alerta.getNombreTipo()).thenReturn("Laptop");
+        when(alerta.getStockOperativo()).thenReturn(2);
+        when(alerta.getTotalEquipos()).thenReturn(10);
+        when(alerta.getPctActual()).thenReturn(new BigDecimal("20.00"));
+        when(alerta.getUmbralPct()).thenReturn(30);
+
+        Usuario admin = new Usuario();
+        admin.setIdUsuario(1);
+        admin.setNombres("Admin");
+        admin.setApellidos("Sistema");
+
+        when(stockCriticoRepository.findAll()).thenReturn(List.of(alerta));
+        when(usuarioRepository.findByRolNombreRolInAndActivoTrue(List.of("ADMINISTRADOR", "SUPERVISOR")))
+                .thenReturn(List.of(admin));
+
+        scheduler.checkStockCritico();
+
+        verify(notificadorService).crearSiNoExiste(
+                eq(admin),
+                eq("STOCK_CRITICO"),
+                contains("Laptop"),
+                contains("Laptop"),
+                eq("/inventario?tipo=1")
+        );
+    }
+
+    @Test
+    void checkStockCritico_sinDestinatarios_noNotifica() {
+        StockCritico alerta = mock(StockCritico.class);
+        when(alerta.getEnAlerta()).thenReturn(true);
+
+        when(stockCriticoRepository.findAll()).thenReturn(List.of(alerta));
+        when(usuarioRepository.findByRolNombreRolInAndActivoTrue(any())).thenReturn(List.of());
+
+        scheduler.checkStockCritico();
+
+        verify(notificadorService, never()).crearSiNoExiste(any(), any(), any(), any(), any());
     }
 }

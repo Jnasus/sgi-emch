@@ -55,5 +55,43 @@ public class NotificacionScheduler {
         log.info("Scheduler SLA: {} ticket(s) con SLA vencido detectado(s).", count);
     }
 
-    // checkStockCritico will be added in Task 4
+    /**
+     * Todos los días a las 08:00 AM: detecta tipos de equipo en alerta de stock crítico
+     * y notifica a todos los ADMINISTRADOR/SUPERVISOR activos (una sola vez por tipo
+     * gracias a la deduplicación en NotificadorService).
+     */
+    @Scheduled(cron = "0 0 8 * * *")
+    public void checkStockCritico() {
+        log.info("Scheduler Stock: iniciando verificación...");
+        List<StockCritico> alertas = stockCriticoRepository.findAll().stream()
+                .filter(StockCritico::getEnAlerta)
+                .toList();
+
+        if (alertas.isEmpty()) {
+            log.info("Scheduler Stock: sin alertas de stock crítico.");
+            return;
+        }
+
+        List<Usuario> destinatarios = usuarioRepository
+                .findByRolNombreRolInAndActivoTrue(List.of("ADMINISTRADOR", "SUPERVISOR"));
+
+        if (destinatarios.isEmpty()) {
+            log.warn("Scheduler Stock: hay alertas pero no hay administradores/supervisores activos.");
+            return;
+        }
+
+        int count = 0;
+        for (StockCritico sc : alertas) {
+            String urlAccion = "/inventario?tipo=" + sc.getIdTipo();
+            String titulo    = "Stock crítico: " + sc.getNombreTipo();
+            String mensaje   = sc.getNombreTipo() + " tiene solo " + sc.getStockOperativo() +
+                    " de " + sc.getTotalEquipos() + " equipos operativos" +
+                    " (" + sc.getPctActual() + "% — umbral mínimo " + sc.getUmbralPct() + "%).";
+            for (Usuario u : destinatarios) {
+                notificadorService.crearSiNoExiste(u, "STOCK_CRITICO", titulo, mensaje, urlAccion);
+                count++;
+            }
+        }
+        log.info("Scheduler Stock: {} notificación(es) de stock crítico procesadas.", count);
+    }
 }
