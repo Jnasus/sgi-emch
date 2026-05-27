@@ -2,6 +2,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { Link, useLocation } from 'react-router';
 import { listarTicketsPorEstado } from '../../services/ticketService';
+import { contarNoLeidas } from '../../services/notificacionService';
 import {
   LayoutDashboard,
   Package,
@@ -31,7 +32,7 @@ const BASE_MENU = [
   { icon: Package,         label: 'Inventario',     path: '/inventario' },
   { icon: AlertTriangle,   label: 'Incidentes',     path: '/incidentes', badgeKey: 'incidentes' },
   { icon: FileText,        label: 'Reportes',       path: '/reportes' },
-  { icon: Bell,            label: 'Notificaciones', path: '/notificaciones' },
+  { icon: Bell,            label: 'Notificaciones', path: '/notificaciones', badgeKey: 'notificaciones' },
   { icon: Users,           label: 'Usuarios',       path: '/usuarios' },
   { icon: Settings,        label: 'Configuración',  path: '/configuracion' },
 ];
@@ -40,11 +41,15 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const [ticketsAbiertos, setTicketsAbiertos] = useState<number | null>(null);
+  const [noLeidas, setNoLeidas] = useState<number | null>(null);
 
   // Cargar conteo de tickets ABIERTOS para el badge del menú
   useEffect(() => {
     listarTicketsPorEstado('ABIERTO', {}, 0, 1)
       .then(r => setTicketsAbiertos(r.totalElements))
+      .catch(() => {}); // silencioso — el badge es informativo
+    contarNoLeidas()
+      .then(c => setNoLeidas(c))
       .catch(() => {}); // silencioso — el badge es informativo
   }, []);
 
@@ -119,7 +124,11 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
               const isActive = location.pathname === item.path ||
                 (item.path !== '/dashboard' && location.pathname.startsWith(item.path + '/'));
               const Icon = item.icon;
-              const badgeCount = item.badgeKey === 'incidentes' ? ticketsAbiertos : null;
+              const badgeCount = item.badgeKey === 'incidentes'
+                ? ticketsAbiertos
+                : item.badgeKey === 'notificaciones'
+                ? noLeidas
+                : null;
 
               return (
                 <motion.div
