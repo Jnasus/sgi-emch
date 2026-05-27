@@ -23,4 +23,7 @@ public interface NotificacionRepository extends JpaRepository<Notificacion, Inte
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Notificacion n SET n.leida = true WHERE n.usuario.idUsuario = :idUsuario AND n.leida = false")
     int marcarTodasLeidasByUsuario(@Param("idUsuario") Integer idUsuario);
+
+    boolean existsByUsuario_IdUsuarioAndTipoNotifAndUrlAccion(
+            Integer idUsuario, String tipoNotif, String urlAccion);
 }
