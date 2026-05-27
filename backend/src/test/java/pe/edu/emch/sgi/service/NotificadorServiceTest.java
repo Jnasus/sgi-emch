@@ -56,4 +56,18 @@ class NotificadorServiceTest {
 
         verify(notificacionRepository, never()).save(any());
     }
+
+    @Test
+    void crearSiNoExiste_usuarioNull_noGuarda() {
+        notificadorService.crearSiNoExiste(null, "INFO", "titulo", "msg", "/ruta");
+        verify(notificacionRepository, never()).save(any());
+        verifyNoInteractions(notificacionRepository);
+    }
+
+    @Test
+    void crearSiNoExiste_urlAccionNull_noGuarda() {
+        notificadorService.crearSiNoExiste(usuario, "INFO", "titulo", "msg", null);
+        verify(notificacionRepository, never()).save(any());
+        verifyNoInteractions(notificacionRepository);
+    }
 }

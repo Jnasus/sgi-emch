@@ -23,6 +23,15 @@ public class NotificadorService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void crearSiNoExiste(Usuario usuario, String tipoNotif,
                                 String titulo, String mensaje, String urlAccion) {
+        if (usuario == null || usuario.getIdUsuario() == null) {
+            log.warn("crearSiNoExiste ignorado — usuario o idUsuario es null");
+            return;
+        }
+        if (tipoNotif == null || urlAccion == null) {
+            log.warn("crearSiNoExiste ignorado — tipoNotif o urlAccion es null (usuario={})",
+                     usuario.getIdUsuario());
+            return;
+        }
         if (notificacionRepository.existsByUsuario_IdUsuarioAndTipoNotifAndUrlAccion(
                 usuario.getIdUsuario(), tipoNotif, urlAccion)) {
             log.debug("Notificación duplicada ignorada — usuario={} tipo={} url={}",
