@@ -3,14 +3,20 @@ import { motion } from 'motion/react';
 import { useParams, useNavigate } from 'react-router';
 import {
   ArrowLeft, AlertCircle, Clock, CheckCircle2, XCircle,
-  ChevronRight, Download, FileText, type LucideIcon,
+  ChevronRight, Download, FileText, Monitor, MapPin, User,
+  Hash, Wifi, ExternalLink, Loader2, type LucideIcon,
 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Separator } from './ui/separator';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from './ui/dialog';
 import * as ticketSvc from '../../services/ticketService';
 import type { TicketResponse, HistorialTicketResponse } from '../../services/ticketService';
+import { obtenerEquipo } from '../../services/inventarioService';
+import type { EquipoResponse } from '../../services/inventarioService';
 import { getCurrentUser } from '../../services/authService';
 import { API_BASE } from '../../lib/api';
 
@@ -80,6 +86,9 @@ export function IncidenteDetalle() {
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
   const [errorEstado,     setErrorEstado]     = useState<string | null>(null);
 
+  const [equipoModal,    setEquipoModal]    = useState<EquipoResponse | null>(null);
+  const [cargandoEquipo, setCargandoEquipo] = useState(false);
+
   useEffect(() => {
     if (!id) return;
     const idNum = Number(id);
@@ -115,6 +124,19 @@ export function IncidenteDetalle() {
       setErrorEstado(err instanceof Error ? err.message : 'Error al cambiar el estado.');
     } finally {
       setCambiandoEstado(false);
+    }
+  }
+
+  async function handleVerEquipo() {
+    if (!ticket) return;
+    setCargandoEquipo(true);
+    try {
+      const eq = await obtenerEquipo(ticket.idEquipo);
+      setEquipoModal(eq);
+    } catch {
+      // silencioso — el modal simplemente no abre
+    } finally {
+      setCargandoEquipo(false);
     }
   }
 
@@ -198,7 +220,20 @@ export function IncidenteDetalle() {
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InfoField label="Equipo"          value={ticket.codigoEjercito} />
+              <div>
+                <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-1">Equipo</p>
+                <button
+                  onClick={handleVerEquipo}
+                  disabled={cargandoEquipo}
+                  className="flex items-center gap-1.5 text-[#4A5D23] font-semibold text-sm hover:underline disabled:opacity-50 disabled:cursor-wait"
+                  title="Ver información del equipo"
+                >
+                  {cargandoEquipo
+                    ? <Loader2 className="w-3 h-3 animate-spin" />
+                    : <ExternalLink className="w-3 h-3" />}
+                  {ticket.codigoEjercito}
+                </button>
+              </div>
               <InfoField label="Tipo"            value={ticket.nombreTipoIncidente} />
               <InfoField label="Técnico"         value={`${ticket.nombresTecnico} ${ticket.apellidosTecnico}`} />
               <InfoField label="Fecha apertura"  value={fechaHora(ticket.fechaApertura)} />
@@ -329,6 +364,95 @@ export function IncidenteDetalle() {
           )}
         </div>
       </motion.div>
+
+      {/* Modal: información del equipo */}
+      <Dialog open={equipoModal !== null} onOpenChange={open => { if (!open) setEquipoModal(null); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 uppercase tracking-wide text-[#2C3E1F]"
+                         style={{ fontSize: '0.9rem', letterSpacing: '0.05em' }}>
+              <Monitor className="w-4 h-4 text-[#D91E18]" />
+              Información del Equipo
+            </DialogTitle>
+          </DialogHeader>
+
+          {equipoModal && (
+            <div className="space-y-4 pt-1">
+              {/* Identificación */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                    <Hash className="w-3 h-3" /> Código Ejército
+                  </p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.codigoEjercito}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5">Tipo</p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.nombreTipo}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5">Modelo</p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.nombreModelo}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5">N.º de Serie</p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.numeroSerie || '—'}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Ubicación y responsable */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                    <MapPin className="w-3 h-3" /> Área / Ubicación
+                  </p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.nombreArea}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                    <User className="w-3 h-3" /> Responsable
+                  </p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.nombreResponsable || '—'}</p>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Red y estado */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5 flex items-center gap-1">
+                    <Wifi className="w-3 h-3" /> IP / Red
+                  </p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">
+                    {equipoModal.ipAddress ?? '—'}
+                    {equipoModal.tipoRed && <span className="text-xs text-[#5C6064] ml-1">({equipoModal.tipoRed})</span>}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-[#5C6064] uppercase tracking-wide mb-0.5">Estado</p>
+                  <p className="text-sm font-semibold text-[#2C3E1F]">{equipoModal.estado}</p>
+                </div>
+              </div>
+
+              {/* Acceso a ficha completa */}
+              <div className="pt-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 border-[#4A5D23] text-[#4A5D23] hover:bg-[#4A5D23] hover:text-white"
+                  onClick={() => { setEquipoModal(null); navigate(`/inventario/${equipoModal.idEquipo}`); }}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  Ver ficha completa del equipo
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
