@@ -7,12 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import pe.edu.emch.sgi.entity.Ticket;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface TicketRepository extends JpaRepository<Ticket, Integer> {
 
     @Query("SELECT MAX(t.numeroTicket) FROM Ticket t WHERE t.numeroTicket LIKE CONCAT('TKT-', :aniomes, '-%')")
     Optional<String> findMaxNumeroTicketByAniomes(@Param("aniomes") String aniomes);
+
+    @Query("SELECT t FROM Ticket t WHERE t.estado IN :estados")
+    List<Ticket> findByEstadoIn(@Param("estados") List<String> estados);
 
     @Query("""
             SELECT t FROM Ticket t
