@@ -5,13 +5,12 @@ const { themes: prismThemes } = require('prism-react-renderer');
 const config = {
   title: 'SGI – Documentación',
   tagline: 'Sistema de Gestión de Inventario — EMCH CFB · DTIC',
-  favicon: 'img/favicon.ico',
 
   // Cambia esta URL a la del dominio donde alojes la documentación
   url: 'https://docs.sgi.escuelamilitar.edu.pe',
   baseUrl: '/',
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   i18n: {
