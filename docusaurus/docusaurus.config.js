@@ -6,8 +6,7 @@ const config = {
   title: 'SGI – Documentación',
   tagline: 'Sistema de Gestión de Inventario — EMCH CFB · DTIC',
 
-  // Cambia esta URL a la del dominio donde alojes la documentación
-  url: 'https://docs.sgi.escuelamilitar.edu.pe',
+  url: 'https://sgi-docs.escuelamilitar.edu.pe',
   baseUrl: '/',
 
   onBrokenLinks: 'warn',
