@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: db_sgi_emch
     volumes:
       - full_mysql_data:/var/lib/mysql
-      - ./backend/db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+      - ./db_sgi_emch.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
     # sin ports: la DB solo es accesible desde la red interna
     networks:
       - sgi_internal
