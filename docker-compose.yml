@@ -91,6 +91,16 @@ services:
       backend:
         condition: service_healthy
 
+  docs:
+    build:
+      context: ./docusaurus
+      dockerfile: Dockerfile
+      target: production
+    container_name: sgi-full-docs
+    restart: unless-stopped
+    networks:
+      - proxy_network   # solo necesita ser alcanzable por Nginx Proxy Manager
+
 volumes:
   full_mysql_data:
   full_pdf_storage:
