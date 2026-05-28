@@ -2,6 +2,7 @@
 id: intro
 title: Introducción
 sidebar_position: 1
+slug: /
 ---
 
 # Sistema de Gestión de Inventario — EMCH CFB
