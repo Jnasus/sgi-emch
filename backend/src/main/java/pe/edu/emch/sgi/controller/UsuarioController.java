@@ -62,6 +62,13 @@ public class UsuarioController {
         return ResponseEntity.ok(ApiResponse.ok("OK", usuarioService.listarTecnicos()));
     }
 
+    @GetMapping("/activos")
+    @Operation(summary = "Listar usuarios con actividad reciente (ventanaMin = minutos desde el último acceso)")
+    public ResponseEntity<ApiResponse<List<UsuarioResponse>>> listarActivos(
+            @RequestParam(defaultValue = "30") int ventanaMin) {
+        return ResponseEntity.ok(ApiResponse.ok("OK", usuarioService.listarUsuariosActivos(ventanaMin)));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener usuario por ID")
     public ResponseEntity<ApiResponse<UsuarioResponse>> obtenerUsuario(@PathVariable Integer id) {

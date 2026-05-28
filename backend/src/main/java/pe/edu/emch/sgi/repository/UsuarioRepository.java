@@ -38,4 +38,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
 
     @Query("SELECT u FROM Usuario u WHERE u.rol.nombreRol IN :roles AND u.activo = true")
     List<Usuario> findByRolNombreRolInAndActivoTrue(@Param("roles") List<String> roles);
+
+    @Query("SELECT u FROM Usuario u WHERE u.ultimoAcceso >= :desde AND u.activo = true ORDER BY u.ultimoAcceso DESC")
+    List<Usuario> findActivos(@Param("desde") LocalDateTime desde);
 }

@@ -61,6 +61,13 @@ public class UsuarioService {
             .stream().map(this::toUsuarioResponse).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<UsuarioResponse> listarUsuariosActivos(int ventanaMin) {
+        LocalDateTime desde = LocalDateTime.now().minusMinutes(ventanaMin);
+        return usuarioRepository.findActivos(desde)
+            .stream().map(this::toUsuarioResponse).toList();
+    }
+
     @Transactional
     public UsuarioResponse crearUsuario(UsuarioCreateRequest request) {
         if (usuarioRepository.existsByDni(request.getDni())) {

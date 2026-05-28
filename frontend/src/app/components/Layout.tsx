@@ -27,6 +27,12 @@ interface LayoutProps {
   userRole?: string;
 }
 
+const ROL_LABEL: Record<string, string> = {
+  ADMINISTRADOR: 'Administrador',
+  TECNICO: 'Técnico DTIC',
+  SUPERVISOR: 'Supervisor',
+};
+
 const BASE_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard',      path: '/dashboard' },
   { icon: Package,         label: 'Inventario',     path: '/inventario' },
@@ -37,7 +43,7 @@ const BASE_MENU = [
   { icon: Settings,        label: 'Configuración',  path: '/configuracion' },
 ];
 
-export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole = 'Administrador' }: LayoutProps) {
+export function Layout({ children, onLogout, userName = 'Usuario', userRole = '' }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const location = useLocation();
   const [ticketsAbiertos, setTicketsAbiertos] = useState<number | null>(null);
@@ -110,7 +116,7 @@ export function Layout({ children, onLogout, userName = 'Admin DTIC', userRole =
                   {userName}
                 </p>
                 <p className="text-white/60 truncate" style={{ fontSize: '0.75rem' }}>
-                  {userRole}
+                  {ROL_LABEL[userRole] ?? userRole}
                 </p>
               </div>
             </div>

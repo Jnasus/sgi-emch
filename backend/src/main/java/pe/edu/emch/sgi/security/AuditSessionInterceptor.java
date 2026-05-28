@@ -29,6 +29,16 @@ public class AuditSessionInterceptor implements HandlerInterceptor {
             log.warn("No se pudieron establecer variables de sesión MySQL: {}", ex.getMessage());
         }
 
+        if (idUsuario != null) {
+            try {
+                jdbcTemplate.update(
+                    "UPDATE usuario_sistema SET ultimo_acceso = NOW() WHERE id_usuario = ?",
+                    idUsuario);
+            } catch (Exception ex) {
+                log.warn("No se pudo actualizar ultimo_acceso para usuario {}: {}", idUsuario, ex.getMessage());
+            }
+        }
+
         return true;
     }
 

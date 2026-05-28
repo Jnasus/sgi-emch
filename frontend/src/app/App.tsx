@@ -39,9 +39,15 @@ export default function App() {
     return <Login onLogin={handleLogin} />;
   }
 
+  const currentUser = authService.getCurrentUser();
+
   return (
     <Router>
-      <Layout onLogout={handleLogout}>
+      <Layout
+        onLogout={handleLogout}
+        userName={currentUser?.username ?? 'Usuario'}
+        userRole={currentUser?.rol ?? ''}
+      >
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />

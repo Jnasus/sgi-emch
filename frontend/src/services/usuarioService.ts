@@ -125,3 +125,6 @@ export const cambiarEstado = (id: number, activo: boolean) =>
 
 export const resetPassword = (id: number, nuevaPassword: string) =>
   putJson<void>(`/api/usuarios/${id}/password`, { nuevaPassword });
+
+export const listarUsuariosActivos = (ventanaMin = 30) =>
+  getJson<UsuarioResponse[]>(`/api/usuarios/activos?ventanaMin=${ventanaMin}`);

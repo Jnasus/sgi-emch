@@ -3,8 +3,9 @@ import { motion } from 'motion/react';
 import {
   Users, Plus, Search, Shield, Edit, KeyRound,
   ToggleLeft, ToggleRight, ChevronLeft, ChevronRight,
-  Eye, EyeOff,
+  Eye, EyeOff, Wifi,
 } from 'lucide-react';
+import * as authService from '../../services/authService';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
@@ -14,6 +15,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Label } from './ui/label';
 import * as svc from '../../services/usuarioService';
 import type { UsuarioResponse, RolResponse, AreaResponse } from '../../services/usuarioService';
+
+const ROL_LABEL: Record<string, string> = {
+  ADMINISTRADOR: 'Administrador',
+  TECNICO: 'Técnico DTIC',
+  SUPERVISOR: 'Supervisor',
+};
 
 // ── Tipos locales ──────────────────────────────────────────────────────────
 type FieldErrors = Record<string, string>;
@@ -88,6 +95,9 @@ function formatFecha(iso: string | null) {
 
 // ── Componente principal ───────────────────────────────────────────────────
 export function Usuarios() {
+  const currentUser = authService.getCurrentUser();
+  const isAdmin = currentUser?.rol === 'ADMINISTRADOR';
+
   const [usuarios, setUsuarios]   = useState<UsuarioResponse[]>([]);
   const [roles, setRoles]         = useState<RolResponse[]>([]);
   const [areas, setAreas]         = useState<AreaResponse[]>([]);
@@ -96,6 +106,7 @@ export function Usuarios() {
   const [search, setSearch]       = useState('');
   const [page, setPage]           = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [activos, setActivos]     = useState<UsuarioResponse[]>([]);
 
   const [showCreate,   setShowCreate]   = useState(false);
   const [showEdit,     setShowEdit]     = useState(false);
@@ -132,7 +143,18 @@ export function Usuarios() {
     }
   }, [page]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const loadActivos = useCallback(async () => {
+    if (!isAdmin) return;
+    try {
+      const data = await svc.listarUsuariosActivos(30);
+      setActivos(data);
+    } catch {
+      // silencioso — panel informativo
+    }
+  }, [isAdmin]);
+
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadActivos(); }, [loadActivos]);
 
   const filtered = usuarios.filter((u) => {
     const q = search.toLowerCase();
@@ -233,6 +255,47 @@ export function Usuarios() {
           <Plus className="w-4 h-4" /> Nuevo Usuario
         </Button>
       </div>
+
+      {/* Panel "En línea" — solo admin */}
+      {isAdmin && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Wifi className="w-4 h-4 text-green-600" />
+              <span className="text-sm font-semibold text-[#2C3E1F] uppercase tracking-wide">
+                En línea ahora
+              </span>
+              <span className="ml-auto text-xs text-[#5C6064]">últimos 30 min</span>
+              <button
+                onClick={loadActivos}
+                className="text-xs text-[#4A5D23] hover:underline ml-2"
+                title="Actualizar"
+              >
+                ↻ Actualizar
+              </button>
+            </div>
+            {activos.length === 0 ? (
+              <p className="text-sm text-[#5C6064] italic">Ningún usuario activo en los últimos 30 minutos.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {activos.map(u => (
+                  <div
+                    key={u.idUsuario}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200"
+                    title={`Último acceso: ${formatFecha(u.ultimoAcceso)}`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                    <span className="text-sm font-medium text-[#2C3E1F]">{u.username}</span>
+                    <span className="text-xs text-[#5C6064]">
+                      {ROL_LABEL[u.nombreRol] ?? u.nombreRol}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Búsqueda */}
       <Card>
