@@ -33,6 +33,24 @@ const ROL_LABEL: Record<string, string> = {
   SUPERVISOR: 'Supervisor',
 };
 
+const ROL_ACCENT: Record<string, { border: string; avatar: string; label: string }> = {
+  ADMINISTRADOR: {
+    border: 'border-l-[#D91E18]',
+    avatar: 'bg-[#D91E18]/20 text-[#ff8080]',
+    label:  'text-[#ff8080]',
+  },
+  TECNICO: {
+    border: 'border-l-blue-500',
+    avatar: 'bg-blue-500/20 text-blue-300',
+    label:  'text-blue-300',
+  },
+  SUPERVISOR: {
+    border: 'border-l-purple-500',
+    avatar: 'bg-purple-500/20 text-purple-300',
+    label:  'text-purple-300',
+  },
+};
+
 const BASE_MENU = [
   { icon: LayoutDashboard, label: 'Dashboard',      path: '/dashboard' },
   { icon: Package,         label: 'Inventario',     path: '/inventario' },
@@ -100,28 +118,39 @@ export function Layout({ children, onLogout, userName = 'Usuario', userRole = ''
         </div>
 
         {/* User info */}
-        {sidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="p-4 bg-[#3A4D29] border-y border-white/10"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-[#4A5D23] flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
+        {sidebarOpen && (() => {
+          const accent = ROL_ACCENT[userRole] ?? {
+            border: 'border-l-white/20',
+            avatar: 'bg-white/10 text-white/70',
+            label:  'text-white/50',
+          };
+          return (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              className={`border-y border-white/10 border-l-4 ${accent.border}`}
+            >
+              <div className="flex items-center gap-3 px-4 py-3">
+                {/* Monogram */}
+                <div className={`w-9 h-9 rounded-sm flex items-center justify-center flex-shrink-0 ${accent.avatar}`}
+                  style={{ fontWeight: 700, fontSize: '0.8125rem', letterSpacing: '0.05em' }}>
+                  {userName.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-white truncate uppercase"
+                    style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.12em' }}>
+                    {userName}
+                  </p>
+                  <p className={`truncate uppercase ${accent.label}`}
+                    style={{ fontSize: '0.625rem', letterSpacing: '0.18em' }}>
+                    {ROL_LABEL[userRole] ?? userRole}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white truncate" style={{ fontSize: '0.875rem', fontWeight: 600 }}>
-                  {userName}
-                </p>
-                <p className="text-white/60 truncate" style={{ fontSize: '0.75rem' }}>
-                  {ROL_LABEL[userRole] ?? userRole}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          );
+        })()}
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-6 px-3">
