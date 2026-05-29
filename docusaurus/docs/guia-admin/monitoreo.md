@@ -114,7 +114,7 @@ docker compose -f docker-compose.monitoring.yml down -v
 Grafana está disponible en:
 
 ```
-https://grafana.sgi.escuelamilitar.edu.pe
+https://sgi-grafana.escuelamilitar.edu.pe
 ```
 
 Las credenciales por defecto son:

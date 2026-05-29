@@ -56,7 +56,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
       # Cambia este valor al subdominio real antes de pedir el cert SSL
-      GF_SERVER_ROOT_URL: https://grafana.sgi.escuelamilitar.edu.pe
+      GF_SERVER_ROOT_URL: https://sgi-grafana.escuelamilitar.edu.pe
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
