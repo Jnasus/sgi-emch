@@ -46,7 +46,9 @@ services:
       - loki
 
   grafana:
-    image: grafana/grafana:latest
+    # Pinado a 11.x: Grafana 12 (latest) tiene un bug en el provisioning
+    # de datasources con UIDs fijos que causa crash loop al arrancar.
+    image: grafana/grafana:11.5.2
     container_name: sgi-full-grafana
     restart: unless-stopped
     environment:
