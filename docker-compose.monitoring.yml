@@ -28,14 +28,13 @@ services:
       - monitoring_network
 
   promtail:
-    image: grafana/promtail:2.9.10   # misma versión que Loki
+    # Promtail 3.0.0: primer release que usa Docker client API ≥1.44.
+    # Promtail 2.9.x usa API 1.42 (hardcoded en el SDK de Go) y el daemon
+    # del servidor rechaza versiones < 1.44. No hay otra forma de arreglarlo
+    # en 2.x. Promtail 3.x es compatible con Loki 2.9 vía HTTP push API.
+    image: grafana/promtail:3.0.0
     container_name: sgi-full-promtail
     restart: unless-stopped
-    environment:
-      # El daemon de Docker en este servidor requiere API mínima 1.44.
-      # Promtail 2.9.x se compila contra docker-client 1.42; forzamos 1.44
-      # para que docker_sd_configs pueda listar contenedores sin error.
-      DOCKER_API_VERSION: "1.44"
     volumes:
       - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
