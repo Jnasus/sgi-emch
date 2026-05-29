@@ -1,0 +1,75 @@
+services:
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sgi-full-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.enable-lifecycle'
+    networks:
+      - monitoring_network
+      - sgi_internal        # necesita alcanzar al backend para scrapearlo
+
+  loki:
+    image: grafana/loki:2.9.10   # pinado: 3.x rompe boltdb-shipper + schema v11
+    container_name: sgi-full-loki
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - monitoring_network
+
+  promtail:
+    image: grafana/promtail:2.9.10   # misma versión que Loki
+    container_name: sgi-full-promtail
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/promtail/promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    networks:
+      - monitoring_network
+    depends_on:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sgi-full-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      # Cambia este valor al subdominio real antes de pedir el cert SSL
+      GF_SERVER_ROOT_URL: https://grafana.sgi.escuelamilitar.edu.pe
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    networks:
+      - monitoring_network
+      - proxy_network       # accesible desde Nginx Proxy Manager
+    depends_on:
+      - prometheus
+      - loki
+
+volumes:
+  prometheus_data:
+  loki_data:
+  grafana_data:
+
+networks:
+  monitoring_network:
+    driver: bridge
+  sgi_internal:
+    external: true          # red del proyecto SGI (name: sgi_internal fijado en docker-compose.yml)
+  proxy_network:
+    external: true          # red de Nginx Proxy Manager

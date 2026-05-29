@@ -125,6 +125,7 @@ volumes:
 
 networks:
   sgi_internal:
+    name: sgi_internal   # nombre fijo para que el stack de monitoreo pueda referenciarlo
     driver: bridge
   sgi_app:
     driver: bridge
