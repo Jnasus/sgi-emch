@@ -80,8 +80,8 @@ sequenceDiagram
     S->>R: findFiltered(...)
     R->>DB: SELECT ... FROM equipo
     DB-->>R: ResultSet
-    R-->>S: Page&lt;Equipo&gt;
-    S-->>C: PagedResponse&lt;EquipoResponse&gt;
+    R-->>S: Page de Equipo (paginado)
+    S-->>C: PagedResponse de EquipoResponse
     C-->>B: 200 OK + JSON
 ```
 

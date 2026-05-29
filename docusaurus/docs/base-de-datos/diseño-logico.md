@@ -199,21 +199,95 @@ El diseño lógico traduce el modelo conceptual a un esquema relacional con tabl
 
 ```mermaid
 erDiagram
-    ROL { int id_rol PK; varchar nombre_rol; varchar descripcion }
-    AREA { int id_area PK; varchar codigo_area; varchar nombre_area; year anio_vigencia; bool activo }
-    USUARIO_SISTEMA { int id_usuario PK; int id_rol FK; int id_area FK; varchar nombres; varchar apellidos; char dni; varchar username; bool activo }
-    TIPO_EQUIPO { int id_tipo PK; varchar nombre_tipo }
-    MARCA { int id_marca PK; varchar nombre_marca }
-    SISTEMA_OPERATIVO { int id_so PK; varchar nombre_so; varchar version_so }
-    MODELO_EQUIPO { int id_modelo PK; int id_marca FK; int id_tipo FK; varchar nombre_modelo }
-    EQUIPO { int id_equipo PK; varchar codigo_ejercito; int id_tipo FK; int id_modelo FK; int id_area FK; int id_so FK; varchar numero_serie; enum estado; enum tipo_red }
-    ESPECIFICACION_TECNICA { int id_espec PK; int id_equipo FK; varchar procesador; int ram_total_gb; decimal disco_capacidad_gb }
-    HISTORIAL_ESTADO { int id_historial PK; int id_equipo FK; int id_usuario FK; enum estado_anterior; enum estado_nuevo; datetime fecha_cambio }
-    TIPO_INCIDENTE { int id_tipo_incidente PK; varchar nombre_tipo; int tiempo_respuesta_min; int tiempo_resolucion_min }
-    TICKET { int id_ticket PK; varchar numero_ticket; int id_equipo FK; int id_tecnico FK; int id_tipo_incidente FK; enum estado; enum prioridad; bool fuera_de_sla }
-    HISTORIAL_TICKET { int id_hist_ticket PK; int id_ticket FK; int id_usuario FK; enum estado_anterior; enum estado_nuevo; datetime fecha_cambio }
-    NOTIFICACION { int id_notif PK; int id_usuario FK; enum tipo_notif; varchar titulo; bool leida; datetime fecha_creacion }
-    CONFIG_STOCK { int id_config PK; int id_tipo FK; int umbral_pct; int id_usuario_config FK }
+    ROL {
+        int id_rol PK
+        varchar nombre_rol
+    }
+    AREA {
+        int id_area PK
+        varchar codigo_area
+        varchar nombre_area
+    }
+    USUARIO_SISTEMA {
+        int id_usuario PK
+        int id_rol FK
+        int id_area FK
+        varchar username
+        char dni
+    }
+    TIPO_EQUIPO {
+        int id_tipo PK
+        varchar nombre_tipo
+    }
+    MARCA {
+        int id_marca PK
+        varchar nombre_marca
+    }
+    SISTEMA_OPERATIVO {
+        int id_so PK
+        varchar nombre_so
+        varchar version_so
+    }
+    MODELO_EQUIPO {
+        int id_modelo PK
+        int id_marca FK
+        int id_tipo FK
+        varchar nombre_modelo
+    }
+    EQUIPO {
+        int id_equipo PK
+        int id_tipo FK
+        int id_modelo FK
+        int id_area FK
+        int id_so FK
+        varchar codigo_ejercito
+        enum estado
+    }
+    ESPECIFICACION_TECNICA {
+        int id_espec PK
+        int id_equipo FK
+        varchar procesador
+        int ram_total_gb
+    }
+    HISTORIAL_ESTADO {
+        int id_historial PK
+        int id_equipo FK
+        int id_usuario FK
+        enum estado_nuevo
+        datetime fecha_cambio
+    }
+    TIPO_INCIDENTE {
+        int id_tipo_incidente PK
+        varchar nombre_tipo
+        int tiempo_resolucion_min
+    }
+    TICKET {
+        int id_ticket PK
+        int id_equipo FK
+        int id_tecnico FK
+        int id_tipo_incidente FK
+        varchar numero_ticket
+        enum estado
+        enum prioridad
+    }
+    HISTORIAL_TICKET {
+        int id_hist_ticket PK
+        int id_ticket FK
+        int id_usuario FK
+        enum estado_nuevo
+    }
+    NOTIFICACION {
+        int id_notif PK
+        int id_usuario FK
+        enum tipo_notif
+        bool leida
+    }
+    CONFIG_STOCK {
+        int id_config PK
+        int id_tipo FK
+        int id_usuario_config FK
+        int umbral_pct
+    }
 
     ROL ||--o{ USUARIO_SISTEMA : "id_rol"
     AREA ||--o{ USUARIO_SISTEMA : "id_area"
