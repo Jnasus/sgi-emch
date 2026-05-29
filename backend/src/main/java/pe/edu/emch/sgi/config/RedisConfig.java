@@ -1,9 +1,5 @@
 package pe.edu.emch.sgi.config;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -20,19 +16,14 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        ObjectMapper om = new ObjectMapper();
-        // Soporte para tipos Java 8 (LocalDateTime, etc.)
-        om.registerModule(new JavaTimeModule());
-        // Guarda el tipo concreto en el JSON para que Spring pueda deserializar
-        // de vuelta al objeto correcto sin conocer la clase de antemano
-        om.activateDefaultTyping(
-            LaissezFaireSubTypeValidator.instance,
-            ObjectMapper.DefaultTyping.NON_FINAL,
-            JsonTypeInfo.As.PROPERTY
-        );
-
-        GenericJackson2JsonRedisSerializer serializer =
-            new GenericJackson2JsonRedisSerializer(om);
+        // Sin ObjectMapper personalizado: GenericJackson2JsonRedisSerializer()
+        // configura su propio ObjectMapper internamente, ya ajustado para la
+        // versión de Jackson instalada (2.21.x en Spring Boot 3.5.x).
+        // Pasar un ObjectMapper con activateDefaultTyping(NON_FINAL, PROPERTY)
+        // provoca MismatchedInputException en Jackson 2.21 porque el formato de
+        // tipo que escribe el serializer difiere del que espera el deserializador
+        // de Spring Data Redis 3.5.x (AsArrayTypeDeserializer vs AsPropertyTypeDeserializer).
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
             .entryTtl(Duration.ofHours(1))
