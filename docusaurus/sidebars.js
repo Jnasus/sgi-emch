@@ -21,6 +21,20 @@ const sidebars = {
       items: [
         'arquitectura/stack-tecnologico',
         'arquitectura/estructura-del-proyecto',
+        'arquitectura/arquitectura-aplicacion',
+        'arquitectura/diagrama-despliegue',
+        'arquitectura/diagrama-componentes',
+        'arquitectura/patrones',
+        'arquitectura/diagrama-clases',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'Base de Datos',
+      items: [
+        'base-de-datos/diseño-conceptual',
+        'base-de-datos/diseño-logico',
+        'base-de-datos/diseño-fisico',
       ],
     },
     {
