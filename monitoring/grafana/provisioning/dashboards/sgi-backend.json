@@ -27,7 +27,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -57,7 +57,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\"}[1m])) * 60",
           "legendFormat": "req/min",
           "refId": "A"
@@ -67,7 +67,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -97,7 +97,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\",outcome=~\"CLIENT_ERROR|SERVER_ERROR\"}[5m])) / sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\"}[5m])) * 100",
           "legendFormat": "errores %",
           "refId": "A"
@@ -107,7 +107,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -137,7 +137,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "process_cpu_usage{job=\"sgi-backend\"}",
           "legendFormat": "CPU proceso",
           "refId": "A"
@@ -147,7 +147,7 @@
       "type": "stat"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "thresholds" },
@@ -177,7 +177,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(jvm_memory_used_bytes{job=\"sgi-backend\",area=\"heap\"}) / sum(jvm_memory_max_bytes{job=\"sgi-backend\",area=\"heap\"}) * 100",
           "legendFormat": "Heap %",
           "refId": "A"
@@ -194,7 +194,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -236,7 +236,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "topk(10, sum by (uri) (rate(http_server_requests_seconds_count{job=\"sgi-backend\"}[2m])))",
           "legendFormat": "{{uri}}",
           "refId": "A"
@@ -246,7 +246,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -301,25 +301,25 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\",status=~\"2..\"}[2m]))",
           "legendFormat": "2xx",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\",status=~\"3..\"}[2m]))",
           "legendFormat": "3xx",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\",status=~\"4..\"}[2m]))",
           "legendFormat": "4xx",
           "refId": "C"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(rate(http_server_requests_seconds_count{job=\"sgi-backend\",status=~\"5..\"}[2m]))",
           "legendFormat": "5xx",
           "refId": "D"
@@ -329,7 +329,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -371,19 +371,19 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{job=\"sgi-backend\"}[5m])) by (le))",
           "legendFormat": "P50",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"sgi-backend\"}[5m])) by (le))",
           "legendFormat": "P95",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "histogram_quantile(0.99, sum(rate(http_server_requests_seconds_bucket{job=\"sgi-backend\"}[5m])) by (le))",
           "legendFormat": "P99",
           "refId": "C"
@@ -400,7 +400,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -450,19 +450,19 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(jvm_memory_used_bytes{job=\"sgi-backend\",area=\"heap\"})",
           "legendFormat": "Usado",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(jvm_memory_committed_bytes{job=\"sgi-backend\",area=\"heap\"})",
           "legendFormat": "Comprometido",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum(jvm_memory_max_bytes{job=\"sgi-backend\",area=\"heap\"})",
           "legendFormat": "Máximo",
           "refId": "C"
@@ -472,7 +472,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -514,19 +514,19 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "jvm_threads_live_threads{job=\"sgi-backend\"}",
           "legendFormat": "Activos",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "jvm_threads_daemon_threads{job=\"sgi-backend\"}",
           "legendFormat": "Daemon",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "jvm_threads_peak_threads{job=\"sgi-backend\"}",
           "legendFormat": "Pico histórico",
           "refId": "C"
@@ -543,7 +543,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -605,25 +605,25 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "hikaricp_connections_active{job=\"sgi-backend\"}",
           "legendFormat": "Activas",
           "refId": "A"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "hikaricp_connections_idle{job=\"sgi-backend\"}",
           "legendFormat": "Libres",
           "refId": "B"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "hikaricp_connections_max{job=\"sgi-backend\"}",
           "legendFormat": "Máximo",
           "refId": "C"
         },
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "hikaricp_connections_pending{job=\"sgi-backend\"}",
           "legendFormat": "Pendientes",
           "refId": "D"
@@ -633,7 +633,7 @@
       "type": "timeseries"
     },
     {
-      "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+      "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
       "fieldConfig": {
         "defaults": {
           "color": { "mode": "palette-classic" },
@@ -681,7 +681,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "prometheus", "uid": "${prometheus}" },
+          "datasource": { "type": "prometheus", "uid": "prometheus-sgi" },
           "expr": "sum by (cache) (rate(cache_gets_total{job=\"sgi-backend\",result=\"hit\"}[5m])) / (sum by (cache) (rate(cache_gets_total{job=\"sgi-backend\",result=\"hit\"}[5m])) + sum by (cache) (rate(cache_gets_total{job=\"sgi-backend\",result=\"miss\"}[5m])))",
           "legendFormat": "{{cache}}",
           "refId": "A"
@@ -698,7 +698,7 @@
       "type": "row"
     },
     {
-      "datasource": { "type": "loki", "uid": "${loki}" },
+      "datasource": { "type": "loki", "uid": "loki-sgi" },
       "fieldConfig": {
         "defaults": {},
         "overrides": []
@@ -717,7 +717,7 @@
       },
       "targets": [
         {
-          "datasource": { "type": "loki", "uid": "${loki}" },
+          "datasource": { "type": "loki", "uid": "loki-sgi" },
           "expr": "{container=\"sgi-full-backend\"}",
           "legendFormat": "",
           "refId": "A"
@@ -731,34 +731,7 @@
   "schemaVersion": 38,
   "tags": ["sgi", "backend", "jvm", "spring-boot"],
   "templating": {
-    "list": [
-      {
-        "current": {},
-        "hide": 0,
-        "includeAll": false,
-        "label": "Prometheus",
-        "multi": false,
-        "name": "prometheus",
-        "options": [],
-        "query": "prometheus",
-        "refresh": 1,
-        "regex": "",
-        "type": "datasource"
-      },
-      {
-        "current": {},
-        "hide": 0,
-        "includeAll": false,
-        "label": "Loki",
-        "multi": false,
-        "name": "loki",
-        "options": [],
-        "query": "loki",
-        "refresh": 1,
-        "regex": "",
-        "type": "datasource"
-      }
-    ]
+    "list": []
   },
   "time": { "from": "now-1h", "to": "now" },
   "timepicker": {},
