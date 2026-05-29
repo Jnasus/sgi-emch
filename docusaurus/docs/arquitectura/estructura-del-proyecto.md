@@ -44,8 +44,23 @@ sgi-emch/
 │   ├── docusaurus.config.js
 │   ├── sidebars.js
 │   └── Dockerfile
+├── monitoring/                     # Configuraciones del stack de monitoreo (opcional)
+│   ├── prometheus/
+│   │   └── prometheus.yml          # Job sgi-backend: raspa /actuator/prometheus cada 15 s
+│   ├── loki/
+│   │   └── loki-config.yaml        # Almacenamiento de logs (boltdb-shipper, schema v11)
+│   ├── promtail/
+│   │   └── promtail-config.yaml    # Recolecta logs de contenedores sgi-full-*
+│   └── grafana/
+│       └── provisioning/
+│           ├── datasources/
+│           │   └── datasources.yaml    # Prometheus (UID: prometheus-sgi) y Loki (UID: loki-sgi)
+│           └── dashboards/
+│               ├── dashboards.yaml     # Proveedor de tipo "file"
+│               └── sgi-backend.json    # Dashboard precargado con 17 paneles
 ├── db_sgi_emch.sql                 # Script de inicialización de la BD
-└── docker-compose.yml              # Orquestación de todos los servicios
+├── docker-compose.yml              # Orquestación del stack principal
+└── docker-compose.monitoring.yml   # Orquestación del stack de monitoreo (opcional)
 ```
 
 ## Servicios Docker y redes
@@ -79,9 +94,10 @@ sgi-emch/
 
 | Red | Propósito | Servicios |
 |---|---|---|
-| `sgi_internal` | Comunicación privada backend ↔ BD | `db`, `backend`, `backup` |
+| `sgi_internal` | Comunicación privada backend ↔ BD | `db`, `backend`, `backup`, `prometheus` |
 | `sgi_app` | Frontend proxea requests al backend | `backend`, `frontend` |
-| `proxy_network` | Red externa de Nginx Proxy Manager | `frontend`, `docs` |
+| `proxy_network` | Red externa de Nginx Proxy Manager | `frontend`, `docs`, `grafana` |
+| `monitoring_network` | Red interna del stack de monitoreo | `prometheus`, `loki`, `promtail`, `grafana` |
 
 ### Volúmenes persistentes
 
@@ -89,6 +105,9 @@ sgi-emch/
 |---|---|
 | `full_mysql_data` | Datos de MySQL (tablas, índices, vistas) |
 | `full_pdf_storage` | Actas PDF generadas por el sistema (`/app/storage/actas`) |
+| `prometheus_data` | Series temporales de métricas (retención 15 días) |
+| `loki_data` | Índice y chunks de logs de contenedores |
+| `grafana_data` | Base de datos de Grafana (dashboards personalizados, usuarios, alertas) |
 
 ## Flujo de una request
 

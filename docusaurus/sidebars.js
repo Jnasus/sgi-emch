@@ -43,6 +43,8 @@ const sidebars = {
         'guia-admin/variables-entorno',
         'guia-admin/backups',
         'guia-admin/nginx-proxy-manager',
+        'guia-admin/monitoreo',
+        'guia-admin/cache',
       ],
     },
     {

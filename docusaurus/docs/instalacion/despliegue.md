@@ -88,6 +88,35 @@ docker compose logs -f backend
 docker compose logs -f db
 ```
 
+## Stack de monitoreo (opcional)
+
+El stack de monitoreo se levanta con un archivo compose separado y requiere que el stack principal ya esté corriendo.
+
+### Levantar monitoreo
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+### Verificar que Prometheus raspa el backend
+
+```bash
+# Debe devolver líneas con métricas (# HELP, # TYPE, ...)
+docker exec sgi-full-prometheus wget -qO- http://sgi-full-backend:8080/actuator/prometheus | head -10
+```
+
+### Acceder a Grafana
+
+```
+https://grafana.sgi.escuelamilitar.edu.pe
+```
+
+Credenciales por defecto: `admin` / `admin` (cambiar en el primer acceso).
+
+El dashboard **"SGI-EMCH Backend"** se carga automáticamente al iniciar Grafana.
+
+Para más detalles sobre configuración, diagnóstico y métricas disponibles, consulta la [Guía de monitoreo](../guia-admin/monitoreo).
+
 ## Healthchecks configurados
 
 | Servicio | Condición de salud |
