@@ -1,6 +1,9 @@
 package pe.edu.emch.sgi.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.emch.sgi.dto.catalogo.AreaRequest;
@@ -52,18 +55,21 @@ public class CatalogoService {
     private final ConfigStockRepository configStockRepository;
     private final UsuarioRepository usuarioRepository;
 
+    @Cacheable("catalogos-areas")
     @Transactional(readOnly = true)
     public List<AreaResponse> listarAreas() {
         return areaRepository.findByActivoTrue().stream()
             .map(this::toAreaResponse).toList();
     }
 
+    @Cacheable("catalogos-tipos-equipo")
     @Transactional(readOnly = true)
     public List<TipoEquipoResponse> listarTiposEquipo() {
         return tipoEquipoRepository.findAll().stream()
             .map(this::toTipoEquipoResponse).toList();
     }
 
+    @CacheEvict(value = "catalogos-tipos-equipo", allEntries = true)
     @Transactional
     public TipoEquipoResponse crearTipoEquipo(TipoEquipoRequest request) {
         if (tipoEquipoRepository.existsByNombreTipo(request.getNombreTipo())) {
@@ -76,6 +82,7 @@ public class CatalogoService {
         return toTipoEquipoResponse(tipoEquipoRepository.save(tipo));
     }
 
+    @CacheEvict(value = "catalogos-tipos-equipo", allEntries = true)
     @Transactional
     public TipoEquipoResponse actualizarTipoEquipo(Integer idTipo, TipoEquipoRequest request) {
         TipoEquipo tipo = tipoEquipoRepository.findById(idTipo)
@@ -89,12 +96,14 @@ public class CatalogoService {
         return toTipoEquipoResponse(tipoEquipoRepository.save(tipo));
     }
 
+    @Cacheable("catalogos-marcas")
     @Transactional(readOnly = true)
     public List<MarcaResponse> listarMarcas() {
         return marcaRepository.findAll().stream()
             .map(this::toMarcaResponse).toList();
     }
 
+    @CacheEvict(value = "catalogos-marcas", allEntries = true)
     @Transactional
     public MarcaResponse crearMarca(MarcaRequest request) {
         if (marcaRepository.existsByNombreMarca(request.getNombreMarca())) {
@@ -106,6 +115,7 @@ public class CatalogoService {
         return toMarcaResponse(marcaRepository.save(marca));
     }
 
+    @CacheEvict(value = "catalogos-marcas", allEntries = true)
     @Transactional
     public MarcaResponse actualizarMarca(Integer idMarca, MarcaRequest request) {
         Marca marca = marcaRepository.findById(idMarca)
@@ -118,6 +128,7 @@ public class CatalogoService {
         return toMarcaResponse(marcaRepository.save(marca));
     }
 
+    @Cacheable(value = "catalogos-modelos", key = "#idMarca != null ? #idMarca : 'all'")
     @Transactional(readOnly = true)
     public List<ModeloResponse> listarModelos(Integer idMarca) {
         List<ModeloEquipo> modelos = (idMarca != null)
@@ -126,6 +137,7 @@ public class CatalogoService {
         return modelos.stream().map(this::toModeloResponse).toList();
     }
 
+    @CacheEvict(value = "catalogos-modelos", allEntries = true)
     @Transactional
     public ModeloResponse crearModelo(ModeloRequest request) {
         Marca marca = marcaRepository.findById(request.getIdMarca())
@@ -143,6 +155,7 @@ public class CatalogoService {
         return toModeloResponse(modeloEquipoRepository.save(modelo));
     }
 
+    @CacheEvict(value = "catalogos-modelos", allEntries = true)
     @Transactional
     public ModeloResponse actualizarModelo(Integer idModelo, ModeloRequest request) {
         ModeloEquipo modelo = modeloEquipoRepository.findById(idModelo)
@@ -161,18 +174,22 @@ public class CatalogoService {
         return toModeloResponse(modeloEquipoRepository.save(modelo));
     }
 
+    @Cacheable("catalogos-so")
     @Transactional(readOnly = true)
     public List<SistemaOperativoResponse> listarSistemasOperativos() {
         return sistemaOperativoRepository.findAll().stream()
             .map(this::toSoResponse).toList();
     }
 
+    @Cacheable("catalogos-tipos-incidente")
     @Transactional(readOnly = true)
     public List<TipoIncidenteResponse> listarTiposIncidente() {
         return tipoIncidenteRepository.findAll().stream()
             .map(this::toTipoIncidenteResponse).toList();
     }
 
+    // configurarStock no tiene caché propia; invalida tipos-equipo porque el umbral
+    // se incluye en TipoEquipoResponse cuando se extienda ese DTO.
     @Transactional
     public ConfigStockResponse configurarStock(Integer idTipo, ConfigStockRequest request, Integer idUsuarioActivo) {
         TipoEquipo tipo = tipoEquipoRepository.findById(idTipo)
@@ -186,6 +203,7 @@ public class CatalogoService {
         return toConfigStockResponse(configStockRepository.save(config));
     }
 
+    @CacheEvict(value = "catalogos-tipos-incidente", allEntries = true)
     @Transactional
     public TipoIncidenteResponse configurarSla(Integer idTipo, SlaConfigRequest request) {
         TipoIncidente tipo = tipoIncidenteRepository.findById(idTipo)
@@ -195,6 +213,7 @@ public class CatalogoService {
         return toTipoIncidenteResponse(tipoIncidenteRepository.save(tipo));
     }
 
+    @CacheEvict(value = "catalogos-so", allEntries = true)
     @Transactional
     public SistemaOperativoResponse crearSistemaOperativo(SistemaOperativoRequest request) {
         if (sistemaOperativoRepository.existsByNombreSoAndVersionSo(
@@ -208,6 +227,7 @@ public class CatalogoService {
         return toSoResponse(sistemaOperativoRepository.save(so));
     }
 
+    @CacheEvict(value = "catalogos-so", allEntries = true)
     @Transactional
     public SistemaOperativoResponse actualizarSistemaOperativo(Integer idSo, SistemaOperativoRequest request) {
         SistemaOperativo so = sistemaOperativoRepository.findById(idSo)
@@ -222,12 +242,17 @@ public class CatalogoService {
         return toSoResponse(sistemaOperativoRepository.save(so));
     }
 
+    @Cacheable("catalogos-areas-todas")
     @Transactional(readOnly = true)
     public List<AreaResponse> listarTodasAreas() {
         return areaRepository.findAll().stream()
             .map(this::toAreaResponse).toList();
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "catalogos-areas",      allEntries = true),
+        @CacheEvict(value = "catalogos-areas-todas", allEntries = true)
+    })
     @Transactional
     public AreaResponse crearArea(AreaRequest request) {
         String codigo = request.getCodigoArea().toUpperCase();
@@ -245,6 +270,10 @@ public class CatalogoService {
         return toAreaResponse(areaRepository.save(area));
     }
 
+    @Caching(evict = {
+        @CacheEvict(value = "catalogos-areas",      allEntries = true),
+        @CacheEvict(value = "catalogos-areas-todas", allEntries = true)
+    })
     @Transactional
     public AreaResponse actualizarArea(Integer idArea, AreaRequest request) {
         String codigo = request.getCodigoArea().toUpperCase();
