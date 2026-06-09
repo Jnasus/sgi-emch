@@ -947,15 +947,15 @@ El proyecto SGI-EMCH es de naturaleza académica; el equipo de desarrollo no per
 
 | N° | Rubro | Descripción | Costo mensual (S/.) | Meses | Total (S/.) |
 |---|---|---|---|---|---|
-| 1 | **Internet empresarial** | Servicio de fibra óptica de 200 Mbps para el área DTIC; necesario para el despliegue y acceso remoto al servidor | 450.00 | 3.5 | 1,575.00 |
+| 1 | **Internet institucional** | Servicio de fibra óptica de 1 Gbps contratado por la EMCH "CFB" (S/. 90,000/año); necesario para el despliegue, acceso remoto al servidor y operación continua del sistema | 7,500.00 | 3.5 | 26,250.00 |
 | 2 | **Energía eléctrica** | Consumo de la sala de servidores del DTIC (servidor principal, switches, UPS) | 620.00 | 3.5 | 2,170.00 |
 | 3 | **Aire acondicionado** | Consumo eléctrico y mantenimiento mensual del equipo de climatización de la sala de servidores | 340.00 | 3.5 | 1,190.00 |
-| 4 | **Agua** | Servicio sanitario del área DTIC (uso del personal durante el período del proyecto) | 75.00 | 3.5 | 262.50 |
+| 4 | **Fluido eléctrico** | Suministro eléctrico general del área DTIC (iluminación, estaciones de trabajo, equipos de red) | 280.00 | 3.5 | 980.00 |
 | 5 | **Mantenimiento de servidor** | Mantenimiento correctivo y preventivo del servidor institucional asignado al proyecto | 400.00 | 3.5 | 1,400.00 |
 | 6 | **Soporte de infraestructura TI** | Costo proporcional del técnico institucional asignado al soporte de la infraestructura de red y servidor | 220.00 | 3.5 | 770.00 |
-| | **TOTAL ESTIMADO** | | **2,105.00** | — | **S/. 7,367.50** |
+| | **TOTAL ESTIMADO** | | **9,360.00** | — | **S/. 32,760.00** |
 
-*Fuente de referencias:* tarifas OSIPTEL para internet empresarial Lima 2026, tarifas Luz del Sur para uso comercial, costos referenciales de mantenimiento TI en Lima metropolitana 2026.
+*Fuente de referencias:* contrato institucional EMCH "CFB" para internet 1 Gbps (S/. 90,000/año), tarifas Enel/Luz del Sur para uso comercial Lima 2026 (energía eléctrica y fluido eléctrico), costos referenciales de mantenimiento TI en Lima metropolitana 2026.
 
 *Nota:* El servidor institucional es infraestructura propia de la EMCH; los montos de mantenimiento y soporte corresponden al costo proporcional asignado al período del proyecto. No incluye costo de hardware (ya existente en la institución) ni licencias de software (todo el stack es de código abierto: Spring Boot, MySQL, React, Docker).
 

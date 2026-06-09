@@ -38,14 +38,14 @@
 | **8. PRESUPUESTO GLOBAL PRELIMINAR** | | | |
 | El proyecto es de naturaleza académica; el equipo de desarrollo no percibe remuneración. Las herramientas utilizadas (Spring Boot, React, MySQL, Docker, Git/GitHub) son de código abierto y sin costo de licencia. El presupuesto refleja los **costos operativos institucionales** que la EMCH "CFB" incurre para sostener el desarrollo y despliegue del sistema durante el período 05/04/2026 – 16/07/2026 (aprox. 3.5 meses). | | | |
 | **N°** | **Rubro** | **Costo mensual (S/.)** | **Total estimado (S/.)** |
-| 1 | Servicio de Internet empresarial (200 Mbps, fibra óptica) | 450.00 × 3.5 meses | 1,575.00 |
+| 1 | Servicio de Internet institucional (1 Gbps, fibra óptica) | 7,500.00 × 3.5 meses | 26,250.00 |
 | 2 | Energía eléctrica — sala de servidores DTIC | 620.00 × 3.5 meses | 2,170.00 |
 | 3 | Aire acondicionado — consumo y mantenimiento mensual | 340.00 × 3.5 meses | 1,190.00 |
-| 4 | Agua — servicio sanitario área DTIC | 75.00 × 3.5 meses | 262.50 |
+| 4 | Fluido eléctrico — suministro general área DTIC | 280.00 × 3.5 meses | 980.00 |
 | 5 | Mantenimiento correctivo/preventivo del servidor institucional | 400.00 × 3.5 meses | 1,400.00 |
 | 6 | Soporte de infraestructura TI (técnico institucional asignado) | 220.00 × 3.5 meses | 770.00 |
-| **TOTAL PRESUPUESTO** | | **S/. 2,105.00 / mes** | **S/. 7,367.50** |
-| *Fuente: tarifas referenciales OSIPTEL (internet), Luz del Sur (electricidad), proveedores de mantenimiento TI Lima 2026. El servidor es infraestructura propia de la EMCH; los montos de mantenimiento y soporte corresponden al costo proporcional asignado al proyecto.* | | | |
+| **TOTAL PRESUPUESTO** | | **S/. 9,360.00 / mes** | **S/. 32,760.00** |
+| *Fuente: contrato institucional EMCH "CFB" (internet 1 Gbps — S/. 90,000/año), tarifas Enel/Luz del Sur para uso comercial Lima 2026 (energía eléctrica y fluido eléctrico), proveedores de mantenimiento TI Lima 2026. El servidor es infraestructura propia de la EMCH; los montos de mantenimiento y soporte corresponden al costo proporcional asignado al proyecto.* | | | |
 | **9. CRITERIOS DE APROBACIÓN** | | | |
 | 1. El sistema debe contemplar al 100% los módulos y funcionalidades definidos en el alcance.  2. Todos los entregables de cada sprint deben ser validados y aprobados por el representante de la EMCH "CFB".  3. Las pruebas de aceptación deben ser realizadas con el personal DTIC y no presentar errores críticos.  4. La documentación técnica y el manual de usuario deben ser entregados antes de la puesta en producción.  5. El sistema debe desplegarse correctamente en el servidor institucional y estar operativo al cierre del proyecto. | | | |
 | **10. CRITERIOS PARA ABORTAR EL PROYECTO** | | | |
