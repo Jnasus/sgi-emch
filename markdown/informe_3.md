@@ -727,15 +727,15 @@ La documentación completa de arquitectura está disponible en la documentación
 
 | Documento | Sección | URL directa |
 |---|---|---|
-| Arquitectura de la aplicación | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/arquitectura-aplicacion |
-| Diagrama de despliegue | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-despliegue |
-| Diagrama de componentes | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-componentes |
-| Patrones de diseño | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/patrones |
-| Diagrama de clases | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-clases |
-| Stack tecnológico | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/stack-tecnologico |
-| Diseño conceptual de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-conceptual |
-| Diseño lógico de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-logico |
-| Diseño físico de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-fisico |
+| Arquitectura de la aplicación | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion |
+| Diagrama de despliegue | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue |
+| Diagrama de componentes | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-componentes |
+| Patrones de diseño | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/patrones |
+| Diagrama de clases | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-clases |
+| Stack tecnológico | Arquitectura | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/stack-tecnologico |
+| Diseño conceptual de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-conceptual |
+| Diseño lógico de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-logico |
+| Diseño físico de BD | Base de Datos | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-fisico |
 
 **3.1.11.1. Diagrama de Arquitectura de Aplicaciones**
 
@@ -821,7 +821,7 @@ Patrones complementarios implementados:
 
 **3.1.11.5. Diagrama de Clases**
 
-*(Ver: [Diagrama de Clases](https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-clases) — sección **Arquitectura** de la documentación técnica)*
+*(Ver: [Diagrama de Clases](https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-clases) — sección **Arquitectura** de la documentación técnica)*
 
 Los módulos principales del modelo de dominio:
 
@@ -834,15 +834,15 @@ Los módulos principales del modelo de dominio:
 
 **3.1.11.6. Diagrama Conceptual de BD**
 
-*(Ver: [Diseño Conceptual de BD](https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-conceptual) — sección **Base de Datos** → Diseño Conceptual)*
+*(Ver: [Diseño Conceptual de BD](https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-conceptual) — sección **Base de Datos** → Diseño Conceptual)*
 
 **3.1.11.7. Diagrama Lógico de BD**
 
-*(Ver: [Diseño Lógico de BD](https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-logico) — sección **Base de Datos** → Diseño Lógico)*
+*(Ver: [Diseño Lógico de BD](https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-logico) — sección **Base de Datos** → Diseño Lógico)*
 
 **3.1.11.8. Diagrama Físico de BD**
 
-*(Ver: [Diseño Físico de BD](https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-fisico) — sección **Base de Datos** → Diseño Físico)*
+*(Ver: [Diseño Físico de BD](https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-fisico) — sección **Base de Datos** → Diseño Físico)*
 
 El esquema físico incluye:
 - **15 tablas** con `ENGINE=InnoDB`, `CHARSET=utf8mb4`
@@ -907,13 +907,13 @@ El manual cubre los siguientes módulos, con descripción paso a paso de cada op
 
 | Módulo | Contenido | URL directa |
 |---|---|---|
-| **Dashboard** | Interpretación de KPIs, lectura de semáforos de stock, panel "En línea ahora" | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/dashboard |
-| **Inventario** | Registro de equipos, cambio de estado, ficha técnica, historial, carga masiva Excel | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/inventario |
-| **Incidentes** | Creación de tickets, seguimiento de SLA, cambio de estado, historial de resolución | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/incidentes |
-| **Reportes** | Generación y descarga de reportes en Excel y PDF con filtros | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/reportes |
-| **Notificaciones** | Centro de alertas, marcado de leídas, tipos de notificación | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/notificaciones |
-| **Usuarios** | Gestión de cuentas, reseteo de contraseña, activación/desactivación | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/usuarios |
-| **Configuración** | Gestión de catálogos (tipos, marcas, modelos, SO, áreas), SLAs y umbrales de stock | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/configuracion |
+| **Dashboard** | Interpretación de KPIs, lectura de semáforos de stock, panel "En línea ahora" | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/dashboard |
+| **Inventario** | Registro de equipos, cambio de estado, ficha técnica, historial, carga masiva Excel | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/inventario |
+| **Incidentes** | Creación de tickets, seguimiento de SLA, cambio de estado, historial de resolución | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/incidentes |
+| **Reportes** | Generación y descarga de reportes en Excel y PDF con filtros | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/reportes |
+| **Notificaciones** | Centro de alertas, marcado de leídas, tipos de notificación | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/notificaciones |
+| **Usuarios** | Gestión de cuentas, reseteo de contraseña, activación/desactivación | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/usuarios |
+| **Configuración** | Gestión de catálogos (tipos, marcas, modelos, SO, áreas), SLAs y umbrales de stock | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/configuracion |
 
 ---
 
@@ -978,30 +978,29 @@ El cronograma del proyecto SGI-EMCH cubre desde la Fase de Inicio (kick-off) has
 ```mermaid
 gantt
     title Cronograma SGI-EMCH - Deadline 16 julio 2026
-    dateFormat  YYYY-MM-DD
-    axisFormat  %d/%m/%y
+    dateFormat YYYY-MM-DD
 
     section Fase 0 - Inicio
-    Kick-off y arquitectura               :done,    s0,  2026-03-30, 2026-04-05
+    Kick-off y arquitectura :done, s0, 2026-03-30, 2026-04-05
 
     section Sprint 1 - Seguridad
-    Usuarios y autenticacion JWT          :done,    s1,  2026-04-06, 2026-04-19
+    Usuarios y autenticacion JWT :done, s1, 2026-04-06, 2026-04-19
 
     section Sprint 2 - Inventario
-    Equipos y carga masiva Excel          :done,    s2,  2026-04-20, 2026-05-10
+    Equipos y carga masiva Excel :done, s2, 2026-04-20, 2026-05-10
 
     section Sprint 3 - Incidentes
-    Tickets y control de SLA              :done,    s3,  2026-05-11, 2026-05-31
+    Tickets y control de SLA :done, s3, 2026-05-11, 2026-05-31
 
     section Sprint 4 - Reportes
-    Dashboard y exportaciones             :done,    s4,  2026-06-01, 2026-06-14
+    Dashboard y exportaciones :done, s4, 2026-06-01, 2026-06-14
 
     section Sprint 5 - Integracion
-    Notificaciones y monitoreo            :done,    s5,  2026-06-15, 2026-06-28
+    Notificaciones y monitoreo :done, s5, 2026-06-15, 2026-06-28
 
     section Sprint 6 - Cierre
-    UAT y modulo de bajas                 :active,  s6a, 2026-06-29, 2026-07-09
-    Entrega final y firma de acta         :crit,    s6b, 2026-07-09, 2026-07-16
+    UAT y modulo de bajas :active, s6a, 2026-06-29, 2026-07-09
+    Entrega final y firma de acta :crit, s6b, 2026-07-09, 2026-07-16
 ```
 
 **Resumen de hitos:**
@@ -1122,31 +1121,31 @@ Ver sección 3.1.2 del presente informe y documento SRS.md (sección de requisit
 
 | Sección | Documento | URL directa |
 |---|---|---|
-| Introducción | Introducción al SGI-EMCH | https://sgi-docs.escuelamilitar.edu.pe/docs/intro |
-| **Arquitectura** | Arquitectura de la aplicación | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/arquitectura-aplicacion |
-| Arquitectura | Stack tecnológico | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/stack-tecnologico |
-| Arquitectura | Estructura del proyecto | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/estructura-del-proyecto |
-| Arquitectura | Diagrama de despliegue | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-despliegue |
-| Arquitectura | Diagrama de componentes | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-componentes |
-| Arquitectura | Patrones de diseño | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/patrones |
-| Arquitectura | Diagrama de clases | https://sgi-docs.escuelamilitar.edu.pe/docs/arquitectura/diagrama-clases |
-| **Base de Datos** | Diseño conceptual | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-conceptual |
-| Base de Datos | Diseño lógico | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-logico |
-| Base de Datos | Diseño físico | https://sgi-docs.escuelamilitar.edu.pe/docs/base-de-datos/diseño-fisico |
-| **Guía de Usuario** | Dashboard | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/dashboard |
-| Guía de Usuario | Inventario | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/inventario |
-| Guía de Usuario | Incidentes | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/incidentes |
-| Guía de Usuario | Reportes | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/reportes |
-| Guía de Usuario | Notificaciones | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/notificaciones |
-| Guía de Usuario | Usuarios | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/usuarios |
-| Guía de Usuario | Configuración | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-usuario/configuracion |
-| **Guía de Administrador** | Monitoreo (Prometheus + Grafana) | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-admin/monitoreo |
-| Guía de Administrador | Backups automáticos | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-admin/backups |
-| Guía de Administrador | Caché en memoria (Caffeine) | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-admin/cache |
-| Guía de Administrador | Variables de entorno | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-admin/variables-entorno |
-| Guía de Administrador | Nginx Proxy Manager | https://sgi-docs.escuelamilitar.edu.pe/docs/guia-admin/nginx-proxy-manager |
-| **API REST** | Visión general de la API | https://sgi-docs.escuelamilitar.edu.pe/docs/api/overview |
-| API REST | Endpoints principales | https://sgi-docs.escuelamilitar.edu.pe/docs/api/endpoints-principales |
+| Introducción | Introducción al SGI-EMCH | https://sgi-docs.escuelamilitar.edu.pe/intro |
+| **Arquitectura** | Arquitectura de la aplicación | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion |
+| Arquitectura | Stack tecnológico | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/stack-tecnologico |
+| Arquitectura | Estructura del proyecto | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/estructura-del-proyecto |
+| Arquitectura | Diagrama de despliegue | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue |
+| Arquitectura | Diagrama de componentes | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-componentes |
+| Arquitectura | Patrones de diseño | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/patrones |
+| Arquitectura | Diagrama de clases | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-clases |
+| **Base de Datos** | Diseño conceptual | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-conceptual |
+| Base de Datos | Diseño lógico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-logico |
+| Base de Datos | Diseño físico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-fisico |
+| **Guía de Usuario** | Dashboard | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/dashboard |
+| Guía de Usuario | Inventario | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/inventario |
+| Guía de Usuario | Incidentes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/incidentes |
+| Guía de Usuario | Reportes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/reportes |
+| Guía de Usuario | Notificaciones | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/notificaciones |
+| Guía de Usuario | Usuarios | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/usuarios |
+| Guía de Usuario | Configuración | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/configuracion |
+| **Guía de Administrador** | Monitoreo (Prometheus + Grafana) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/monitoreo |
+| Guía de Administrador | Backups automáticos | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/backups |
+| Guía de Administrador | Caché en memoria (Caffeine) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/cache |
+| Guía de Administrador | Variables de entorno | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/variables-entorno |
+| Guía de Administrador | Nginx Proxy Manager | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/nginx-proxy-manager |
+| **API REST** | Visión general de la API | https://sgi-docs.escuelamilitar.edu.pe/api/overview |
+| API REST | Endpoints principales | https://sgi-docs.escuelamilitar.edu.pe/api/endpoints-principales |
 
 El sitio de documentación es un contenedor Docker independiente (Docusaurus 3.5.2) desplegado en el mismo servidor institucional, con soporte de diagramas Mermaid para visualización de arquitectura y base de datos.
 
