@@ -975,7 +975,11 @@ El proyecto SGI-EMCH es de naturaleza académica; el equipo de desarrollo no per
 
 El cronograma del proyecto SGI-EMCH cubre desde la Fase de Inicio (kick-off) hasta el deadline académico del **16 de julio de 2026**, con un total de 7 fases (Fase 0 + 6 Sprints).
 
-```mermaid
+![Cronograma SGI-EMCH — Gantt Sprint 0 al Sprint 6](gantt_cronograma.png)
+
+<!--
+Fuente Mermaid del diagrama (regenerar con: mmdc -i gantt_temp.mmd -o gantt_cronograma.png -w 1200 -H 500 --backgroundColor white):
+
 gantt
     title Cronograma SGI-EMCH - Deadline 16 julio 2026
     dateFormat YYYY-MM-DD
@@ -1001,7 +1005,7 @@ gantt
     section Sprint 6 - Cierre
     UAT y modulo de bajas :active, s6a, 2026-06-29, 2026-07-09
     Entrega final y firma de acta :crit, s6b, 2026-07-09, 2026-07-16
-```
+-->
 
 **Resumen de hitos:**
 
