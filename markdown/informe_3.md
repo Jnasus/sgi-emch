@@ -1,4 +1,4 @@
-<!-- INFORME DE AVANCE N°3 — SGI-EMCH -->
+﻿<!-- INFORME DE AVANCE N°3 — SGI-EMCH -->
 
 **Facultad de Ingeniería**
 
@@ -739,57 +739,39 @@ La documentación completa de arquitectura está disponible en la documentación
 
 **3.1.11.1. Diagrama de Arquitectura de Aplicaciones**
 
-```mermaid
-graph TB
-    subgraph Cliente["Cliente — Navegador Web"]
-        RT["React Router (App.tsx)"]
-        PC["Componentes de página (Dashboard, Inventario, Incidentes…)"]
-        SM["Servicios (inventarioService, ticketService…)"]
-        FA["fetchWithAuth — api.ts (inyecta JWT)"]
-        RT --> PC --> SM --> FA
-    end
+> 📐 **Diagrama interactivo disponible en la documentación oficial:**
+> **[https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion](https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion)**
 
-    FA -->|"HTTPS · Bearer Token"| SEC
+El diagrama muestra el flujo completo desde el navegador del cliente hasta la base de datos:
 
-    subgraph Servidor["Servidor — Spring Boot"]
-        SEC["Spring Security (JwtFilter + AuditSessionInterceptor)"]
-        CTRL["Controladores REST (@RestController)"]
-        SVC["Servicios (@Service + lógica de negocio)"]
-        CACHE["Caché Caffeine (@Cacheable / @CacheEvict)"]
-        REPO["Repositorios JPA (Spring Data)"]
-        SCHED["Scheduler (@Scheduled — SLA + stock)"]
-        NOTIF["NotificadorService"]
-
-        SEC --> CTRL --> SVC
-        SVC --> CACHE
-        SVC --> REPO
-        SCHED --> NOTIF --> SVC
-    end
-
-    REPO -->|"JDBC · HikariCP"| DB[("MySQL 8.0 — db_sgi_emch")]
-```
+| Capa | Tecnología | Descripción |
+|---|---|---|
+| **Presentación** | React 18 + TypeScript | `App.tsx` → Páginas → Servicios → `fetchWithAuth` (inyecta JWT) |
+| **Seguridad** | Spring Security 6 | `JwtFilter` valida token · `AuditSessionInterceptor` registra usuario/IP |
+| **Controladores** | `@RestController` | Enrutan peticiones HTTP, validan entrada, devuelven `ApiResponse<T>` |
+| **Servicios** | `@Service` | Lógica de negocio, `@Transactional`, orquestación de repositorios |
+| **Caché** | Caffeine | `@Cacheable` / `@CacheEvict` para catálogos (TTL 1 h, máx. 1 000 entradas) |
+| **Scheduler** | `@Scheduled` | `NotificadorService` — revisa SLA vencidos y stock crítico cada 5 min |
+| **Repositorios** | Spring Data JPA | Acceso a datos vía JPQL; HikariCP gestiona el pool de conexiones |
+| **Base de datos** | MySQL 8.0 | `db_sgi_emch` — triggers de auditoría, vistas SQL, procedimientos almacenados |
 
 **3.1.11.2. Diagrama de Despliegue**
 
-El sistema se despliega mediante Docker Compose en el servidor institucional de la EMCH:
+> 🚀 **Diagrama interactivo disponible en la documentación oficial:**
+> **[https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue](https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue)**
 
-```mermaid
-graph LR
-    Internet["Internet / Intranet EMCH"] --> NPM
+El sistema se despliega mediante Docker Compose en el servidor institucional de la EMCH. La topología de servicios es:
 
-    subgraph VPS["Servidor Institucional EMCH"]
-        NPM["Nginx Proxy Manager (HTTPS)"]
-        NPM -->|"sgi.escuelamilitar.edu.pe"| FE["sgi-full-frontend (Nginx + React)"]
-        NPM -->|"sgi-docs.escuelamilitar.edu.pe"| DOCS["sgi-full-docs (Docusaurus)"]
-        NPM -->|"sgi-grafana.escuelamilitar.edu.pe"| GF["Grafana 11.5.2"]
-
-        FE -->|"HTTP interno /api/*"| BE["sgi-full-backend (Spring Boot)"]
-        BE --> DB["sgi-full-db (MySQL 8.0)"]
-        BE --> BACKUP["sgi-full-backup (mysqldump diario)"]
-        GF --- PROM["Prometheus"]
-        PROM -->|"/actuator/prometheus"| BE
-    end
-```
+| Servicio | Imagen / Puerto | Descripción |
+|---|---|---|
+| **Nginx Proxy Manager** | `jc21/nginx-proxy-manager` | Punto de entrada HTTPS; gestiona TLS y enruta por subdominio |
+| `sgi-full-frontend` | `nginx:alpine` · 80 | SPA React compilada con Vite, servida por Nginx |
+| `sgi-full-backend` | `eclipse-temurin:21` · 8080 | API REST Spring Boot 3.5 (embedded Tomcat) |
+| `sgi-full-db` | `mysql:8.0` · 3306 | Base de datos principal `db_sgi_emch` |
+| `sgi-full-docs` | `node:alpine` · 3000 | Documentación Docusaurus |
+| `sgi-full-backup` | `alpine:crond` | `mysqldump` diario, retención 7 días |
+| **Prometheus** | `prom/prometheus` · 9090 | Recolector de métricas desde `/actuator/prometheus` |
+| **Grafana** | `grafana/grafana:11.5.2` · 3001 | Dashboard de monitoreo (17 paneles pre-provisionados) |
 
 **3.1.11.3. Diagrama de Componentes**
 
