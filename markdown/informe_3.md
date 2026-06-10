@@ -114,17 +114,17 @@ Desarrollar e implementar un sistema web que digitalice y centralice la gestión
 
 | Módulo | Descripción | Incluido |
 |---|---|---|
-| Usuarios y Seguridad | Autenticación JWT, 5 roles RBAC, auditoría de acciones | ✅ |
-| Inventario de activos TI | PCs de escritorio, laptops, impresoras y servidores | ✅ |
-| Especificaciones técnicas | CPU, RAM, almacenamiento, GPU, monitor, red | ✅ |
-| Carga masiva Excel | Importación de equipos en lote desde archivo .xlsx | ✅ |
-| Mesa de ayuda / Tickets | Creación, asignación, SLA, historial, cierre | ✅ |
-| Notificaciones automáticas | SLA vencido, stock crítico, ticket asignado | ✅ |
-| Dashboard y reportes | KPIs en tiempo real, Excel, PDF | ✅ |
-| Catálogos configurables | Tipos, marcas, modelos, SO, áreas, SLAs, umbrales | ✅ |
-| Monitoreo operativo | Prometheus, Grafana, Loki, Promtail | ✅ |
-| Backup automático | mysqldump diario, retención 7 días | ✅ |
-| Documentación técnica | Docusaurus con guías de usuario y administrador | ✅ |
+| Usuarios y Seguridad | Autenticación JWT, 5 roles RBAC, auditoría de acciones | [OK] |
+| Inventario de activos TI | PCs de escritorio, laptops, impresoras y servidores | [OK] |
+| Especificaciones técnicas | CPU, RAM, almacenamiento, GPU, monitor, red | [OK] |
+| Carga masiva Excel | Importación de equipos en lote desde archivo .xlsx | [OK] |
+| Mesa de ayuda / Tickets | Creación, asignación, SLA, historial, cierre | [OK] |
+| Notificaciones automáticas | SLA vencido, stock crítico, ticket asignado | [OK] |
+| Dashboard y reportes | KPIs en tiempo real, Excel, PDF | [OK] |
+| Catálogos configurables | Tipos, marcas, modelos, SO, áreas, SLAs, umbrales | [OK] |
+| Monitoreo operativo | Prometheus, Grafana, Loki, Promtail | [OK] |
+| Backup automático | mysqldump diario, retención 7 días | [OK] |
+| Documentación técnica | Docusaurus con guías de usuario y administrador | [OK] |
 
 **Fuera del alcance:**
 
@@ -310,28 +310,28 @@ El Product Backlog del SGI-EMCH contiene **22 historias de usuario** distribuida
 
 | ID | Historia de Usuario | Prioridad | Sprint | Estado |
 |---|---|---|---|---|
-| US-01 | Como Administrador quiero gestionar usuarios (crear, editar, activar/desactivar) con roles para controlar el acceso al sistema | Alta | 1 | ✅ Completado |
-| US-02 | Como usuario quiero iniciar sesión con mis credenciales y recibir un token JWT para acceder de forma segura | Alta | 1 | ✅ Completado |
-| US-03 | Como usuario quiero que mi sesión expire automáticamente para proteger la información institucional | Alta | 1 | ✅ Completado |
-| US-04 | Como Administrador quiero gestionar catálogos (tipos, marcas, modelos, SO, áreas) para mantener los datos maestros actualizados | Media | 1 | ✅ Completado |
-| US-05 | Como Técnico quiero registrar un equipo con su código Ejército único para ingresarlo al inventario | Alta | 2 | ✅ Completado |
-| US-06 | Como Técnico quiero actualizar el estado de un equipo (bodega, asignado, reparación, préstamo, baja) para reflejar su situación real | Alta | 2 | ✅ Completado |
-| US-07 | Como Técnico quiero registrar las especificaciones técnicas de cada equipo para disponer de su ficha completa | Media | 2 | ✅ Completado |
-| US-08 | Como Administrador quiero cargar equipos masivamente desde un archivo Excel para agilizar el ingreso inicial del inventario | Media | 2 | ✅ Completado |
-| US-09 | Como Técnico quiero abrir un ticket de incidente vinculado a un equipo para registrar formalmente un problema | Alta | 3 | ✅ Completado |
-| US-10 | Como sistema quiero calcular automáticamente el tiempo transcurrido de cada ticket para detectar SLA vencidos | Alta | 3 | ✅ Completado |
-| US-11 | Como Técnico quiero actualizar el estado de un ticket y dejar comentarios en el historial para documentar la resolución | Alta | 3 | ✅ Completado |
-| US-12 | Como Jefe DTIC quiero ver el dashboard con indicadores en tiempo real (stock, tickets, KPIs) para tomar decisiones | Alta | 4 | ✅ Completado |
-| US-13 | Como Administrador quiero exportar el inventario a Excel o PDF con filtros para generar reportes formales | Media | 4 | ✅ Completado |
-| US-14 | Como Administrador quiero exportar la lista de equipos con más de N años de antigüedad para planificar renovaciones | Media | 4 | ✅ Completado |
-| US-15 | Como usuario quiero recibir una notificación cuando se me asigne un ticket para enterarme de nuevas tareas | Alta | 5 | ✅ Completado |
-| US-16 | Como Jefe DTIC quiero recibir una notificación automática cuando un ticket supere su SLA para escalarlo | Alta | 5 | ✅ Completado |
-| US-17 | Como Jefe DTIC quiero recibir alertas automáticas cuando el stock de un tipo de equipo caiga bajo el umbral configurado | Alta | 5 | ✅ Completado |
-| US-18 | Como Administrador quiero monitorear el rendimiento del sistema con Grafana para supervisar su operación | Media | 5 | ✅ Completado |
-| US-19 | Como equipo quiero que la base de datos se respalde automáticamente cada noche para garantizar continuidad ante fallos | Alta | 5 | ✅ Completado |
-| US-20 | Como usuario quiero acceder a la documentación técnica y de usuario en línea para resolver dudas operativas | Baja | 5–6 | ✅ Completado |
-| US-21 | Como Técnico quiero ejecutar el proceso formal de baja o transferencia de un equipo con formulario dedicado, acta PDF y flujo de aprobación | Media | 6 | 🔄 En progreso |
-| US-22 | Como Sponsor quiero validar el sistema mediante pruebas de aceptación (UAT) antes de la entrega formal | Alta | 6 | 🔄 En progreso |
+| US-01 | Como Administrador quiero gestionar usuarios (crear, editar, activar/desactivar) con roles para controlar el acceso al sistema | Alta | 1 | [OK] Completado |
+| US-02 | Como usuario quiero iniciar sesión con mis credenciales y recibir un token JWT para acceder de forma segura | Alta | 1 | [OK] Completado |
+| US-03 | Como usuario quiero que mi sesión expire automáticamente para proteger la información institucional | Alta | 1 | [OK] Completado |
+| US-04 | Como Administrador quiero gestionar catálogos (tipos, marcas, modelos, SO, áreas) para mantener los datos maestros actualizados | Media | 1 | [OK] Completado |
+| US-05 | Como Técnico quiero registrar un equipo con su código Ejército único para ingresarlo al inventario | Alta | 2 | [OK] Completado |
+| US-06 | Como Técnico quiero actualizar el estado de un equipo (bodega, asignado, reparación, préstamo, baja) para reflejar su situación real | Alta | 2 | [OK] Completado |
+| US-07 | Como Técnico quiero registrar las especificaciones técnicas de cada equipo para disponer de su ficha completa | Media | 2 | [OK] Completado |
+| US-08 | Como Administrador quiero cargar equipos masivamente desde un archivo Excel para agilizar el ingreso inicial del inventario | Media | 2 | [OK] Completado |
+| US-09 | Como Técnico quiero abrir un ticket de incidente vinculado a un equipo para registrar formalmente un problema | Alta | 3 | [OK] Completado |
+| US-10 | Como sistema quiero calcular automáticamente el tiempo transcurrido de cada ticket para detectar SLA vencidos | Alta | 3 | [OK] Completado |
+| US-11 | Como Técnico quiero actualizar el estado de un ticket y dejar comentarios en el historial para documentar la resolución | Alta | 3 | [OK] Completado |
+| US-12 | Como Jefe DTIC quiero ver el dashboard con indicadores en tiempo real (stock, tickets, KPIs) para tomar decisiones | Alta | 4 | [OK] Completado |
+| US-13 | Como Administrador quiero exportar el inventario a Excel o PDF con filtros para generar reportes formales | Media | 4 | [OK] Completado |
+| US-14 | Como Administrador quiero exportar la lista de equipos con más de N años de antigüedad para planificar renovaciones | Media | 4 | [OK] Completado |
+| US-15 | Como usuario quiero recibir una notificación cuando se me asigne un ticket para enterarme de nuevas tareas | Alta | 5 | [OK] Completado |
+| US-16 | Como Jefe DTIC quiero recibir una notificación automática cuando un ticket supere su SLA para escalarlo | Alta | 5 | [OK] Completado |
+| US-17 | Como Jefe DTIC quiero recibir alertas automáticas cuando el stock de un tipo de equipo caiga bajo el umbral configurado | Alta | 5 | [OK] Completado |
+| US-18 | Como Administrador quiero monitorear el rendimiento del sistema con Grafana para supervisar su operación | Media | 5 | [OK] Completado |
+| US-19 | Como equipo quiero que la base de datos se respalde automáticamente cada noche para garantizar continuidad ante fallos | Alta | 5 | [OK] Completado |
+| US-20 | Como usuario quiero acceder a la documentación técnica y de usuario en línea para resolver dudas operativas | Baja | 5–6 | [OK] Completado |
+| US-21 | Como Técnico quiero ejecutar el proceso formal de baja o transferencia de un equipo con formulario dedicado, acta PDF y flujo de aprobación | Media | 6 | [En curso] En progreso |
+| US-22 | Como Sponsor quiero validar el sistema mediante pruebas de aceptación (UAT) antes de la entrega formal | Alta | 6 | [En curso] En progreso |
 
 ### 3.1.3. Sprint 0 — Kick-off y Planificación
 
@@ -350,6 +350,8 @@ Durante la fase de kick-off se realizaron las siguientes actividades:
 - Configuración del entorno de desarrollo: repositorio Git en GitHub, estructura de carpetas del proyecto, variables de entorno.
 - Diseño inicial del esquema de base de datos (diagrama entidad-relación conceptual).
 - Elaboración del Product Backlog inicial con el Product Owner.
+
+> **Documento generado en esta fase:** Ver `project_charter.md` (Anexo 1) para el Project Charter completo con alcance, riesgos, presupuesto, cronograma de hitos y firmas del equipo.
 
 **3.1.3.2. Propósito del Proyecto**
 
@@ -657,7 +659,7 @@ Funcionalidades demostradas:
 |---|---|
 | **Fechas** | 29 de junio – 16 de julio de 2026 |
 | **Objetivo** | Pruebas de aceptación (UAT), corrección de defectos finales, flujo formal de bajas y transferencias, entrega académica y firma de acta de aceptación |
-| **Estado** | 🔄 **EN PROGRESO** — Sprint activo al momento de este informe |
+| **Estado** | [En curso] **EN PROGRESO** — Sprint activo al momento de este informe |
 | **Story Points** | 9 puntos planificados |
 
 **3.1.9.1. Sprint Planning**
@@ -701,25 +703,25 @@ Las **10 heurísticas de usabilidad de Jakob Nielsen** son principios generales 
 
 | N° | Heurística | Implementación en SGI-EMCH | Nivel de cumplimiento |
 |---|---|---|---|
-| 1 | **Visibilidad del estado del sistema** | Badges de color para estado de equipos (EN_BODEGA=gris, ASIGNADO=verde, EN_REPARACION=amarillo, DADO_DE_BAJA=rojo) y tickets. Contador de SLA visible en la ficha del ticket. Indicador de carga (spinner) en operaciones asíncronas. | ✅ Alto |
-| 2 | **Coincidencia con el mundo real** | Terminología castrense: "Código Ejército", "DTIC", "Área", "Acta". Los estados de los equipos reflejan el vocabulario institucional real. | ✅ Alto |
-| 3 | **Control y libertad del usuario** | Botón "Cancelar" en todos los formularios. Confirmación antes de cambios de estado irreversibles (baja definitiva). Paginación navegable en todas las tablas. | ✅ Alto |
-| 4 | **Consistencia y estándares** | shadcn/ui como sistema de diseño unificado en todo el frontend. Paleta de colores institucional EMCH (verde #2C3E1F, rojo #D91E18) aplicada consistentemente. Mismo patrón de layout en todas las páginas (sidebar + contenido principal). | ✅ Alto |
-| 5 | **Prevención de errores** | Validación en tiempo real con `react-hook-form` antes de enviar formularios. Campos requeridos claramente marcados. Confirmación explícita en operaciones destructivas. TypeScript previene errores de tipo en el código frontend. | ✅ Alto |
-| 6 | **Reconocer antes que memorizar** | Sidebar persistente con íconos y etiquetas en todas las páginas. Breadcrumbs en vistas de detalle. Filtros visibles en las tablas. Columnas claramente etiquetadas. | ✅ Alto |
-| 7 | **Flexibilidad y eficiencia de uso** | Filtros avanzados en inventario (por estado, área, tipo). Carga masiva Excel para usuarios avanzados (importación de cientos de equipos en minutos). Paginación configurable (20/50/100 registros). | ✅ Alto |
-| 8 | **Estética y diseño minimalista** | Layout limpio sin información superflua. Información organizada en tarjetas y secciones colapsables. Solo se muestran las acciones disponibles según el rol del usuario. | ✅ Alto |
-| 9 | **Ayudar a los usuarios a reconocer, diagnosticar y recuperarse de errores** | Mensajes de error descriptivos en formularios (ej: "El Código Ejército ya existe en el sistema"). Respuestas HTTP con mensajes sanitizados via `GlobalExceptionHandler`. Retroalimentación visual clara en la carga masiva (filas válidas en verde, errores en rojo con descripción). | ✅ Alto |
-| 10 | **Ayuda y documentación** | Documentación completa disponible en `https://sgi-docs.escuelamilitar.edu.pe` con guía de usuario por módulo, guía de administrador y referencia de API. | ✅ Alto |
+| 1 | **Visibilidad del estado del sistema** | Badges de color para estado de equipos (EN_BODEGA=gris, ASIGNADO=verde, EN_REPARACION=amarillo, DADO_DE_BAJA=rojo) y tickets. Contador de SLA visible en la ficha del ticket. Indicador de carga (spinner) en operaciones asíncronas. | [OK] Alto |
+| 2 | **Coincidencia con el mundo real** | Terminología castrense: "Código Ejército", "DTIC", "Área", "Acta". Los estados de los equipos reflejan el vocabulario institucional real. | [OK] Alto |
+| 3 | **Control y libertad del usuario** | Botón "Cancelar" en todos los formularios. Confirmación antes de cambios de estado irreversibles (baja definitiva). Paginación navegable en todas las tablas. | [OK] Alto |
+| 4 | **Consistencia y estándares** | shadcn/ui como sistema de diseño unificado en todo el frontend. Paleta de colores institucional EMCH (verde #2C3E1F, rojo #D91E18) aplicada consistentemente. Mismo patrón de layout en todas las páginas (sidebar + contenido principal). | [OK] Alto |
+| 5 | **Prevención de errores** | Validación en tiempo real con `react-hook-form` antes de enviar formularios. Campos requeridos claramente marcados. Confirmación explícita en operaciones destructivas. TypeScript previene errores de tipo en el código frontend. | [OK] Alto |
+| 6 | **Reconocer antes que memorizar** | Sidebar persistente con íconos y etiquetas en todas las páginas. Breadcrumbs en vistas de detalle. Filtros visibles en las tablas. Columnas claramente etiquetadas. | [OK] Alto |
+| 7 | **Flexibilidad y eficiencia de uso** | Filtros avanzados en inventario (por estado, área, tipo). Carga masiva Excel para usuarios avanzados (importación de cientos de equipos en minutos). Paginación configurable (20/50/100 registros). | [OK] Alto |
+| 8 | **Estética y diseño minimalista** | Layout limpio sin información superflua. Información organizada en tarjetas y secciones colapsables. Solo se muestran las acciones disponibles según el rol del usuario. | [OK] Alto |
+| 9 | **Ayudar a los usuarios a reconocer, diagnosticar y recuperarse de errores** | Mensajes de error descriptivos en formularios (ej: "El Código Ejército ya existe en el sistema"). Respuestas HTTP con mensajes sanitizados via `GlobalExceptionHandler`. Retroalimentación visual clara en la carga masiva (filas válidas en verde, errores en rojo con descripción). | [OK] Alto |
+| 10 | **Ayuda y documentación** | Documentación completa disponible en `https://sgi-docs.escuelamilitar.edu.pe` con guía de usuario por módulo, guía de administrador y referencia de API. | [OK] Alto |
 
 **Pruebas adicionales:**
 
 | Tipo de prueba | Descripción | Resultado |
 |---|---|---|
-| **Pruebas de escalabilidad** | El sistema está diseñado para soportar hasta 10,000 equipos registrados y 50,000 eventos en `audit_log`. HikariCP limita a 10 conexiones simultáneas a la BD. Caffeine reduce la carga de BD para consultas de catálogos. | ✅ Arquitectura adecuada para el volumen esperado |
-| **Pruebas de confiabilidad** | Backup automático diario (mysqldump a las 02:00 AM, retención 7 días). Health check del backend en `/actuator/health`. Restart automático de contenedores Docker (`restart: unless-stopped`). | ✅ Objetivo: 99.0% de disponibilidad |
-| **Pruebas de seguridad** | Contraseñas cifradas con BCrypt (cost factor ≥10). Comunicación cifrada HTTPS/TLS. JWT con expiración de 1 hora. RBAC granular por endpoint con `@PreAuthorize`. Protección contra SQL Injection vía consultas parametrizadas JPA. Auditoría completa de operaciones INSERT/UPDATE/DELETE. | ✅ Controles OWASP implementados |
-| **Pruebas de integración** | Flujo completo validado: Login → Registrar equipo → Crear ticket → Cambiar estado → Generar reporte → Recibir notificación. Carga masiva: plantilla → subida → validación → confirmación. | ✅ Sin errores en flujos principales |
+| **Pruebas de escalabilidad** | El sistema está diseñado para soportar hasta 10,000 equipos registrados y 50,000 eventos en `audit_log`. HikariCP limita a 10 conexiones simultáneas a la BD. Caffeine reduce la carga de BD para consultas de catálogos. | [OK] Arquitectura adecuada para el volumen esperado |
+| **Pruebas de confiabilidad** | Backup automático diario (mysqldump a las 02:00 AM, retención 7 días). Health check del backend en `/actuator/health`. Restart automático de contenedores Docker (`restart: unless-stopped`). | [OK] Objetivo: 99.0% de disponibilidad |
+| **Pruebas de seguridad** | Contraseñas cifradas con BCrypt (cost factor ≥10). Comunicación cifrada HTTPS/TLS. JWT con expiración de 1 hora. RBAC granular por endpoint con `@PreAuthorize`. Protección contra SQL Injection vía consultas parametrizadas JPA. Auditoría completa de operaciones INSERT/UPDATE/DELETE. | [OK] Controles OWASP implementados |
+| **Pruebas de integración** | Flujo completo validado: Login → Registrar equipo → Crear ticket → Cambiar estado → Generar reporte → Recibir notificación. Carga masiva: plantilla → subida → validación → confirmación. | [OK] Sin errores en flujos principales |
 
 ### 3.1.11. Arquitectura de Aplicaciones
 
@@ -739,7 +741,7 @@ La documentación completa de arquitectura está disponible en la documentación
 
 **3.1.11.1. Diagrama de Arquitectura de Aplicaciones**
 
-> 📐 **Diagrama interactivo disponible en la documentación oficial:**
+> [Diagrama] **Diagrama interactivo disponible en la documentación oficial:**
 > **[https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion](https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion)**
 
 El diagrama muestra el flujo completo desde el navegador del cliente hasta la base de datos:
@@ -757,7 +759,7 @@ El diagrama muestra el flujo completo desde el navegador del cliente hasta la ba
 
 **3.1.11.2. Diagrama de Despliegue**
 
-> 🚀 **Diagrama interactivo disponible en la documentación oficial:**
+> [Despliegue] **Diagrama interactivo disponible en la documentación oficial:**
 > **[https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue](https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue)**
 
 El sistema se despliega mediante Docker Compose en el servidor institucional de la EMCH. La topología de servicios es:
@@ -907,31 +909,31 @@ Al cierre del Sprint 5 e inicio del Sprint 6, el SGI-EMCH presenta el siguiente 
 
 | Módulo | Funcionalidades implementadas | Estado | Sprint de cierre |
 |---|---|---|---|
-| **Autenticación y Seguridad** | Login JWT (access 1h + refresh 24h), RBAC 5 roles, auditoría de acciones, triggers MySQL | ✅ Completo | Sprint 1 |
-| **Gestión de Usuarios** | CRUD usuarios, asignación de roles y áreas, activación/desactivación, reseteo de contraseña | ✅ Completo | Sprint 1 |
-| **Catálogos Configurables** | Tipos de equipo, marcas, modelos, SO, áreas, tipos de incidente, SLAs, umbrales de stock | ✅ Completo | Sprint 1 |
-| **Inventario de Equipos** | CRUD equipos, especificaciones técnicas, historial de estados, código Ejército único, filtros | ✅ Completo | Sprint 2 |
-| **Carga Masiva Excel** | Plantilla dinámica con dropdowns, validación en 2 fases (validar → confirmar), importación atómica | ✅ Completo | Sprint 2 |
-| **Mesa de Ayuda / Tickets** | Ciclo ABIERTO→CERRADO, numeración TKT-YYYYMM-NNNN, SLA en tiempo real, historial, exportación PDF | ✅ Completo | Sprint 3 |
-| **Dashboard Ejecutivo** | KPIs en tiempo real, distribución por tipo, semáforo de stock, panel "En línea ahora" | ✅ Completo | Sprint 4 |
-| **Reportes Exportables** | Inventario completo, selección manual, equipos antiguos — formatos Excel y PDF | ✅ Completo | Sprint 4 |
-| **Notificaciones Automáticas** | SLA vencido, stock crítico, ticket asignado — generación automática cada 5 min, centro UI | ✅ Completo | Sprint 5 |
-| **Monitoreo Operativo** | Prometheus + Grafana 11.5.2 + Loki + Promtail; dashboard 17 paneles | ✅ Completo | Sprint 5 |
-| **Backup Automático** | mysqldump diario (02:00 AM), comprimido con gzip, retención 7 días | ✅ Completo | Sprint 5 |
-| **Documentación Técnica** | Docusaurus con 20+ páginas: guía de usuario, administrador, API, arquitectura, base de datos | ✅ Completo | Sprint 5–6 |
-| **Bajas y Transferencias (UI formal)** | Formulario dedicado, acta PDF, flujo de aprobación Jefe DTIC | 🔄 En progreso | Sprint 6 |
-| **Pruebas UAT** | Validación con personal DTIC-EMCH, corrección de defectos | 🔄 En progreso | Sprint 6 |
+| **Autenticación y Seguridad** | Login JWT (access 1h + refresh 24h), RBAC 5 roles, auditoría de acciones, triggers MySQL | [OK] Completo | Sprint 1 |
+| **Gestión de Usuarios** | CRUD usuarios, asignación de roles y áreas, activación/desactivación, reseteo de contraseña | [OK] Completo | Sprint 1 |
+| **Catálogos Configurables** | Tipos de equipo, marcas, modelos, SO, áreas, tipos de incidente, SLAs, umbrales de stock | [OK] Completo | Sprint 1 |
+| **Inventario de Equipos** | CRUD equipos, especificaciones técnicas, historial de estados, código Ejército único, filtros | [OK] Completo | Sprint 2 |
+| **Carga Masiva Excel** | Plantilla dinámica con dropdowns, validación en 2 fases (validar → confirmar), importación atómica | [OK] Completo | Sprint 2 |
+| **Mesa de Ayuda / Tickets** | Ciclo ABIERTO→CERRADO, numeración TKT-YYYYMM-NNNN, SLA en tiempo real, historial, exportación PDF | [OK] Completo | Sprint 3 |
+| **Dashboard Ejecutivo** | KPIs en tiempo real, distribución por tipo, semáforo de stock, panel "En línea ahora" | [OK] Completo | Sprint 4 |
+| **Reportes Exportables** | Inventario completo, selección manual, equipos antiguos — formatos Excel y PDF | [OK] Completo | Sprint 4 |
+| **Notificaciones Automáticas** | SLA vencido, stock crítico, ticket asignado — generación automática cada 5 min, centro UI | [OK] Completo | Sprint 5 |
+| **Monitoreo Operativo** | Prometheus + Grafana 11.5.2 + Loki + Promtail; dashboard 17 paneles | [OK] Completo | Sprint 5 |
+| **Backup Automático** | mysqldump diario (02:00 AM), comprimido con gzip, retención 7 días | [OK] Completo | Sprint 5 |
+| **Documentación Técnica** | Docusaurus con 20+ páginas: guía de usuario, administrador, API, arquitectura, base de datos | [OK] Completo | Sprint 5–6 |
+| **Bajas y Transferencias (UI formal)** | Formulario dedicado, acta PDF, flujo de aprobación Jefe DTIC | [En curso] En progreso | Sprint 6 |
+| **Pruebas UAT** | Validación con personal DTIC-EMCH, corrección de defectos | [En curso] En progreso | Sprint 6 |
 
 **Indicadores de avance al cierre del Sprint 5:**
 
 | KPI | Meta | Estado actual |
 |---|---|---|
 | Módulos implementados | 100% | 86% (12/14 módulos completos) |
-| Bugs críticos en producción | 0 | 0 ✅ |
+| Bugs críticos en producción | 0 | 0 [OK] |
 | Story points completados | 140 | 131 (93.6%) |
-| Disponibilidad del sistema | ≥ 99.0% | ✅ Operativo en producción |
-| Cobertura de documentación | 100% de módulos | 100% ✅ |
-| Backup automático diario | 100% de días | ✅ Verificado |
+| Disponibilidad del sistema | ≥ 99.0% | [OK] Operativo en producción |
+| Cobertura de documentación | 100% de módulos | 100% [OK] |
+| Backup automático diario | 100% de días | [OK] Verificado |
 
 ## 4.2. Presupuesto
 
@@ -956,6 +958,8 @@ El proyecto SGI-EMCH es de naturaleza académica; el equipo de desarrollo no per
 ## 4.3. Cronograma de actividades
 
 El cronograma del proyecto SGI-EMCH cubre desde la Fase de Inicio (kick-off) hasta el deadline académico del **16 de julio de 2026**, con un total de 7 fases (Fase 0 + 6 Sprints).
+
+> **Documento completo del cronograma:** Ver `gantt.md` (Anexo 6) para el detalle de cada sprint, actividades, entregables y tabla de burndown.
 
 ![Cronograma SGI-EMCH — Gantt Sprint 0 al Sprint 6](gantt_cronograma.png)
 
@@ -993,15 +997,15 @@ gantt
 
 | Hito | Fecha | Estado |
 |---|---|---|
-| Kick-off del proyecto | 05/04/2026 | ✅ Completado |
-| Entrega Sprint 1 (Usuarios y Seguridad) | 19/04/2026 | ✅ Completado |
-| Entrega Sprint 2 (Inventario) | 10/05/2026 | ✅ Completado |
-| Entrega Sprint 3 (Incidentes) | 31/05/2026 | ✅ Completado |
-| Entrega Sprint 4 (Reportes/Dashboard) | 14/06/2026 | ✅ Completado |
-| Entrega Sprint 5 (Notificaciones/Integración) | 28/06/2026 | ✅ Completado |
-| Inicio UAT con personal DTIC | 29/06/2026 | 🔄 En progreso |
-| Entrega Informe N°3 | Junio/Julio 2026 | 🔄 En progreso |
-| **Deadline académico** | **16/07/2026** | ⏳ Pendiente |
+| Kick-off del proyecto | 05/04/2026 | [OK] Completado |
+| Entrega Sprint 1 (Usuarios y Seguridad) | 19/04/2026 | [OK] Completado |
+| Entrega Sprint 2 (Inventario) | 10/05/2026 | [OK] Completado |
+| Entrega Sprint 3 (Incidentes) | 31/05/2026 | [OK] Completado |
+| Entrega Sprint 4 (Reportes/Dashboard) | 14/06/2026 | [OK] Completado |
+| Entrega Sprint 5 (Notificaciones/Integración) | 28/06/2026 | [OK] Completado |
+| Inicio UAT con personal DTIC | 29/06/2026 | [En curso] En progreso |
+| Entrega Informe N°3 | Junio/Julio 2026 | [En curso] En progreso |
+| **Deadline académico** | **16/07/2026** | [Pendiente] Pendiente |
 
 ---
 
@@ -1065,15 +1069,27 @@ gantt
 
 # ANEXOS
 
-## Anexo 1: Acta de Constitución del Proyecto
+## Anexo 1: Project Charter -- Acta de Constitucion del Proyecto
 
-Ver documento: `markdown/acta.md`
+Ver documento: `markdown/project_charter.md`
 
-El Acta de Constitución del Proyecto (Project Charter) fue elaborada el 05/04/2026 y contiene: identificación del proyecto, justificación institucional, objetivos estratégicos, descripción de módulos, cronograma de hitos, equipo del proyecto, presupuesto operativo institucional, riesgos identificados y criterios de aprobación y aborto del proyecto.
+El Project Charter fue elaborado en el Sprint 0 (05/04/2026) y recoge los elementos formales de inicio del proyecto: identificacion, necesidad del negocio, alcance y entregables, riesgos, suposiciones y dependencias, presupuesto operativo institucional, cronograma de hitos, equipo, comite de aprobacion, criterios de exito y firmas.
 
-**Sponsor:** TCO2 EP MORALES PEREZ Edgar Oscar (DTIC – EMCH "CFB")  
+**Estructura del documento:**
+
+- Seccion 1: Identificacion del proyecto (fechas, URLs, repositorio)
+- Seccion 2: Necesidad del negocio (5 problemas criticos del DTIC-EMCH)
+- Seccion 3: Alcance (7 modulos incluidos + exclusiones)
+- Seccion 4: Entregables (10 entregables con estado actual)
+- Seccion 5: Riesgos (6 riesgos con estrategia de mitigacion)
+- Seccion 6: Suposiciones y dependencias criticas
+- Seccion 7: Presupuesto (S/. 32,760.00 en costos operativos institucionales)
+- Seccion 8: Cronograma de hitos (Sprint 0 -- Sprint 6, deadline 16/07/2026)
+- Seccion 9: Equipo y comite de aprobacion
+- Secciones 10-13: Criterios de exito, nivel de autoridad del jefe de proyecto y firmas
+
+**Sponsor:** TCO2 EP MORALES PEREZ Edgar Oscar (DTIC -- EMCH "CFB")
 **Jefe de Proyecto:** Pariona Torres, Jonas Efrain
-
 ## Anexo 2: Plan de Control de Cambios — RFC-2026-003
 
 Ver documento: `markdown/plan_control.md`
@@ -1135,6 +1151,19 @@ Ver sección 3.1.2 del presente informe y documento SRS.md (sección de requisit
 
 El sitio de documentación es un contenedor Docker independiente (Docusaurus 3.5.2) desplegado en el mismo servidor institucional, con soporte de diagramas Mermaid para visualización de arquitectura y base de datos.
 
+
+## Anexo 6: Cronograma de Actividades -- Diagrama de Gantt
+
+Ver documento: `markdown/gantt.md`
+
+El documento de cronograma contiene el diagrama de Gantt del proyecto (Sprint 0 al Sprint 6, deadline 16/07/2026), el detalle de actividades y entregables de cada sprint, la tabla de hitos con fechas programadas y estado, y la tabla de burndown con story points completados por sprint.
+
+**Estructura del documento:**
+
+- Diagrama de Gantt (imagen PNG generada con mmdc v11.15.0)
+- Detalle de cada sprint: periodo, duracion, responsables, estado, entregables e historias de usuario
+- Tabla de resumen de hitos
+- Tabla de burndown (144 story points planificados / 135 completados al cierre del Sprint 5)
 ---
 
 *Fin del Informe de Avance N°3 — SGI-EMCH*
