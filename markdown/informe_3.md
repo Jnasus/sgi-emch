@@ -959,7 +959,7 @@ El proyecto SGI-EMCH es de naturaleza académica; el equipo de desarrollo no per
 
 El cronograma del proyecto SGI-EMCH cubre desde la Fase de Inicio (kick-off) hasta el deadline académico del **16 de julio de 2026**, con un total de 7 fases (Fase 0 + 6 Sprints).
 
-> **Documento completo del cronograma:** Ver `gantt.md` (Anexo 6) para el detalle de cada sprint, actividades, entregables y tabla de burndown.
+> **Documento completo del cronograma:** Ver Anexo 6 -- [Gantt escrito (SharePoint)](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQCK2DxFSqxuSq7cmhWxvMAxAftDUZmK5rrwUvpVjfwSc-E?e=jVoiuR) | [Grafico PNG (SharePoint)](https://utpedupe-my.sharepoint.com/:u:/g/personal/u22219534_utp_edu_pe/IQBh-ci6vKGySqoS80Hhyn0XAYh_a-gvv0vCRAaYAgF5JBY?e=bm2Gfg) | fuente local: `gantt.md`
 
 ![Cronograma SGI-EMCH — Gantt Sprint 0 al Sprint 6](gantt_cronograma.png)
 
@@ -1071,7 +1071,11 @@ gantt
 
 ## Anexo 1: Project Charter -- Acta de Constitucion del Proyecto
 
-Ver documento: `markdown/project_charter.md`
+| Documento | Acceso |
+|---|---|
+| **Project Charter** (documento formal del proyecto) | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQAycRiq8PosSJGEoBN-_g0tAfniR0pyqmNQFuYCkjmj-Cc?e=Gpcy40) |
+| **Acta de Constitucion** (documento institucional) | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQDNDVc-xyXdRYOHND3NxnuxAYXMvl60v-tMk2zI8y-wMWk?e=wWYhCP) |
+| Fuente local | `markdown/project_charter.md` |
 
 El Project Charter fue elaborado en el Sprint 0 (05/04/2026) y recoge los elementos formales de inicio del proyecto: identificacion, necesidad del negocio, alcance y entregables, riesgos, suposiciones y dependencias, presupuesto operativo institucional, cronograma de hitos, equipo, comite de aprobacion, criterios de exito y firmas.
 
@@ -1090,71 +1094,81 @@ El Project Charter fue elaborado en el Sprint 0 (05/04/2026) y recoge los elemen
 
 **Sponsor:** TCO2 EP MORALES PEREZ Edgar Oscar (DTIC -- EMCH "CFB")
 **Jefe de Proyecto:** Pariona Torres, Jonas Efrain
-## Anexo 2: Plan de Control de Cambios — RFC-2026-003
 
-Ver documento: `markdown/plan_control.md`
+## Anexo 2: Plan de Control de Cambios -- RFC-2026-003
 
-El RFC-2026-003 describe el cambio propuesto para implementar el flujo formal de UI para bajas definitivas y transferencias de equipos entre áreas. Incluye análisis de impacto, matriz de riesgos, plan de implementación, ventana de mantenimiento (sábado 13 de junio, 02:00–04:00 hrs), plan de rollback y métricas de control.
+| Documento | Acceso |
+|---|---|
+| **Plan de Control de Cambios RFC-2026-003** | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQA-BF_DZNdMT5UoQaaI5NrZARH9rOTwGGc3RQnV1hGUXkw?e=wcv4NX) |
+| Fuente local | `markdown/plan_control.md` |
 
-**Estado:** Aprobado por el equipo — implementación en Sprint 6.
+El RFC-2026-003 describe el cambio propuesto para implementar el flujo formal de UI para bajas definitivas y transferencias de equipos entre areas. Incluye analisis de impacto, matriz de riesgos, plan de implementacion, ventana de mantenimiento (sabado 13 de junio, 02:00-04:00 hrs), plan de rollback y metricas de control.
 
-## Anexo 3: Especificación de Requerimientos de Software (SRS)
+**Estado:** Aprobado por el equipo -- implementacion en Sprint 6.
 
-Ver documento: `markdown/SRS.md`
+## Anexo 3: Especificacion de Requerimientos de Software (SRS)
 
-El SRS fue elaborado bajo el estándar IEEE Std 830-1998 / ISO/IEC/IEEE 29148:2018 e incluye: catálogo de 22 historias de usuario, 20 requisitos no funcionales, 7 restricciones técnicas, casos de uso UML, SLAs por tipo de incidente, KPIs del sistema y cronograma Scrum completo.
+| Documento | Acceso |
+|---|---|
+| **Especificacion de Requerimientos de Software** | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQCH528OIRpARoj-2s5FxUBXAdQR9AqIZfvc_HaKVLIBzsU?e=zdZ4ih) |
+| Fuente local | `markdown/SRS.md` |
+
+El SRS fue elaborado bajo el estandar IEEE Std 830-1998 / ISO/IEC/IEEE 29148:2018 e incluye: catalogo de 22 historias de usuario, 20 requisitos no funcionales, 7 restricciones tecnicas, casos de uso UML, SLAs por tipo de incidente, KPIs del sistema y cronograma Scrum completo.
 
 ## Anexo 4: Product Backlog Completo
 
-Ver sección 3.1.2 del presente informe y documento SRS.md (sección de requisitos funcionales).
+Ver seccion 3.1.2 del presente informe y el documento SRS (Anexo 3, seccion de requisitos funcionales).
 
-## Anexo 5: Recursos del Proyecto en Línea
+## Anexo 5: Recursos del Proyecto en Linea
 
-### Sistema en producción y repositorio
+### Sistema en produccion y repositorio
 
 | Recurso | URL |
 |---|---|
 | **Sistema SGI-EMCH** (acceso con credenciales DTIC) | https://sgi.escuelamilitar.edu.pe |
-| **Documentación técnica** (Docusaurus 3.5.2) | https://sgi-docs.escuelamilitar.edu.pe |
+| **Documentacion tecnica** (Docusaurus 3.5.2) | https://sgi-docs.escuelamilitar.edu.pe |
 | **Monitoreo Grafana** (acceso restringido DTIC) | https://sgi-grafana.escuelamilitar.edu.pe |
-| **Repositorio de código fuente** | https://github.com/Jnasus/sgi-emch |
+| **Repositorio de codigo fuente** | https://github.com/Jnasus/sgi-emch |
 
-### Índice completo de la documentación técnica
+### Indice completo de la documentacion tecnica
 
-| Sección | Documento | URL directa |
+| Seccion | Documento | URL directa |
 |---|---|---|
-| Introducción | Introducción al SGI-EMCH | https://sgi-docs.escuelamilitar.edu.pe/intro |
-| **Arquitectura** | Arquitectura de la aplicación | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion |
-| Arquitectura | Stack tecnológico | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/stack-tecnologico |
+| Introduccion | Introduccion al SGI-EMCH | https://sgi-docs.escuelamilitar.edu.pe/intro |
+| **Arquitectura** | Arquitectura de la aplicacion | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/arquitectura-aplicacion |
+| Arquitectura | Stack tecnologico | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/stack-tecnologico |
 | Arquitectura | Estructura del proyecto | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/estructura-del-proyecto |
 | Arquitectura | Diagrama de despliegue | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-despliegue |
 | Arquitectura | Diagrama de componentes | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-componentes |
-| Arquitectura | Patrones de diseño | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/patrones |
+| Arquitectura | Patrones de diseno | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/patrones |
 | Arquitectura | Diagrama de clases | https://sgi-docs.escuelamilitar.edu.pe/arquitectura/diagrama-clases |
-| **Base de Datos** | Diseño conceptual | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-conceptual |
-| Base de Datos | Diseño lógico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-logico |
-| Base de Datos | Diseño físico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-fisico |
-| **Guía de Usuario** | Dashboard | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/dashboard |
-| Guía de Usuario | Inventario | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/inventario |
-| Guía de Usuario | Incidentes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/incidentes |
-| Guía de Usuario | Reportes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/reportes |
-| Guía de Usuario | Notificaciones | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/notificaciones |
-| Guía de Usuario | Usuarios | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/usuarios |
-| Guía de Usuario | Configuración | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/configuracion |
-| **Guía de Administrador** | Monitoreo (Prometheus + Grafana) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/monitoreo |
-| Guía de Administrador | Backups automáticos | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/backups |
-| Guía de Administrador | Caché en memoria (Caffeine) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/cache |
-| Guía de Administrador | Variables de entorno | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/variables-entorno |
-| Guía de Administrador | Nginx Proxy Manager | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/nginx-proxy-manager |
-| **API REST** | Visión general de la API | https://sgi-docs.escuelamilitar.edu.pe/api/overview |
+| **Base de Datos** | Diseno conceptual | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-conceptual |
+| Base de Datos | Diseno logico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-logico |
+| Base de Datos | Diseno fisico | https://sgi-docs.escuelamilitar.edu.pe/base-de-datos/diseño-fisico |
+| **Guia de Usuario** | Dashboard | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/dashboard |
+| Guia de Usuario | Inventario | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/inventario |
+| Guia de Usuario | Incidentes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/incidentes |
+| Guia de Usuario | Reportes | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/reportes |
+| Guia de Usuario | Notificaciones | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/notificaciones |
+| Guia de Usuario | Usuarios | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/usuarios |
+| Guia de Usuario | Configuracion | https://sgi-docs.escuelamilitar.edu.pe/guia-usuario/configuracion |
+| **Guia de Administrador** | Monitoreo (Prometheus + Grafana) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/monitoreo |
+| Guia de Administrador | Backups automaticos | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/backups |
+| Guia de Administrador | Cache en memoria (Caffeine) | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/cache |
+| Guia de Administrador | Variables de entorno | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/variables-entorno |
+| Guia de Administrador | Nginx Proxy Manager | https://sgi-docs.escuelamilitar.edu.pe/guia-admin/nginx-proxy-manager |
+| **API REST** | Vision general de la API | https://sgi-docs.escuelamilitar.edu.pe/api/overview |
 | API REST | Endpoints principales | https://sgi-docs.escuelamilitar.edu.pe/api/endpoints-principales |
 
-El sitio de documentación es un contenedor Docker independiente (Docusaurus 3.5.2) desplegado en el mismo servidor institucional, con soporte de diagramas Mermaid para visualización de arquitectura y base de datos.
-
+El sitio de documentacion es un contenedor Docker independiente (Docusaurus 3.5.2) desplegado en el mismo servidor institucional, con soporte de diagramas Mermaid para visualizacion de arquitectura y base de datos.
 
 ## Anexo 6: Cronograma de Actividades -- Diagrama de Gantt
 
-Ver documento: `markdown/gantt.md`
+| Documento | Acceso |
+|---|---|
+| **Gantt escrito** (detalle de sprints, hitos y burndown) | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:b:/g/personal/u22219534_utp_edu_pe/IQCK2DxFSqxuSq7cmhWxvMAxAftDUZmK5rrwUvpVjfwSc-E?e=jVoiuR) |
+| **Grafico de Gantt** (imagen PNG del cronograma) | [Abrir en SharePoint](https://utpedupe-my.sharepoint.com/:u:/g/personal/u22219534_utp_edu_pe/IQBh-ci6vKGySqoS80Hhyn0XAYh_a-gvv0vCRAaYAgF5JBY?e=bm2Gfg) |
+| Fuente local | `markdown/gantt.md` |
 
 El documento de cronograma contiene el diagrama de Gantt del proyecto (Sprint 0 al Sprint 6, deadline 16/07/2026), el detalle de actividades y entregables de cada sprint, la tabla de hitos con fechas programadas y estado, y la tabla de burndown con story points completados por sprint.
 
