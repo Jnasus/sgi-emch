@@ -27,6 +27,8 @@
 
 **2026**
 
+\newpage
+
 ---
 
 ## ÍNDICE
@@ -74,6 +76,8 @@
 - [**ANEXOS**](#anexos)
 
 ---
+
+\newpage
 
 # Capítulo 1 — ASPECTOS GENERALES
 

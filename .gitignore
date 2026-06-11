@@ -2,6 +2,17 @@
 frontend/dist/
 frontend/node_modules/
 
+# Docusaurus
+docusaurus/node_modules/
+docusaurus/build/
+docusaurus/.docusaurus/
+
+# Markdown — generated/temp files (no rastrear)
+markdown/*.html
+markdown/*.pdf
+markdown/informe_3.html
+docs/superpowers/
+
 # Secrets — never commit
 backend/.env
 **/.env.local
