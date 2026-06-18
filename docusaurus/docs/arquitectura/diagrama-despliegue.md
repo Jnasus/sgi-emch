@@ -69,6 +69,39 @@ graph LR
     GF2 -->|"proxy_network · HTTPS"| NPM_EXT["Nginx Proxy Manager"]
 ```
 
+## Pipeline CI/CD (`github/workflows/ci-cd.yml`)
+
+Cada push o PR a `main` dispara el pipeline. El despliegue al servidor solo ocurre si el job `ci` pasa **y** el evento es un push directo a `main`.
+
+```mermaid
+graph TD
+    DEV(["👨‍💻 Developer"])
+
+    subgraph GitHub["GitHub — sgi-emch"]
+        PR["Push / PR → main"]
+
+        subgraph CI["Job: ci"]
+            T1["./mvnw test\nbackend · Java 21"]
+            T2["npm ci && npm run build\nfrontend · Node 20"]
+        end
+
+        subgraph CD["Job: deploy\n(solo push a main)"]
+            SSH["SSH al servidor\ngit pull\ndocker compose up --build -d"]
+        end
+    end
+
+    subgraph Servidor["Servidor Linux"]
+        DC["Docker Compose\nreconstruye imágenes modificadas\nvolúmenes de datos intactos"]
+    end
+
+    DEV -->|"git push / PR"| PR
+    PR --> T1
+    PR --> T2
+    T1 -->|"ci OK"| SSH
+    T2 -->|"ci OK"| SSH
+    SSH -->|"SSH · appleboy/ssh-action"| DC
+```
+
 ## Nodos de despliegue
 
 | Nodo | Tipo | Artefactos desplegados |
