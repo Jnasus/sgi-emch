@@ -45,6 +45,40 @@ services:
     depends_on:
       - loki
 
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: sgi-full-node-exporter
+    restart: unless-stopped
+    pid: host
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    networks:
+      - monitoring_network
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: sgi-full-cadvisor
+    restart: unless-stopped
+    # privileged: necesario para métricas de disco I/O por contenedor en Linux
+    privileged: true
+    devices:
+      - /dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      - /dev/disk:/dev/disk:ro
+    networks:
+      - monitoring_network
+
   grafana:
     # Pinado a 11.x: Grafana 12 (latest) tiene un bug en el provisioning
     # de datasources con UIDs fijos que causa crash loop al arrancar.

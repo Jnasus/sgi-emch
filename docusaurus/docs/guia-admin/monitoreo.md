@@ -11,18 +11,24 @@ El stack de monitoreo es **opcional** y se despliega por separado del stack prin
 ## Arquitectura del stack de monitoreo
 
 ```
-backend (Spring Boot)
-    │  /actuator/prometheus  ← Prometheus raspa cada 15 s
-    ▼
-Prometheus                   ← Almacena métricas (15 días de retención)
+Servidor Linux (host)
+    │  /proc, /sys, /rootfs  ← node-exporter lee métricas del host
     │
-    ▼
-Grafana                      ← Visualización de dashboards
-    │
-    ├── Prometheus datasource
-    └── Loki datasource ← Logs de contenedores
-              ▲
-           Promtail          ← Lee logs de Docker y los envía a Loki
+    ├── Docker daemon
+    │       │  socket + /var/lib/docker  ← cAdvisor lee métricas por contenedor
+    │       │
+    │       └── sgi-full-backend:8080
+    │               │  /actuator/prometheus  ← métricas JVM / HTTP / HikariCP
+    │               ▼
+    │           Prometheus  ← raspa los 3 targets cada 15 s; retención 15 días
+    │               │
+    │               ▼
+    │           Grafana  ← dashboards de infraestructura y aplicación
+    │               │
+    │               ├── datasource: Prometheus
+    │               └── datasource: Loki ← logs de contenedores
+    │                         ▲
+    │                      Promtail  ← recolecta logs de Docker
 ```
 
 ### Componentes
@@ -30,9 +36,19 @@ Grafana                      ← Visualización de dashboards
 | Contenedor | Imagen | Puerto interno | Rol |
 |---|---|---|---|
 | `sgi-full-prometheus` | `prom/prometheus:latest` | 9090 | Scraping y almacenamiento de métricas |
+| `sgi-full-node-exporter` | `prom/node-exporter:latest` | 9100 | Métricas del host: CPU, RAM, disco, red |
+| `sgi-full-cadvisor` | `gcr.io/cadvisor/cadvisor:latest` | 8080 | Métricas por contenedor Docker |
 | `sgi-full-loki` | `grafana/loki:2.9.10` | 3100 | Almacenamiento de logs |
 | `sgi-full-promtail` | `grafana/promtail:3.0.0` | — | Recolección de logs desde Docker |
 | `sgi-full-grafana` | `grafana/grafana:11.5.2` | 3000 | Dashboard de visualización |
+
+### Qué mide cada componente
+
+| Fuente | Ejemplos de métricas |
+|---|---|
+| **node-exporter** (host) | `node_cpu_seconds_total`, `node_memory_MemAvailable_bytes`, `node_filesystem_avail_bytes`, `node_network_receive_bytes_total` |
+| **cAdvisor** (contenedores) | `container_cpu_usage_seconds_total`, `container_memory_usage_bytes`, `container_fs_reads_bytes_total` |
+| **backend** (JVM / app) | `jvm_memory_used_bytes`, `http_server_requests_seconds`, `hikaricp_connections_active`, `cache_gets_total` |
 
 :::note Versiones fijadas
 - **Loki 2.9.10**: Loki 3.x rompe la compatibilidad con `boltdb-shipper` + schema v11.
@@ -227,6 +243,34 @@ Debe mostrar `HTTP/1.1 200`. Si muestra `401`, reconstruye el backend:
 ```bash
 docker compose build backend && docker compose up -d backend
 ```
+
+### node-exporter no aparece como UP en Prometheus
+
+```bash
+# Verifica que el contenedor esté corriendo
+docker compose -f docker-compose.monitoring.yml ps node-exporter
+
+# Comprueba que expone métricas
+docker exec sgi-full-prometheus wget -qO- http://sgi-full-node-exporter:9100/metrics | head -5
+```
+
+Si el contenedor no arranca, verifica que el servidor Linux expone `/proc` y `/sys` (siempre es el caso en Linux nativo; puede fallar en WSL2 sin configuración adicional).
+
+### cAdvisor no reporta métricas de contenedores
+
+```bash
+# Verifica que el contenedor esté corriendo
+docker compose -f docker-compose.monitoring.yml ps cadvisor
+
+# Comprueba el endpoint de métricas
+docker exec sgi-full-prometheus wget -qO- http://sgi-full-cadvisor:8080/metrics | grep container_memory | head -5
+```
+
+Si ves errores de permisos en los logs de cAdvisor:
+```bash
+docker logs sgi-full-cadvisor --tail 20
+```
+En algunos kernels de Linux es necesario que `/dev/kmsg` exista en el host. Verifica con `ls /dev/kmsg`. Si no existe, elimina la línea `devices: [/dev/kmsg]` del compose y redesplega.
 
 ### Grafana no arranca (crash loop)
 

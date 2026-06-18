@@ -79,6 +79,8 @@ sidebar_position: 1
 | Componente | Imagen Docker | Rol |
 |---|---|---|
 | **Prometheus** | `prom/prometheus:latest` | Scraping y almacenamiento de métricas (retención 15 días) |
+| **node-exporter** | `prom/node-exporter:latest` | Métricas del host: CPU, RAM, disco, red |
+| **cAdvisor** | `gcr.io/cadvisor/cadvisor:latest` | Métricas por contenedor Docker |
 | **Loki** | `grafana/loki:2.9.10` | Almacenamiento de logs de contenedores |
 | **Promtail** | `grafana/promtail:3.0.0` | Recolección de logs desde el socket de Docker |
 | **Grafana** | `grafana/grafana:11.5.2` | Visualización de dashboards y logs |
