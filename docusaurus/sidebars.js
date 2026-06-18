@@ -59,6 +59,7 @@ const sidebars = {
         'guia-admin/nginx-proxy-manager',
         'guia-admin/monitoreo',
         'guia-admin/cache',
+        'guia-admin/ci-cd',
       ],
     },
     {
