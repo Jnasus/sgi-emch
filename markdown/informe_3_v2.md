@@ -1320,14 +1320,26 @@ Métricas por contenedor Docker recolectadas por cAdvisor. Variables de template
 
 ### Métricas Expuestas por el Backend
 
-El endpoint `/actuator/prometheus` expone métricas en formato Prometheus:
+El endpoint `/actuator/prometheus` expone métricas en formato Prometheus. Las siguientes propiedades en `application.properties` son necesarias para habilitar las métricas de latencia HTTP y caché:
+
+```properties
+# Habilita _bucket para histogram_quantile (paneles P50/P95/P99)
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+# Habilita contadores de hit/miss en Caffeine
+spring.cache.caffeine.spec=maximumSize=1000,expireAfterWrite=3600s,recordStats
+# Pre-registra caches al arrancar para que Micrometer los detecte
+spring.cache.cache-names=catalogos-areas,catalogos-areas-todas,catalogos-tipos-equipo,catalogos-marcas,catalogos-modelos,catalogos-so,catalogos-tipos-incidente
+```
+
+Ejemplos de métricas disponibles en el endpoint:
 
 ```
-# Ejemplos de métricas disponibles
+http_server_requests_seconds_bucket{uri="/api/equipos", method="GET", status="200", le="0.05"}
 http_server_requests_seconds_count{uri="/api/equipos", method="GET", status="200"}
 jvm_memory_used_bytes{area="heap"}
 hikaricp_connections_active{pool="HikariPool-1"}
-cache_gets_total{name="tipos", result="hit"}
+cache_gets_total{name="catalogos-tipos-equipo", result="hit"}
+cache_gets_total{name="catalogos-marcas", result="miss"}
 ```
 
 ### Alertas y Umbrales

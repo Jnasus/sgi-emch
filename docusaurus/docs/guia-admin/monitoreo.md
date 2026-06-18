@@ -209,6 +209,23 @@ Al arrancar, Grafana carga automáticamente el dashboard **"SGI-EMCH Backend"** 
 
 Panel de logs de Loki con filtro `{container="sgi-full-backend"}` — muestra los últimos registros del backend en tiempo real.
 
+:::note Configuración requerida en el backend
+Los paneles de Latencia HTTP y Caffeine Hit Rate requieren que el backend tenga habilitadas estas propiedades en `application.properties`:
+
+```properties
+# Habilita _bucket series para histogram_quantile (P50/P95/P99)
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+
+# Habilita estadísticas en Caffeine para que Micrometer pueda leerlas
+spring.cache.caffeine.spec=maximumSize=1000,expireAfterWrite=3600s,recordStats
+
+# Pre-registra los caches al arrancar (sin esto, Micrometer no los ve hasta el primer uso)
+spring.cache.cache-names=catalogos-areas,catalogos-areas-todas,catalogos-tipos-equipo,catalogos-marcas,catalogos-modelos,catalogos-so,catalogos-tipos-incidente
+```
+
+Sin estas propiedades, los paneles de latencia y caché muestran "No data" aunque el backend esté funcionando.
+:::
+
 ## Provisionamiento automático
 
 Los datasources y el dashboard se configuran automáticamente al arrancar Grafana mediante archivos YAML en `monitoring/grafana/provisioning/`:
@@ -291,6 +308,54 @@ Si ves errores de permisos en los logs de cAdvisor:
 docker logs sgi-full-cadvisor --tail 20
 ```
 En algunos kernels de Linux es necesario que `/dev/kmsg` exista en el host. Verifica con `ls /dev/kmsg`. Si no existe, elimina la línea `devices: [/dev/kmsg]` del compose y redesplega.
+
+### Prometheus no carga nuevos jobs tras actualizar `prometheus.yml`
+
+Si se agregan nuevos `scrape_configs` al archivo pero los targets no aparecen en `/targets` después de un `kill -HUP 1`, el contenedor de Prometheus está montando un **volumen nombrado** inicializado con la config antigua. El HUP recarga desde ese volumen, no desde el archivo en disco.
+
+```bash
+# Verificar qué config tiene el contenedor actualmente
+docker exec sgi-full-prometheus cat /etc/prometheus/prometheus.yml
+
+# Si el archivo en disco tiene los jobs nuevos pero el contenedor no los ve:
+docker compose -f docker-compose.monitoring.yml up -d --force-recreate prometheus
+```
+
+`--force-recreate` recrea el contenedor montando el archivo actual del host sin tocar el volumen de datos TSDB (métricas históricas no se pierden).
+
+### Paneles de Latencia HTTP sin datos ("No data")
+
+Spring Boot 3 no expone series `_bucket` por defecto. Sin buckets, `histogram_quantile` no puede calcular percentiles.
+
+```bash
+# Verificar si existen buckets
+docker exec sgi-full-prometheus wget -qO- http://sgi-full-backend:8080/actuator/prometheus | grep "http_server_requests_seconds_bucket" | head -3
+```
+
+Si no devuelve nada, agregar a `application.properties` del backend y redesplegar:
+
+```properties
+management.metrics.distribution.percentiles-histogram.http.server.requests=true
+```
+
+### Panel Caffeine Hit Rate sin datos ("No data")
+
+Dos causas posibles (ambas deben resolverse):
+
+1. **`recordStats` ausente** en el spec de Caffeine — sin él Micrometer no tiene contadores que leer.
+2. **Caches creados de forma lazy** — `CaffeineCacheManager` crea cada cache en el primer acceso; Micrometer solo se enlaza a los caches que existen al arrancar, por lo que los caches lazy nunca quedan registrados.
+
+```bash
+# Verificar si existen métricas de caché
+docker exec sgi-full-prometheus wget -qO- http://sgi-full-backend:8080/actuator/prometheus | grep "cache_gets_total" | head -5
+```
+
+Si no devuelve nada, agregar a `application.properties` y redesplegar:
+
+```properties
+spring.cache.caffeine.spec=maximumSize=1000,expireAfterWrite=3600s,recordStats
+spring.cache.cache-names=catalogos-areas,catalogos-areas-todas,catalogos-tipos-equipo,catalogos-marcas,catalogos-modelos,catalogos-so,catalogos-tipos-incidente
+```
 
 ### Grafana no arranca (crash loop)
 
