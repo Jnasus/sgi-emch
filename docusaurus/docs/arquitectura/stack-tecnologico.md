@@ -84,3 +84,14 @@ sidebar_position: 1
 | **Grafana** | `grafana/grafana:11.5.2` | Visualización de dashboards y logs |
 
 El stack de monitoreo es opcional y se despliega por separado. Ver [Guía de monitoreo](../guia-admin/monitoreo) para instrucciones.
+
+### CI/CD
+
+| Componente | Rol |
+|---|---|
+| **GitHub Actions** | Pipeline de integración y despliegue continuo |
+
+- Job `ci`: tests con `./mvnw test` (Java 21) y build con `npm run build` (Node 20) en cada push y PR a `main`.
+- Job `deploy`: SSH al servidor → `git pull && docker compose up --build -d`, solo si `ci` pasa y el evento es un push directo a `main`.
+
+Ver [CI/CD con GitHub Actions](../guia-admin/ci-cd) para la configuración de secrets y diagnóstico.

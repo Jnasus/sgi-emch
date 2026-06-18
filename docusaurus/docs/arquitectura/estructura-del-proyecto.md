@@ -10,6 +10,9 @@ sidebar_position: 2
 
 ```
 sgi-emch/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml               # Pipeline CI (tests) + CD (deploy SSH) en GitHub Actions
 ├── backend/                        # Aplicación Spring Boot
 │   ├── src/main/java/pe/edu/emch/sgi/
 │   │   ├── config/                 # DataSeeder, SecurityConfig, WebConfig

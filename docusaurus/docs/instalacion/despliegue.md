@@ -46,7 +46,9 @@ Todos los servicios deben aparecer como `healthy` o `running`.
 
 ## Actualizaciones
 
-Cuando hay cambios en el código:
+En producción, cualquier push a `main` se despliega automáticamente via el [pipeline CI/CD](../guia-admin/ci-cd): GitHub Actions ejecuta los tests y, si pasan, conecta al servidor por SSH y corre el deploy.
+
+Para intervención manual (hotfix directo o rollback):
 
 ```bash
 git pull
