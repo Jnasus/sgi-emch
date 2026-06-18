@@ -1239,15 +1239,20 @@ docker compose up --build -d
 
 El SGI-EMCH fue diseñado para el volumen de activos y usuarios del DTIC-EMCH. El análisis de capacidad establece los límites actuales y los puntos de escala futura:
 
-| Dimensión | Capacidad actual | Umbral de escala |
-|---|---|---|
-| Equipos registrados | Hasta ~10,000 equipos | >10,000: evaluar particionamiento de tabla |
-| Eventos en `audit_log` | Hasta ~50,000 registros sin impacto en rendimiento | >50,000: purga periódica de registros antiguos |
-| Usuarios concurrentes | Hasta ~50 usuarios simultáneos (HikariCP: 10 conexiones BD) | >50: incrementar `maximum-pool-size` y evaluar Redis |
-| Conexiones a BD | Máximo 10 (HikariCP `maximum-pool-size`) | Ajustable en `application.properties` sin redespliegue |
-| Caché Caffeine | 1,000 entradas por cache; TTL 1 hora | Ajustable en configuración sin código adicional |
-| Almacenamiento PDFs | Volumen Docker `full_pdf_storage` en disco del servidor | Monitorear uso con `docker system df` |
-| Retención de métricas | 15 días (Prometheus) | Ajustable en `prometheus.yml` con `--storage.tsdb.retention.time` |
+| Dimensión | Capacidad actual | Umbral de escala | Fuente de medición |
+|---|---|---|---|
+| Equipos registrados | Hasta ~10,000 equipos | >10,000: evaluar particionamiento de tabla | `v_dashboard_resumen` (BD) |
+| Eventos en `audit_log` | Hasta ~50,000 registros sin impacto en rendimiento | >50,000: purga periódica de registros antiguos | `SELECT COUNT(*) FROM audit_log` |
+| Usuarios concurrentes | Hasta ~50 usuarios simultáneos (HikariCP: 10 conexiones BD) | >50: incrementar `maximum-pool-size` y evaluar Redis | Grafana: `hikaricp_connections_active` |
+| Conexiones a BD | Máximo 10 (HikariCP `maximum-pool-size`) | Ajustable en `application.properties` sin redespliegue | Grafana: `hikaricp_connections_pending` |
+| CPU del servidor | Variable según carga | >80% sostenido: evaluar optimización de queries | Grafana: dashboard `sgi-node-exporter` (node-exporter) |
+| RAM del servidor | Disponible según host | <10% libre: incrementar memoria o reducir Caffeine TTL | Grafana: `node_memory_MemAvailable_bytes` |
+| Disco del servidor | Partición `/` del host | >85% uso: limpiar logs o ampliar disco | Grafana: bargauge por partición (node-exporter) |
+| CPU por contenedor | Medido por cAdvisor | >70% promedio en backend: revisar queries lentos | Grafana: dashboard `sgi-cadvisor` (cAdvisor) |
+| RAM por contenedor | Medido por cAdvisor | Backend > 512 MB RSS: revisar memory leaks JVM | Grafana: `container_memory_rss` por nombre |
+| Caché Caffeine | 1,000 entradas por cache; TTL 1 hora | Ajustable en configuración sin código adicional | Grafana: `cache_gets_total` (hit rate) |
+| Almacenamiento PDFs | Volumen Docker `full_pdf_storage` en disco del servidor | Monitorear uso con `docker system df` | `docker system df` en servidor |
+| Retención de métricas | 15 días (Prometheus) | Ajustable en `prometheus.yml` con `--storage.tsdb.retention.time` | Prometheus UI: `tsdb/status` |
 
 **Escenario actual del DTIC-EMCH:**
 
@@ -1255,7 +1260,7 @@ El SGI-EMCH fue diseñado para el volumen de activos y usuarios del DTIC-EMCH. E
 - ~15–25 usuarios del sistema
 - ~5–10 tickets activos simultáneos en promedio
 
-El sistema opera con amplio margen respecto a sus límites de capacidad para el volumen real de la institución.
+El sistema opera con amplio margen respecto a sus límites de capacidad para el volumen real de la institución. Las métricas reales de CPU, RAM y disco son visibles en tiempo real en los dashboards de Grafana (`sgi-node-exporter` para el host, `sgi-cadvisor` para los contenedores), permitiendo validar empíricamente que los umbrales no están siendo alcanzados.
 
 ---
 
@@ -1269,14 +1274,20 @@ El stack de monitoreo se despliega con `docker-compose.monitoring.yml`, de forma
 
 | Componente | Imagen | Puerto | Rol |
 |---|---|---|---|
-| **Prometheus** | `prom/prometheus:latest` | 9090 | Scraping de métricas cada 15 s desde `/actuator/prometheus` |
+| **Prometheus** | `prom/prometheus:latest` | 9090 | Scraping de métricas cada 15 s (backend, node-exporter, cAdvisor) |
+| **node-exporter** | `prom/node-exporter:latest` | 9100 | Métricas del host Linux: CPU, RAM, disco, red, load average |
+| **cAdvisor** | `gcr.io/cadvisor/cadvisor:latest` | 8080 | Métricas por contenedor Docker: CPU, memoria RSS/caché, red |
 | **Grafana** | `grafana/grafana:11.5.2` | 3000 | Visualización; acceso en `https://sgi-grafana.escuelamilitar.edu.pe` |
 | **Loki** | `grafana/loki:2.9.10` | 3100 | Almacenamiento de logs de contenedores |
 | **Promtail** | `grafana/promtail:3.0.0` | — | Recolección de logs desde el socket de Docker |
 
-### Dashboard Grafana Pre-provisionado
+### Dashboards Grafana Pre-provisionados
 
-El dashboard **"SGI-EMCH Backend"** se carga automáticamente al iniciar Grafana (17 paneles):
+Al iniciar, Grafana carga automáticamente tres dashboards desde `monitoring/grafana/provisioning/dashboards/`:
+
+#### Dashboard: SGI-EMCH Backend (`sgi-emch-backend-v1`)
+
+Métricas de la aplicación Spring Boot (17 paneles):
 
 | Categoría | Paneles |
 |---|---|
@@ -1285,6 +1296,27 @@ El dashboard **"SGI-EMCH Backend"** se carga automáticamente al iniciar Grafana
 | HikariCP | Conexiones activas, conexiones en espera, tiempo de adquisición |
 | Caffeine | Hit rate por cache, misses, evictions |
 | Logs | Stream de logs de contenedores `sgi-full-*` vía Loki |
+
+#### Dashboard: SGI-EMCH — Servidor (`sgi-node-exporter`)
+
+Métricas del host Linux recolectadas por node-exporter (12 paneles):
+
+| Categoría | Paneles |
+|---|---|
+| Stats | CPU %, RAM usada, RAM disponible, Disco raíz %, Uptime, Load average 1m |
+| Series temporales | CPU usage + iowait, RAM total/usada/disponible, Red entrada/salida, Disco lectura/escritura, Load average 1/5/15 min |
+| Bargauge | Uso de disco por partición con umbrales de color |
+
+#### Dashboard: SGI-EMCH — Contenedores (`sgi-cadvisor`)
+
+Métricas por contenedor Docker recolectadas por cAdvisor. Variables de template `$host` y `$container` para filtrar:
+
+| Categoría | Paneles |
+|---|---|
+| CPU | Uso acumulado por contenedor (stacked) |
+| Memoria | RSS por contenedor, caché por contenedor |
+| Red | Tráfico de entrada y salida por contenedor |
+| Tabla | Uptime en días, imagen, servicio Docker Compose por contenedor |
 
 ### Métricas Expuestas por el Backend
 
@@ -1300,7 +1332,20 @@ cache_gets_total{name="tipos", result="hit"}
 
 ### Alertas y Umbrales
 
-> *[Pendiente de completar — configuración de alertas en Grafana para SLA de disponibilidad del sistema]*
+Los dashboards provisionados incluyen umbrales de color configurados para identificar visualmente el estado de cada métrica:
+
+| Métrica | Umbral advertencia | Umbral crítico | Acción recomendada |
+|---|---|---|---|
+| CPU del servidor (%) | 70% | 90% | Revisar queries lentos; analizar iowait en dashboard `sgi-node-exporter` |
+| RAM disponible | < 2 GB | < 1 GB | Reducir TTL de Caffeine o aumentar RAM del servidor |
+| Disco raíz usado (%) | 70% | 85% | Purgar logs Docker (`docker system prune`) o ampliar disco |
+| Load average 1 min | > 2.0 | > 4.0 | Revisar procesos con `docker stats`; escalar si persiste |
+| Conexiones HikariCP activas | > 7 | > 9 | Incrementar `maximum-pool-size` en `application.properties` |
+| Tasa de errores HTTP (%) | > 1% | > 5% | Revisar logs del backend en Grafana → panel Loki |
+
+Los umbrales de CPU, RAM y disco corresponden al servidor con 4 vCPU y 8 GB RAM. Si el hardware del servidor institucional difiere, ajustar los valores en los campos `thresholds.steps` de `node-exporter.json`.
+
+Grafana 11 soporta alertas nativas (Grafana Alerting) que pueden disparar notificaciones por email o webhook. La configuración de alertas en producción queda como tarea del administrador DTIC una vez que el sistema acumule datos de línea base (≥7 días de métricas).
 
 ---
 
