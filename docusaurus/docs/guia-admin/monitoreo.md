@@ -144,7 +144,25 @@ Las credenciales por defecto son:
 En el primer acceso, Grafana pedirá cambiar la contraseña. Usa una contraseña segura y guárdala en un gestor de contraseñas. Si necesitas restablecerla, usa las variables de entorno `GRAFANA_USER` y `GRAFANA_PASSWORD` en el archivo `.env`.
 :::
 
-## Dashboard precargado: SGI-EMCH Backend
+## Dashboards precargados
+
+Al arrancar, Grafana carga automáticamente **tres dashboards** desde `monitoring/grafana/provisioning/dashboards/`:
+
+| Archivo | UID | Título | Fuente de datos |
+|---|---|---|---|
+| `sgi-backend.json` | `sgi-emch-backend-v1` | SGI-EMCH Backend | Prometheus + Loki |
+| `node-exporter.json` | `sgi-node-exporter` | SGI-EMCH — Servidor (node-exporter) | Prometheus |
+| `cadvisor.json` | `sgi-cadvisor` | SGI-EMCH — Contenedores (cAdvisor) | Prometheus |
+
+### Dashboard: SGI-EMCH — Servidor (node-exporter)
+
+Métricas del host Linux. Fila superior con 6 stats (CPU %, RAM usada, RAM disponible, disco /, uptime, load avg 1m); luego gráficas de series temporales para CPU, RAM, red I/O, disco I/O, load average y un bargauge con uso por partición.
+
+### Dashboard: SGI-EMCH — Contenedores (cAdvisor)
+
+Métricas por contenedor Docker. Variables de template `$host` y `$container` para filtrar. Paneles de CPU usage, memory RSS, memory cache, tráfico de red entrada/salida, y tabla de info de contenedores con uptime en días.
+
+### Dashboard: SGI-EMCH Backend
 
 Al arrancar, Grafana carga automáticamente el dashboard **"SGI-EMCH Backend"** (UID `sgi-emch-backend-v1`) con los siguientes paneles:
 
@@ -209,7 +227,9 @@ monitoring/
         │   └── datasources.yaml    # Prometheus (UID: prometheus-sgi) y Loki (UID: loki-sgi)
         └── dashboards/
             ├── dashboards.yaml     # Proveedor de tipo "file" apuntando a esta carpeta
-            └── sgi-backend.json    # Dashboard precargado
+            ├── sgi-backend.json    # Dashboard: métricas JVM / HTTP / HikariCP / Caché
+            ├── node-exporter.json  # Dashboard: métricas del host (CPU, RAM, disco, red)
+            └── cadvisor.json       # Dashboard: métricas por contenedor Docker
 ```
 
 Los UIDs de datasource fijos (`prometheus-sgi`, `loki-sgi`) son referenciados directamente en el JSON del dashboard, eliminando la necesidad de variables de template.
